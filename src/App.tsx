@@ -4,6 +4,7 @@ import Layout from "./components/Layout";
 import Dashboard from './components/Dashboard';
 import CategoryConfigRouter from './pages/Categories/CategoriesRouter';
 import SubcategoryConfigRouter from './pages/Subcategories/Subcategoriesrouter';
+import BrandConfigRouter from './pages/Brands/Brandrouter';
 
 function App() { 
 
@@ -15,17 +16,21 @@ function App() {
         <Route
                 path="/Categories/*"
                 element={                 
-                   <CategoryConfigRouter/>
-                 
+                   <CategoryConfigRouter/>                 
                 }
               />       
               <Route
                 path="/SubCategories/*"
                 element={                 
-                  <SubcategoryConfigRouter/>
-                 
+                  <SubcategoryConfigRouter/>                 
                 }
-              />       
+              />     
+              <Route
+              path="/Brands/*"
+              element={
+                <BrandConfigRouter/>
+              }
+              />  
         </Route>
       </Routes>
     </BrowserRouter>

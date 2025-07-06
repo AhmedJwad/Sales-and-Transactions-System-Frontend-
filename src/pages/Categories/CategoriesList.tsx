@@ -3,26 +3,39 @@ import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import DataGridCustom from "../../components/DataGridCustom";
 import LoadingComponent from "../../components/LoadingComponent";
-import CategoryRepository from "../../repositories/categoryRepository";
 import GenericDialog from "../../components/GenericDialog";
 import CategoriesCreate from "./CategoriesCreate";
+import { CategoryDto } from "../../types/CategoryDto";
+import genericRepository from "../../repositories/genericRepository";
 
 const CategoriesList = () => {
   const [loading, setLoading] = useState(false);
-  const [rows, setRows] = useState<any[]>([]);
+  const [rows, setRows] = useState<CategoryDto[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
   const columns = [
     { field: "id", headerName: "ID", flex: 1 },
-    { field: "name", headerName: "Name", flex: 12},
+    { field: "name", headerName: "Name", flex: 12 },
   ];
+
+  // استخدم genericRepository مباشرة مع المسار المناسب و الـ DTO
+  const repository = genericRepository<CategoryDto[], CategoryDto>("categories");
 
   const getCategories = async () => {
     setLoading(true);
     try {
-      const data = await CategoryRepository().get();
-      setRows(data.map((item: any) => ({ ...item, id: item.id })));
+      const data = await repository.getAll();
+      if (!data.error && data.response) {
+        const categories = data.response.map((item: CategoryDto) => ({
+          ...item,
+          id: item.id, // مطلوب لـ MUI DataGrid
+        }));
+        setRows(categories);
+      }else
+      {
+        console.log(data.error);
+      }
     } catch (error) {
       console.log(error);
     } finally {
@@ -33,7 +46,7 @@ const CategoriesList = () => {
   const handleDelete = async (id: number) => {
     try {
       setLoading(true);
-      await CategoryRepository().delete(id);
+      await repository.delete(id);
       await getCategories();
     } catch (error) {
       console.log(error);

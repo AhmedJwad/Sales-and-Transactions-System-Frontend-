@@ -1,3 +1,4 @@
+// src/pages/Subcategories/SubcategoryCreate.tsx
 import {
     Box,
     Button,
@@ -10,9 +11,10 @@ import {
   import { useFormik } from "formik";
   import * as Yup from "yup";
   import { FC, useEffect, useState } from "react";
-  import CategoryRepository from "../../repositories/categoryRepository";
-  import SubcategoryRepository from "../../repositories/subcategoryRepository";
   import LoadingComponent from "../../components/LoadingComponent";
+  import genericRepository from "../../repositories/genericRepository";
+  import { CategoryDto } from "../../types/CategoryDto";
+  import { SubcategoryDto } from "../../types/SubcategoryDto";
   
   interface Props {
     id?: number | null;
@@ -21,20 +23,22 @@ import {
   
   const SubcategoryCreate: FC<Props> = ({ id, onClose }) => {
     const numericId = Number(id);
-    const [categories, setCategories] = useState<{ id: number; name: string }[]>(
-      []
-    );
-  
+    const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [initialValues, setInitialValues] = useState({
       name: "",
       categoryId: 0,
     });
   
+    const categoryRepo = genericRepository<CategoryDto[], CategoryDto>("categories");
+    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("subcategories");
+  
     const fetchCategories = async () => {
       try {
-        const data = await CategoryRepository().get();
-        setCategories(data);
+        const result = await categoryRepo.getAll();
+        if (!result.error && result.response) {
+          setCategories(result.response);
+        }
       } catch (err) {
         console.log(err);
       }
@@ -43,11 +47,13 @@ import {
     const getSubcategoryById = async () => {
       setLoading(true);
       try {
-        const data = await SubcategoryRepository().getById(numericId);
-        setInitialValues({
-          name: data.name,
-          categoryId: data.categoryId,
-        });
+        const result = await subcategoryRepo.getOne(numericId);
+        if (!result.error && result.response) {
+          setInitialValues({
+            name: result.response.name,
+            categoryId: result.response.categoryId,
+          });
+        }
       } catch (error) {
         console.log(error);
       } finally {
@@ -67,8 +73,8 @@ import {
     const validationSchema = Yup.object({
       name: Yup.string().required("Name is required"),
       categoryId: Yup.number()
-      .required("Category is required")
-      .min(1, "Please select a category"),
+        .required("Category is required")
+        .min(1, "Please select a category"),
     });
   
     const formik = useFormik({
@@ -77,9 +83,9 @@ import {
       onSubmit: async (values) => {
         try {
           if (numericId) {
-            await SubcategoryRepository().put({ ...values, id: numericId });
+            await subcategoryRepo.put({ ...values, id: numericId });
           } else {
-            await SubcategoryRepository().post(values);
+            await subcategoryRepo.post(values);
           }
           onClose();
         } catch (error) {
@@ -88,7 +94,7 @@ import {
       },
       validateOnBlur: false,
       validateOnMount: true,
-      enableReinitialize: true, // مهم جدًا لتحديث القيم عند تحميل البيانات
+      enableReinitialize: true,
     });
   
     return (
@@ -135,9 +141,9 @@ import {
                   }
                   size="small"
                 >
-                     <MenuItem value={0} disabled>
-                        -- Select a category --
-                    </MenuItem>
+                  <MenuItem value={0} disabled>
+                    -- Select a category --
+                  </MenuItem>
                   {categories.map((cat) => (
                     <MenuItem key={cat.id} value={cat.id}>
                       {cat.name}

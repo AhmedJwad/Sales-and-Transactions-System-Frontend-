@@ -1,59 +1,118 @@
 import axios from "axios";
+import { HttpResponseWrapper } from "../repositories/httpResponseWrapper";
 
-const baseURL="https://localhost:7027/api/";
+const baseURL = "https://localhost:7027/api/";
 
-export const axiosInstance=axios.create({
-    baseURL,
-    timeout:30000,
-    headers:{
-        "Content-Type":"application/json"
-    },
+export const axiosInstance = axios.create({
+  baseURL,
+  timeout: 30000,
+  headers: {
+    "Content-Type": "application/json",
+  },
 });
 
 axiosInstance.interceptors.request.use(
-    (config)=>{
-        const token=localStorage.getItem("jwtToken");
-        if(token)
-        {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    (error)=>{
-        return Promise.reject(error);
-    }    
-);
-axiosInstance.interceptors.response.use(
-    (response)=>{
-        return response;
-    },
-    (error)=>{
-        if(error.response && error.response.status===401)
-        {
-            localStorage.removeItem("jwtToken");
-            window.location.href="/login"
-        }       
-        return Promise.reject(error);
+  (config) => {
+    const token = localStorage.getItem("jwtToken");
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    return config;
+  },
+  (error) => Promise.reject(error)
 );
 
-const httpService={
-    get:async(url:string ,params=null)=>{
-        const  response=await axiosInstance.get(`${url}`,{params})
-        return response.data;
-    },
-    post:async(url:string, data:any)=>{
-        const  response=await axiosInstance.post(`${url}`, data)
-        return response.data
-    },
-    put:async(url:string, data:any)=>{
-        const  response=await axiosInstance.put(`${url}`, data)
-        return response.data
-    },
-    delete: async (url: string) => {
-        const response = await axiosInstance.delete(`${url}`);
-        return response.data;
-      },
-}
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("jwtToken");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+);
+
+const extractErrorMessage = (errorData: any): string => {
+  if (!errorData) return "An unexpected error has occurred.";
+  if (typeof errorData === "string") return errorData;
+  if (typeof errorData.message === "string") return errorData.message;
+  // يمكن إضافة حالات أخرى حسب شكل خطأ الـ API
+  return JSON.stringify(errorData);
+};
+
+const httpService = {
+  get: async <T>(url: string, params: Record<string, any> | null = null): Promise<HttpResponseWrapper<T>> => {
+    try {
+      const response = await axiosInstance.get(url, { params });
+      return {
+        response: response.data,
+        error: false,
+        statusCode: response.status,
+      };
+    } catch (error: any) {
+      return {
+        response: null,
+        error: true,
+        statusCode: error.response?.status ?? 500,
+        message: extractErrorMessage(error.response?.data),
+      };
+    }
+  },
+
+  post: async <T>(url: string, data: any): Promise<HttpResponseWrapper<T>> => {
+    try {
+      const response = await axiosInstance.post(url, data);
+      return {
+        response: response.data,
+        error: false,
+        statusCode: response.status,
+      };
+    } catch (error: any) {
+      return {
+        response: null,
+        error: true,
+        statusCode: error.response?.status ?? 500,
+        message: extractErrorMessage(error.response?.data),
+      };
+    }
+  },
+
+  put: async <T>(url: string, data: any): Promise<HttpResponseWrapper<T>> => {
+    try {
+      const response = await axiosInstance.put(url, data);
+      return {
+        response: response.data,
+        error: false,
+        statusCode: response.status,
+      };
+    } catch (error: any) {
+      return {
+        response: null,
+        error: true,
+        statusCode: error.response?.status ?? 500,
+        message: extractErrorMessage(error.response?.data),
+      };
+    }
+  },
+
+  delete: async <T>(url: string): Promise<HttpResponseWrapper<T>> => {
+    try {
+      const response = await axiosInstance.delete(url);
+      return {
+        response: response.data,
+        error: false,
+        statusCode: response.status,
+      };
+    } catch (error: any) {
+      return {
+        response: null,
+        error: true,
+        statusCode: error.response?.status ?? 500,
+        message: extractErrorMessage(error.response?.data),
+      };
+    }
+  },
+};
 
 export default httpService;

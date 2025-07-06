@@ -6,7 +6,11 @@ import { Link } from "react-router-dom";
 import { ListItemButton, ListItemIcon } from "@mui/material";
 import {
     IconBook,   
+    IconBrandAmazon,   
     IconCategory,
+    IconCategory2,
+    IconCategoryPlus,
+    IconHome,
     IconSchool,    
   } from "@tabler/icons-react";
 
@@ -46,7 +50,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             to="/"
           >
             <ListItemIcon>
-              <IconSchool />
+              <IconHome/>
             </ListItemIcon>
             <ListItemText
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
@@ -63,7 +67,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             to="/Categories"
           >
             <ListItemIcon>
-              <IconBook />
+             <IconCategory/>
             </ListItemIcon>
             <ListItemText
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
@@ -80,14 +84,31 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             to="/Subcategories"
           >
             <ListItemIcon>
-              <IconCategory/>
+              <IconCategoryPlus/>
             </ListItemIcon>
             <ListItemText
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Subcategories"
             />
           </ListItemButton>
-            </List>
+          <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/Brands"
+          >
+            <ListItemIcon>
+             <IconCategory2/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Brands"
+            />
+          </ListItemButton>
+        </List>
             
         </Drawer>
     );
