@@ -31,7 +31,7 @@ import {
     });
   
     const categoryRepo = genericRepository<CategoryDto[], CategoryDto>("categories");
-    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("subcategories");
+    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
   
     const fetchCategories = async () => {
       try {

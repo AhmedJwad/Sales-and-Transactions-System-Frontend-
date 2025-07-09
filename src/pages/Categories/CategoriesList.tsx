@@ -14,13 +14,12 @@ const CategoriesList = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
 
-  const columns = [
-    { field: "id", headerName: "ID", flex: 1 },
+  const columns = [   
     { field: "name", headerName: "Name", flex: 12 },
   ];
 
-  // استخدم genericRepository مباشرة مع المسار المناسب و الـ DTO
-  const repository = genericRepository<CategoryDto[], CategoryDto>("categories");
+  
+  const repository = genericRepository<CategoryDto[], CategoryDto>("Categories");
 
   const getCategories = async () => {
     setLoading(true);
@@ -29,9 +28,9 @@ const CategoriesList = () => {
       if (!data.error && data.response) {
         const categories = data.response.map((item: CategoryDto) => ({
           ...item,
-          id: item.id, // مطلوب لـ MUI DataGrid
+          id: item.id,          
         }));
-        setRows(categories);
+        setRows(categories);        
       }else
       {
         console.log(data.error);

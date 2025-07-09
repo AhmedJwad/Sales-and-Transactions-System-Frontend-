@@ -28,7 +28,7 @@ const DataGridCustom = ({
   onCreateClick,
   onEditClick,
 }: Props) => {
-  const [filter, setFilter] = useState("");
+  const [filter, setFilter] = useState(""); 
 
   const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
@@ -92,19 +92,20 @@ const DataGridCustom = ({
       </Toolbar>
 
       <DataGrid
-        rows={filteredRows}
-        columns={[...columns, actionColumn]}
-        pagination
-        pageSizeOptions={[10, 20, 50]}
-        initialState={{
-          pagination: {
-            paginationModel: {
-              pageSize: 10,
+          rows={filteredRows}
+          columns={[...columns, actionColumn]}
+          pageSizeOptions={[10, 20, 50]}
+          initialState={{
+            pagination: {
+              paginationModel: {
+                page: 0,
+                pageSize: 10,
+              },
             },
-          },
-        }}
-        disableRowSelectionOnClick
-      />
+          }}
+          autoHeight
+          disableRowSelectionOnClick          
+        />
     </Box>
   );
 };

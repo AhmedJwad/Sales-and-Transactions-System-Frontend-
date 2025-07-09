@@ -19,7 +19,7 @@ const Layout:FC=()=>{
             flexDirection:"column",
             height:"100vh",
             background:isDarkMode?
-            "var(--color-background-000)"
+            "var(--color-background-000):"
             :"var(--color-background-100)",
             color: "var(--color-text-100)",
             transition:"background-color 0.3s ease, color 0.3s ease",
@@ -35,8 +35,8 @@ const Layout:FC=()=>{
             }}>
                <Sidebar open={sidebarOpen} toggleSidebar={toggleSidebar}/>
                <main style={{
-                flexGrow:1,
-                marginLeft:sidebarOpen ? "0px" : "-240px",
+                flexGrow:1,             
+                marginLeft:sidebarOpen ? "-100px" : "-240px",
                 transition: "margin-left 0.3s ease",
                 marginTop: "74px",
                 backgroundColor: "var(--color-background-000)",
@@ -47,7 +47,7 @@ const Layout:FC=()=>{
                 sx={{ margin: 4 }}
                 border={"0px solid var(--color-border-100)"}
                 borderRadius={2}
-                bgcolor="var(--color-background-100)"
+                bgcolor="var(--color-background-000)"
                 style={{
                 transition: "background-color 0.3s ease, color 0.3s ease",
                 }}
