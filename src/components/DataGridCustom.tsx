@@ -74,9 +74,9 @@ const DataGridCustom = ({
 
   return (
     <Box sx={{ width: "100%", minWidth: "1000px", overflowX: "auto", justifyContent: "center" }}>
-      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-        <Typography variant="h6">{title}</Typography>
-        <Box display="flex" alignItems="center">
+    <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+      <Typography variant="h6">{title}</Typography>
+      <Box display="flex" alignItems="center">
           <TextField
             variant="standard"
             placeholder="Search"

@@ -5,7 +5,7 @@ import GenericDialog from "../../components/GenericDialog";
 import LoadingComponent from "../../components/LoadingComponent";
 import SubcategoryCreate from "./ٍSubcategorycreate";
 import genericRepository from "../../repositories/genericRepository";
-import { SubcategoryDto } from "../../types/SubcategoryDto"; // تأكد من وجوده أو أنشئه
+import { SubcategoryDto } from "../../types/SubcategoryDto"; 
 
 const SubcategoriesList = () => {
   const [loading, setLoading] = useState(false);

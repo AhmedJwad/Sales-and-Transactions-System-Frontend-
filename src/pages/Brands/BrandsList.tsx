@@ -5,7 +5,6 @@ import GenericDialog from "../../components/GenericDialog";
 import LoadingComponent from "../../components/LoadingComponent";
 import genericRepository from "../../repositories/genericRepository";
 import { BrandDto } from "../../types/BrandDto";
-import SubcategoryCreate from "../Subcategories/ٍSubcategorycreate";
 import BrandCreate from "./Brandcreate";
 
 

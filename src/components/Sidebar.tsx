@@ -7,6 +7,7 @@ import { ListItemButton, ListItemIcon } from "@mui/material";
 import {
     IconBook,   
     IconBrandAmazon,   
+    IconBrandProducthunt,   
     IconCategory,
     IconCategory2,
     IconCategoryPlus,
@@ -106,6 +107,23 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             <ListItemText
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Brands"
+            />
+          </ListItemButton>
+          <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/Products"
+          >
+            <ListItemIcon>
+             <IconBrandProducthunt/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Products"
             />
           </ListItemButton>
         </List>

@@ -5,6 +5,7 @@ import Dashboard from './components/Dashboard';
 import CategoryConfigRouter from './pages/Categories/CategoriesRouter';
 import SubcategoryConfigRouter from './pages/Subcategories/Subcategoriesrouter';
 import BrandConfigRouter from './pages/Brands/Brandrouter';
+import ProductConfigRouter from './pages/Products/Productrouter';
 
 function App() { 
 
@@ -29,6 +30,12 @@ function App() {
               path="/Brands/*"
               element={
                 <BrandConfigRouter/>
+              }
+              />  
+                <Route
+              path="/Products/*"
+              element={
+                <ProductConfigRouter/>
               }
               />  
         </Route>
