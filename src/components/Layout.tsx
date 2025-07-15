@@ -33,15 +33,16 @@ const Layout:FC=()=>{
                 transition:"margin-left 0.3s ease",
 
             }}>
-               <Sidebar open={sidebarOpen} toggleSidebar={toggleSidebar}/>
-               <main style={{
-                flexGrow:1,             
-                marginLeft:sidebarOpen ? "-100px" : "-240px",
-                transition: "margin-left 0.3s ease",
-                marginTop: "74px",
-                backgroundColor: "var(--color-background-000)",
-    
-               }}>
+             <Sidebar open={sidebarOpen} toggleSidebar={toggleSidebar} />
+                <main
+                style={{
+                    flexGrow: 1,
+                    marginLeft: sidebarOpen ? "0px" : "-240px",
+                    transition: "margin-left 0.3s ease",
+                    marginTop: "74px",
+                    backgroundColor: "var(--color-background-000)",
+                }}
+                >
                 <Box
                 component={"div"}
                 sx={{ margin: 4 }}

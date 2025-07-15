@@ -5,7 +5,7 @@ export interface SubcategoryDto {
     name: string;
     categoryId: number;
     category: CategoryDto | null;
-    prosubcategories: any; // يمكن تخصيصها لاحقًا
-    brands: any;           // يمكن تخصيصها لاحقًا
+    prosubcategories: any; 
+    brands: any;           
     productCategoriesNumber: number;
   }

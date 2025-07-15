@@ -6,7 +6,7 @@ const SubcategoryConfigRouter = () => {
   return (
     <Routes>
       <Route index element={<SubcategoriesList/>}/>/
-     
+  
     </Routes>
   );
 };

@@ -3,16 +3,13 @@ import List from "@mui/material/List";
 import { useThemeContext } from "../ThemeContext";
 import ListItemText from "@mui/material/ListItemText";
 import { Link } from "react-router-dom";
-import { ListItemButton, ListItemIcon } from "@mui/material";
-import {
-    IconBook,   
-    IconBrandAmazon,   
+import { ListItem, ListItemButton, ListItemIcon } from "@mui/material";
+import {   
     IconBrandProducthunt,   
     IconCategory,
     IconCategory2,
     IconCategoryPlus,
-    IconHome,
-    IconSchool,    
+    IconHome,   
   } from "@tabler/icons-react";
 
 
