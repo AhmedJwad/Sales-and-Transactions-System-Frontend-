@@ -1,5 +1,4 @@
-export interface ProductImageDTO {
-    id: number;
+export interface ProductImageDTO {    
     productId: number;
     image: string;
   }

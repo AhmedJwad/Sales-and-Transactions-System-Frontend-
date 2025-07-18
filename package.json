@@ -18,8 +18,11 @@
     "@tabler/icons-react": "^3.34.0",
     "axios": "^1.10.0",
     "formik": "^2.4.6",
+    "multiselect-react-dropdown": "^2.0.25",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-image-gallery": "^1.4.0",
+    "react-multiple-image-uploader": "^1.0.3",
     "react-router-dom": "^7.6.2",
     "yup": "^1.6.1"
   },

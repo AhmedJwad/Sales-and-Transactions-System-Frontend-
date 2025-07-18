@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import ProductCreate from "./Productcreate";
+import ProductEdit from "./Productedit";
 import ProductList from "./ProductsList";
 
 
@@ -14,7 +15,7 @@ const ProductConfigRouter = () => {
       />
       <Route
         path="/edit/:id"
-        element={<ProductCreate  />}
+        element={<ProductEdit  />}
       />
      
     </Routes>

@@ -73,17 +73,18 @@ const ProductCreate: FC = () => {
     }
   };
 
-  const createOrUpdateAsync = async (updatedProduct: ProductDtoRequest) => {
+  const createOrUpdateAsync = async (updatedProduct: ProductDtoRequest) => {    
     const result = numericId > 0
       ? await repo.put({ ...updatedProduct, id: numericId })
-      : await repo.post(updatedProduct);
-
-    if (result.error) {
-      console.error("Error submitting product:", result.message);
-    } else {
+      : await repo.post(updatedProduct);  
+    console.log("Product after post", updatedProduct);  
+    if (!result.error && result.response) {
       navigate("/products");
-    }
+    } else {
+      console.error("Error submitting product:", result.message);
+    }  
   };
+  
 
   const handleReturn = () => {
     navigate("/products");
@@ -101,7 +102,7 @@ const ProductCreate: FC = () => {
   ) : (
     <ProductForm
       product={product}
-      isEdit={numericId > 0}
+      isEdit={false}
       nonSelectedSubcategories={nonSelectedSubcategories}
       selectedSubcategories={selectedSubcategories}
       onValidSubmit={createOrUpdateAsync}

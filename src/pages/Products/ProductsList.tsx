@@ -79,6 +79,7 @@ const ProductList = () => {
             item.productImages && item.productImages.length > 0
               ? item.productImages[0].image
               : "/no-image.png";
+              console.log("show products image", imagePath)
 
           return {
             id: item.id,
@@ -121,11 +122,7 @@ const ProductList = () => {
     }
   };
 
-  const handleDialogClose = async () => {
-    setDialogOpen(false);
-    setEditId(null);
-    await getProducts(categoriesList, subcategoriesList);
-  };  
+ 
 
   const handleCreateClick = () => {
     navigate("/products/create");
@@ -173,14 +170,14 @@ const ProductList = () => {
             filtercolumn={["name"]}     
             onDelete={handleDelete}
             onCreateClick={() => {
+                setEditId(null);
                 handleCreateClick();
             }}
             onEditClick={(id) => {
+                setEditId(id);
               handleEditClick(id);
             }}
-          />
-     
-          
+          />           
           
         </>
       )}

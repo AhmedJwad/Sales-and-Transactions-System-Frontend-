@@ -1,14 +1,5 @@
-import { FC, useState, useEffect } from "react";
-import {
-  Button,
-  Grid,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  Paper,
-  Typography,
-} from "@mui/material";
+import { FC, useEffect, useState } from "react";
+import Multiselect from "multiselect-react-dropdown";
 import { MultipleSelectorModel } from "../types/MultipleSelectorModel";
 
 interface Props {
@@ -22,104 +13,65 @@ const MultipleSelector: FC<Props> = ({
   nonSelected,
   onChange,
 }) => {
-  const [available, setAvailable] = useState<MultipleSelectorModel[]>([]);
-  const [chosen, setChosen] = useState<MultipleSelectorModel[]>([]);
+  const [options, setOptions] = useState<{ name: string; id: string }[]>([]);
+  const [selectedOptions, setSelectedOptions] = useState<
+    { name: string; id: string }[]
+  >([]);
 
-  // تحديث الحالتين عندما تتغير الـ props
   useEffect(() => {
-    setAvailable(nonSelected);
-    setChosen(selected);
-  }, [nonSelected, selected]);
+    const allOptions = [...selected, ...nonSelected].map((item) => ({
+      id: item.key,
+      name: item.value,
+    }));
+    const selectedMapped = selected.map((item) => ({
+      id: item.key,
+      name: item.value,
+    }));
 
-  const add = (item: MultipleSelectorModel) => {
-    const newAvailable = available.filter((x) => x.key !== item.key);
-    const newChosen = [...chosen, item];
-    setAvailable(newAvailable);
-    setChosen(newChosen);
-    onChange(newChosen);
+    setOptions(allOptions);
+    setSelectedOptions(selectedMapped);
+  }, [selected, nonSelected]);
+
+  const handleSelect = (
+    selectedList: { name: string; id: string }[],
+    selectedItem: { name: string; id: string }
+  ) => {
+    const result = selectedList.map((item) => ({
+      key: item.id,
+      value: item.name,
+    }));
+    setSelectedOptions(selectedList);
+    onChange(result);
   };
 
-  const remove = (item: MultipleSelectorModel) => {
-    const newChosen = chosen.filter((x) => x.key !== item.key);
-    const newAvailable = [...available, item];
-    setAvailable(newAvailable);
-    setChosen(newChosen);
-    onChange(newChosen);
-  };
-
-  const addAll = () => {
-    const all = [...chosen, ...available];
-    setChosen(all);
-    setAvailable([]);
-    onChange(all);
-  };
-
-  const removeAll = () => {
-    const back = [...available, ...chosen];
-    setAvailable(back);
-    setChosen([]);
-    onChange([]);
+  const handleRemove = (
+    selectedList: { name: string; id: string }[],
+    removedItem: { name: string; id: string }
+  ) => {
+    const result = selectedList.map((item) => ({
+      key: item.id,
+      value: item.name,
+    }));
+    setSelectedOptions(selectedList);
+    onChange(result);
   };
 
   return (
-    <Grid container spacing={2}>
-      {/* Available List */}
-      <Grid size={{xs:5}}>
-        <Typography variant="subtitle2" gutterBottom>
-          Available
-        </Typography>
-        <Paper variant="outlined" sx={{ height: 200, overflow: "auto" }}>
-          <List dense>
-            {available.map((item) => (
-              <ListItem key={item.key} disablePadding>
-                <ListItemButton onClick={() => add(item)}>
-                  <ListItemText primary={item.value} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
-
-      {/* Buttons */}
-      <Grid
-        size={{xs:2}}
-        container
-        direction="column"
-        justifyContent="center"
-        alignItems="center"
-        spacing={1}
-      >
-        <Grid>
-          <Button variant="outlined" onClick={addAll}>
-            &gt;&gt;
-          </Button>
-        </Grid>
-        <Grid>
-          <Button variant="outlined" onClick={removeAll}>
-            &lt;&lt;
-          </Button>
-        </Grid>
-      </Grid>
-
-      {/* Selected List */}
-      <Grid size={{xs:5}}>
-        <Typography variant="subtitle2" gutterBottom>
-          Selected
-        </Typography>
-        <Paper variant="outlined" sx={{ height: 200, overflow: "auto" }}>
-          <List dense>
-            {chosen.map((item) => (
-              <ListItem key={item.key} disablePadding>
-                <ListItemButton onClick={() => remove(item)}>
-                  <ListItemText primary={item.value} />
-                </ListItemButton>
-              </ListItem>
-            ))}
-          </List>
-        </Paper>
-      </Grid>
-    </Grid>
+    <div>
+      <Multiselect
+        options={options}
+        selectedValues={selectedOptions}
+        onSelect={handleSelect}
+        onRemove={handleRemove}
+        displayValue="name"
+        placeholder="Select options"
+        showCheckbox
+        style={{
+          chips: { background: "#1976d2" },
+          multiselectContainer: { color: "black" },
+        }}
+      />
+    </div>
   );
 };
 

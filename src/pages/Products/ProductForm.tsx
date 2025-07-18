@@ -1,4 +1,4 @@
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import CarouselView from "../../components/CarouselView";
@@ -12,10 +12,12 @@ import {
   Grid,
   Button,
   TextField,
-  Typography,
-  Paper,
+  Typography,  
 } from "@mui/material";
 import ImageUploader from "../../components/ImageUploader";
+
+
+
 
 interface ProductFormProps {
   product: ProductDtoRequest;
@@ -24,8 +26,8 @@ interface ProductFormProps {
   selectedSubcategories: SubcategoryDto[];
   onValidSubmit: (values: ProductDtoRequest) => Promise<void> | void;
   returnAction: () => void;
-  addImageAction?: () => void;
-  removeImageAction?: () => void;
+  addImageAction?: (images: string[]) => void;
+  removeImageAction?: (images:string[]) => void;
 }
 
 const ProductForm: FC<ProductFormProps> = ({
@@ -38,8 +40,7 @@ const ProductForm: FC<ProductFormProps> = ({
   addImageAction,
   removeImageAction,
 }) => {
-  const [loading] = useState(false);
-
+    const [loading] = useState(false);
   const [selected, setSelected] = useState<MultipleSelectorModel[]>(
     selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }))
   );
@@ -68,11 +69,12 @@ const ProductForm: FC<ProductFormProps> = ({
   const handleSelectorChange = (newSelected: MultipleSelectorModel[]) => {
     setSelected(newSelected);
   };
+ 
 
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6">👜 Create New Product</Typography>
+        <Typography variant="h6">{isEdit ? "👜 Edit Product":"👜 Create New Product"}</Typography>
         <Box>
           <Button
             variant="contained"
@@ -142,7 +144,7 @@ const ProductForm: FC<ProductFormProps> = ({
             </Grid>
 
             {/* Column 2: Category Selector */}
-            <Grid size={{xs:12, md:6}}>
+            <Grid size={{xs:12, md:4}}>
               <Typography variant="subtitle1" sx={{ mb: 1 }}>
                 Categories:
               </Typography>
@@ -154,32 +156,44 @@ const ProductForm: FC<ProductFormProps> = ({
             </Grid>
 
             {/* Column 3: Image Uploader */}
-            <Grid size={{xs:12, md:4}}>
-              <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                Photo
-              </Typography>
-              <ImageUploader
-                onImageSelected={(base64) => {
-                  const current = formik.values.productImages ?? [];
-                  formik.setFieldValue("productImages", [...current, base64]);
-                }}
-                initialImage={formik.values.productImages?.[0]}
-              />
-
-              {isEdit && (
-                <Box mt={2} display="flex" gap={2}>
-                  {addImageAction && (
-                    <Button variant="outlined" color="primary" onClick={addImageAction}>
-                      Add Image
-                    </Button>
-                  )}
-                  {removeImageAction && (
-                    <Button variant="outlined" color="error" onClick={removeImageAction}>
-                      Remove Image
-                    </Button>
-                  )}
-                </Box>
-              )}
+            <Grid size={{xs:12, md:4}}>            
+                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                      Photo
+                    </Typography>
+                    <ImageUploader
+                      onImageSelected={(base64) => {
+                        const current = formik.values.productImages ?? [];
+                        formik.setFieldValue("productImages", [...current, base64]);
+                      }}
+                      initialImage={formik.values.productImages?.[0]}
+                    />                
+                
+             {isEdit && (
+                        <Box
+                          mt={2}
+                          width="100%"                 
+                          display="flex"
+                          justifyContent="center"       
+                          alignItems="center"         
+                          textAlign="center"            
+                          gap={2}
+                        >
+                          <Button
+                              variant="outlined"
+                              color="primary"
+                              onClick={() => addImageAction?.(formik.values.productImages ?? [])}
+                            >
+                              Add Image
+                            </Button>
+                          <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={()=>removeImageAction?.(formik.values.productImages??[])}
+                          >
+                            Remove Image
+                          </Button>                            
+                        </Box>
+                      )}
             </Grid>
           </Grid>
 
