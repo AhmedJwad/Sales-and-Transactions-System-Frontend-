@@ -15,10 +15,6 @@ import {
   Typography,  
 } from "@mui/material";
 import ImageUploader from "../../components/ImageUploader";
-
-
-
-
 interface ProductFormProps {
   product: ProductDtoRequest;
   isEdit?: boolean;

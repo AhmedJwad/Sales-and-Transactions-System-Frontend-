@@ -1,14 +1,13 @@
 import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
 import DataGridCustom from "../../components/DataGridCustom";
-import GenericDialog from "../../components/GenericDialog";
 import LoadingComponent from "../../components/LoadingComponent";
 import genericRepository from "../../repositories/genericRepository";
 import { ProductDTO } from "../../types/ProductDTO";
 import { CategoryDto } from "../../types/CategoryDto";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
-import ProductCreate from "./Productcreate";
 import { useNavigate } from "react-router-dom";
+
 
 const ProductList = () => {
   const [loading, setLoading] = useState(false);
@@ -16,7 +15,7 @@ const ProductList = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
   const [subcategoriesList, setSubcategoriesList] = useState<SubcategoryDto[]>([]);
-  const [categoriesList, setCategoriesList] = useState<CategoryDto[]>([]);
+  const [categoriesList, setCategoriesList] = useState<CategoryDto[]>([]); 
   const navigate = useNavigate();
 
   const renderImageCell = (params: any) => {
@@ -41,7 +40,7 @@ const ProductList = () => {
     { field: "description", headerName: "Description", flex: 6 },
     { field: "price", headerName: "Price", flex: 3 },
     { field: "stock", headerName: "Stock", flex: 3 },
-    { field: "brand", headerName: "Brand", flex: 6 },
+    //{ field: "brand", headerName: "Brand", flex: 6 },
     { field: "categories", headerName: "Categories", flex: 6 },
     { field: "subcategories", headerName: "Subcategories", flex: 6 },
     { field: "image", headerName: "Image", flex: 6, renderCell: renderImageCell },
@@ -53,7 +52,8 @@ const ProductList = () => {
 
   const getProducts = async (
     categories: CategoryDto[],
-    subcategories: SubcategoryDto[]
+    subcategories: SubcategoryDto[],  
+        
   ) => {
     setLoading(true);
     try {
@@ -74,7 +74,16 @@ const ProductList = () => {
             .filter((value, index, self) => self.indexOf(value) === index)
             .join(", ");
 
-          const brandName = item.brand && !Array.isArray(item.brand) ? item.brand.name : "N/A";
+         //const brandName = item.brand && !Array.isArray(item.brand) ? item.brand.name : "N/A";
+         const brandName = item.productsubCategories
+                            .map((psc) => {
+                              const sub = subcategories.find((s) => s.id === psc.subcategoryId);                             
+                              return sub?.brands?.[0]?.name ?? null;
+                            })
+                            .filter(Boolean)
+                            .filter((value, index, self) => self.indexOf(value) === index)
+                            .join(", ");
+                        console.log(brandName);
           const imagePath =
             item.productImages && item.productImages.length > 0
               ? item.productImages[0].image

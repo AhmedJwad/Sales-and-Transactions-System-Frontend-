@@ -9,9 +9,15 @@ import {
     IconCategory,
     IconCategory2,
     IconCategoryPlus,
-    IconHome,   
+    IconHome,
+    IconLayoutNavbarCollapse,
+    IconMap,
+    IconMap2,   
   } from "@tabler/icons-react";
-
+import Collapse from '@mui/material/Collapse';
+import ExpandLess from '@mui/icons-material/ExpandLess';
+import ExpandMore from '@mui/icons-material/ExpandMore';
+import { useState } from "react";
 
 interface SidebarProps{
     open:boolean;
@@ -19,6 +25,10 @@ interface SidebarProps{
 }
 const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
     const { isDarkMode } = useThemeContext();
+    const [openCategories, setOpenCategories] = useState(false);
+    const handleCategoriesClick = () => {
+      setOpenCategories(!openCategories);
+      };
     return(
         <Drawer
         variant="persistent"
@@ -54,8 +64,80 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Home"
             />
-          </ListItemButton>
+          </ListItemButton>          
           <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/Countries"
+              >
+            <ListItemIcon>
+             <IconMap/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Countries"
+            />
+          </ListItemButton>
+            <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/States"
+              >
+            <ListItemIcon>
+             <IconMap/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="States"
+            />           
+          </ListItemButton>
+           <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/Cities"
+              >
+            <ListItemIcon>
+             <IconMap2/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Cities"
+            />           
+          </ListItemButton>
+          
+          <ListItemButton
+           onClick={handleCategoriesClick}
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/"
+          >
+            <ListItemIcon>
+             <IconLayoutNavbarCollapse/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Pages"
+            />
+             {openCategories ? <ExpandLess /> : <ExpandMore />}
+          </ListItemButton>
+          <Collapse in={openCategories} timeout="auto" unmountOnExit>
+            <ListItemButton          
             sx={{
               bgcolor: "var(--color-background-100)",
               mb: 1,
@@ -70,9 +152,9 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             <ListItemText
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Categories"
-            />
+            />          
           </ListItemButton>
-          <ListItemButton
+           <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
               mb: 1,
@@ -105,8 +187,9 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Brands"
             />
-          </ListItemButton>
-          <ListItemButton
+          </ListItemButton>         
+          </Collapse> 
+           <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
               mb: 1,
@@ -122,7 +205,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Products"
             />
-          </ListItemButton>
+          </ListItemButton>                  
         </List>
             
         </Drawer>
