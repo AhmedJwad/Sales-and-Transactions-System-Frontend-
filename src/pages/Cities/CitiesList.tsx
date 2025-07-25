@@ -6,6 +6,7 @@ import LoadingComponent from "../../components/LoadingComponent";
 import DataGridCustom from "../../components/DataGridCustom";
 import GenericDialog from "../../components/GenericDialog";
 import { CityDto } from "../../types/CityDto";
+import CityCreate from "./CityCreate";
 
 
 const CitiesList=()=>{
@@ -97,7 +98,13 @@ const CitiesList=()=>{
               setDialogOpen(true);
             }}
           /> 
-          
+            <GenericDialog
+                                open={dialogOpen}
+                                onClose={handleDialogClose}
+                                title={editId ? "Edit City" : "Create City"}
+                              >
+                                <CityCreate id={editId} onClose={handleDialogClose} />
+                              </GenericDialog>                 
         </>
       )}
     </Box>

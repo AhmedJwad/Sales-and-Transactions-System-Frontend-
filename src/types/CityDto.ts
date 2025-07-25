@@ -6,4 +6,5 @@ export interface CityDto {
   stateId: number;  
   state:StateDto|null;
   users: any[] | null;
+  countryId:number;
 }
