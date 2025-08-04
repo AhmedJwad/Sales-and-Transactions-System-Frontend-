@@ -62,7 +62,6 @@ const CityCreate: FC<Props> = ({ id, onClose }) => {
     }
   };
 
-  // جلب بيانات المدينة عند التعديل
   const getCityById = async () => {
     try {
       setLoading(true);
@@ -87,7 +86,7 @@ const CityCreate: FC<Props> = ({ id, onClose }) => {
     }
   };
 
-  // عند تحميل الصفحة
+  
   useEffect(() => {
     fetchCountries();
     if (id) {

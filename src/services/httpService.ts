@@ -36,8 +36,7 @@ axiosInstance.interceptors.response.use(
 const extractErrorMessage = (errorData: any): string => {
   if (!errorData) return "An unexpected error has occurred.";
   if (typeof errorData === "string") return errorData;
-  if (typeof errorData.message === "string") return errorData.message;
-  // يمكن إضافة حالات أخرى حسب شكل خطأ الـ API
+  if (typeof errorData.message === "string") return errorData.message;  
   return JSON.stringify(errorData);
 };
 
