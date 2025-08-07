@@ -10,145 +10,137 @@ import {
     Avatar,
     Box,
     Tooltip,
+    Divider,
   } from "@mui/material";
   import { FC, useState } from "react";
   import { useNavigate } from "react-router-dom";
   import { useThemeContext } from "../ThemeContext";
   import MenuIcon from "@mui/icons-material/Menu";
   import { IconMoon, IconSun } from "@tabler/icons-react";
+import { useAuth } from "../hooks/useAuth";
+import LoginModal from "./LoginModal";
  
   
-  interface HeaderProps {
-    toggleSidebar: () => void;
-  }
-  
-  const Header: FC<HeaderProps> = ({ toggleSidebar }) => {
-    const [anchorElUser, setAnchorElUser] = useState<null | HTMLElement>(null);
-    const navigate = useNavigate();
-    const { isDarkMode, toggleTheme } = useThemeContext();
-  
-    const handleOpenUserMenu = (event: React.MouseEvent<HTMLElement>) => {
-      setAnchorElUser(event.currentTarget);
-    };
-  
-    const handleCloseUserMenu = () => {
-      setAnchorElUser(null);
-    };
-  
-    return (
-      <>
-        <CssBaseline />
-        <AppBar
-          position="fixed"
-          sx={{
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            bgcolor: "rgba(0, 123, 255, 0.95)", // Azure tone
-            borderRadius: "0 0 12px 12px",
-            boxShadow: "0px 2px 10px rgba(0, 0, 0, 0.2)",
-          }}
-        >
-          <Toolbar sx={{ justifyContent: "space-between", px: 2 }}>
-            {/* Left Side */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>              
-              <IconButton
-                onClick={toggleSidebar}
-                sx={{
-                  bgcolor: "rgba(255,255,255,0.15)",
-                  "&:hover": { bgcolor: "rgba(255,255,255,0.25)" },
-                  borderRadius: 2,
-                  color: "#fff",
-                }}
-              >
-                <MenuIcon />
-              </IconButton>
-            </Box>
-  
-            {/* Center */}
-            <Typography variant="h6" noWrap component="div" sx={{ color: "white", fontWeight: 600 }}>
-              OrderPlus Dashboard
-            </Typography>
-  
-            {/* Right Side */}
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Tooltip title="Toggle theme">
-                <IconButton
-                  onClick={toggleTheme}
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.85)",
-                    color: "rgba(0, 123, 255, 1)",
-                    borderRadius: "50%",
-                    "&:hover": {
-                      bgcolor: "#fff",
-                      boxShadow: "0 4px 8px rgba(0,123,255,0.4)",
-                    },
-                  }}
-                >
-                  {isDarkMode ? <IconSun size={20} /> : <IconMoon size={20} />}
-                </IconButton>
-              </Tooltip>
-  
-              <Tooltip title="Acocunt">
-                <IconButton
-                  onClick={handleOpenUserMenu}
-                  sx={{
-                    bgcolor: "rgba(255,255,255,0.15)",
-                    "&:hover": { bgcolor: "rgba(255,255,255,0.25)" },
-                    borderRadius: 2,
-                  }}
-                >
-                  <Avatar
-                    alt="User"
-                    src="/broken-image.jpg"
-                    sx={{
-                      width: 32,
-                      height: 32,
-                      bgcolor: "white",
-                      color: "rgba(0,123,255,1)",
-                      fontSize: 14,
-                    }}
-                  />
-                </IconButton>
-              </Tooltip>
-  
-              <Menu
-                sx={{ mt: "45px" }}
-                id="menu-appbar"
-                anchorEl={anchorElUser}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(anchorElUser)}
-                onClose={handleCloseUserMenu}
-                PaperProps={{
-                  sx: {
-                    borderRadius: 2,
-                    boxShadow: "0 2px 10px rgba(0,0,0,0.2)",
-                    minWidth: 140,
-                  },
-                }}
-              >
-                <MenuItem
-                  onClick={() => {
-                    handleCloseUserMenu();
-                    navigate("/login");
-                  }}
-                  sx={{ fontWeight: "bold", fontSize: 14 }}
-                >
-                  Login
-                </MenuItem>
-              </Menu>
-            </Box>
-          </Toolbar>
-        </AppBar>
-      </>
-    );
+ interface HeaderProps {
+  toggleSidebar: () => void;
+}
+
+const Header: FC<HeaderProps> = ({ toggleSidebar }) => { 
+  const { isAuthenticated, logout, email , photo} = useAuth();
+  const [open, setOpen] = useState(false);
+  const navigate = useNavigate();
+  const fullImagePath = photo && photo !== "/no-image.png"
+    ? `https://localhost:7027/${photo}`
+    : "/path/to/user/avatar.png";
+    console.log("fullImagePath:", fullImagePath)
+  // Estado para manejar el menú de usuario
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  const { isDarkMode, toggleTheme } = useThemeContext();
+
+  const handleLogout = () => {
+     logout();      
   };
-  
-  export default Header;
-  
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <AppBar
+      position="fixed"
+      sx={{
+        zIndex: (theme) => theme.zIndex.drawer + 1,
+        bgcolor: "var(--color-main-150)",
+      }}
+    >
+      <Toolbar>
+       
+        <IconButton
+          edge="start"
+          color="inherit"
+          aria-label="menu"
+          onClick={toggleSidebar}
+          sx={{ ml: 1 }}
+        >
+          <MenuIcon />
+        </IconButton>
+        <Typography variant="h6" style={{ flexGrow: 1 }}></Typography>
+        
+        <Box sx={{ padding: 2 }}>
+          <CssBaseline />
+          <Button
+            onClick={toggleTheme}
+            sx={{
+              backgroundColor: "#fff!important",
+              "&:hover": {
+                backgroundColor: "initial",
+              },
+              color: "var(--color-main-150)",
+            }}
+          >
+            {!isDarkMode ? <IconMoon /> : <IconSun />}
+          </Button>
+        </Box>
+
+        {isAuthenticated ? (
+          <>
+            {/* Botón con avatar de usuario */}
+            <IconButton onClick={handleMenuOpen} color="inherit">
+              <Avatar
+                alt="User Avatar"
+                src={fullImagePath}                
+              />
+              
+            </IconButton>
+
+            {/* Menú que se abre al hacer clic en el avatar */}
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              anchorOrigin={{
+                vertical: "bottom",
+                horizontal: "center",
+              }}
+              transformOrigin={{
+                vertical: "top",
+                horizontal: "center",
+              }}
+            >
+              <Box sx={{ p: 2, textAlign: "center" }}>
+                {/* Información del usuario */}
+                <Avatar
+                  alt="User Avatar"
+                  src={fullImagePath}
+                  sx={{ width: 56, height: 56, margin: "auto" }}
+                />
+                <Typography variant="body1" sx={{ mt: 1 }}>
+                  {`${"hi"}, ${email}`}
+                </Typography>
+              </Box>
+              <Divider />
+              {/* Link para editar perfil */}
+              <MenuItem onClick={() => navigate("/edit-user")}>
+                {"Edit Profile"}
+              </MenuItem>
+              {/* Link para cerrar sesión */}
+              <MenuItem onClick={handleLogout}>Logout</MenuItem>
+            </Menu>
+          </>
+        ) : (
+          <Button color="inherit" onClick={() => setOpen(true)}>
+            Login
+          </Button>
+        )}
+      </Toolbar>
+      {open && <LoginModal open={open} handleClose={() => setOpen(false)} />}
+    </AppBar>
+  );
+};
+
+export default Header;
