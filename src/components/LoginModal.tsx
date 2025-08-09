@@ -57,7 +57,7 @@ const LoginModal: FC<LoginProps> = ({ open, handleClose }) => {
         enableReinitialize: true,
     });
 
-    // مسح رسالة الخطأ عند إغلاق النافذة
+   
     const handleModalClose = () => {
         setLoginError("");
         formik.resetForm();

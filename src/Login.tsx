@@ -1,7 +1,9 @@
-import { Box, Grid, styled, keyframes } from "@mui/material";
+import {  Grid, styled, keyframes, Link } from "@mui/material";
 import logoEdu from "./assets/image.jpg";
-import logoAlcaldia from "./assets/image.jpg";
+import { Box } from "@mui/system";
 import LoginForm from "./components/LoginForm";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 // حركات الحركة الناعمة
 const floatAnimation = keyframes`
@@ -37,7 +39,6 @@ const MainContainer = styled(Box)(({ theme }) => ({
   overflow: "hidden",
 }));
 
-// صندوق مركزي للـ Login مع ظل ناعم وخلفية زجاجية (Glassmorphism)
 const FormWrapper = styled(Box)(({ theme }) => ({
   width: "100%",
   maxWidth: "420px",
@@ -51,7 +52,6 @@ const FormWrapper = styled(Box)(({ theme }) => ({
   alignItems: "center",
 }));
 
-// شعار متحرك عائم
 const FloatingLogo = styled("img")({
   width: "160px",
   marginBottom: "30px",
@@ -66,7 +66,6 @@ const FloatingLogo = styled("img")({
   },
 });
 
-// تذييل بشعار صغير مع حركة نبضية
 const Footer = styled(Box)({
   position: "fixed",
   bottom: 0,
@@ -95,15 +94,54 @@ const FooterLogo = styled("img")({
 });
 
 const Login = () => {
-  return (
-    <MainContainer>
-      <FormWrapper>
-        <FloatingLogo src={logoEdu} alt="Education Logo" />
-        <LoginForm />
-      </FormWrapper>
-    
-    </MainContainer>
-  );
+    const [isLoading, setIsLoading] = useState(false);
+   const [resendEmailOpen, setResendEmailOpen] = useState(false);
+   const [forgotPassOpen, setForgotPassOpen] = useState(false);
+   const navigate = useNavigate();
+ return (
+  <MainContainer>
+    <FormWrapper>
+      <FloatingLogo src={logoEdu} alt="Education Logo" />
+      <LoginForm />      
+      <Box
+        mt={3}
+        textAlign="center"
+        display="flex"
+        flexDirection="column"
+        gap={1}
+      >
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => setForgotPassOpen(true)}
+          disabled={isLoading}
+        >
+          Forgot Password?
+        </Link>
+
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => navigate("/register")}
+          sx={{ fontWeight: 500 }}
+          disabled={isLoading}
+        >
+          Don’t have an account? Register here
+        </Link>
+
+        <Link
+          component="button"
+          variant="body2"
+          onClick={() => setResendEmailOpen(true)}
+          disabled={isLoading}
+        >
+          Resend Confirmation Email
+        </Link>
+      </Box>
+    </FormWrapper>
+  </MainContainer>
+);
+
 };
 
 export default Login;

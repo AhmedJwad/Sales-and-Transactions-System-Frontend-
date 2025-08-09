@@ -12,6 +12,7 @@ import CitiesRouter from './pages/Cities/CitiesRouter';
 import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './Login';
+import RegisterForm from './pages/Register/RegisterForm';
 
 function App() { 
 
@@ -21,6 +22,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout />}>  
         <Route index element={<Dashboard />} /> 
+        <Route path="/register" element={<RegisterForm/>}/>
         <Route path="/login/" element={<Login/>} /> 
               <Route
                 path="/Categories/*"

@@ -18,6 +18,7 @@ import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
 import ExpandMore from '@mui/icons-material/ExpandMore';
 import { useState } from "react";
+import { useAuth } from "../hooks/useAuth";
 
 interface SidebarProps{
     open:boolean;
@@ -29,6 +30,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
     const handleCategoriesClick = () => {
       setOpenCategories(!openCategories);
       };
+    const { isAuthenticated, userRole } = useAuth();
     return(
         <Drawer
         variant="persistent"
@@ -64,8 +66,9 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Home"
             />
-          </ListItemButton>          
-          <ListItemButton
+          </ListItemButton> 
+           {(userRole === "Admin" || userRole === "User") && (
+            <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
               mb: 1,
@@ -81,7 +84,9 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Countries"
             />
-          </ListItemButton>
+          </ListItemButton>          
+           )}   
+            {(userRole === "Admin" || userRole === "User") && (
             <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
@@ -92,14 +97,16 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             to="/States"
               >
             <ListItemIcon>
-             <IconMap/>
+             <IconMap2/>
             </ListItemIcon>
             <ListItemText
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="States"
             />           
           </ListItemButton>
-           <ListItemButton
+          )}      
+          {(userRole === "Admin" || userRole === "User") && (
+            <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
               mb: 1,
@@ -116,8 +123,9 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               primary="Cities"
             />           
           </ListItemButton>
-          
-          <ListItemButton
+          )}
+          {(userRole === "Admin" || userRole === "User") && (
+             <ListItemButton
            onClick={handleCategoriesClick}
             sx={{
               bgcolor: "var(--color-background-100)",
@@ -136,7 +144,10 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             />
              {openCategories ? <ExpandLess /> : <ExpandMore />}
           </ListItemButton>
-          <Collapse in={openCategories} timeout="auto" unmountOnExit>
+          )}
+           
+          {(userRole === "Admin" || userRole === "User") && (
+             <Collapse in={openCategories} timeout="auto" unmountOnExit>
             <ListItemButton          
             sx={{
               bgcolor: "var(--color-background-100)",
@@ -189,7 +200,9 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
             />
           </ListItemButton>         
           </Collapse> 
-           <ListItemButton
+          )}
+          {(userRole === "Admin" || userRole === "User" && 
+          <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
               mb: 1,
@@ -206,6 +219,8 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               primary="Products"
             />
           </ListItemButton>                  
+          )}        
+           
         </List>
             
         </Drawer>

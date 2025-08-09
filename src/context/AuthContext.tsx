@@ -26,6 +26,8 @@ interface UserData {
   Address: string;
   Photo: string;
   CityId: string;
+  CountryCode:string;
+  MobilePhone:string;
 }
 
 interface AuthContextProps {
@@ -110,6 +112,8 @@ const TokenUtils = {
         Address: payload.Address || payload.Adress || payload.address || '',
         Photo: payload.Photo || payload.photo || '',
         CityId: payload.CityId || payload.cityId || payload.city_id || '',
+        CountryCode:payload.CountryCode || payload.CountryCode || '',
+        MobilePhone:payload.PhoneNumber || payload.PhoneNumber || '',
       };
     } catch (error) {
       console.error('Failed to extract user data:', error);
@@ -317,22 +321,18 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       console.log('Refresh already in progress, skipping...');
       return false;
     }
-
     if (retryCount >= MAX_RETRY_ATTEMPTS) {
       console.error('Max retry attempts reached for token refresh');
       clearAuthState();
       return false;
     }
-
     // Check network connectivity
     if (!navigator.onLine) {
       console.warn('No internet connection, skipping token refresh');
       return false;
     }
-
     setIsRefreshing(true);
     setRetryCount(prev => prev + 1);
-
     try {
       const currentTokenData = SecureStorage.getTokenData();
       if (!currentTokenData?.refreshToken) {
@@ -404,8 +404,8 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       
       if (tokenData?.token?.trim()) {
         try {
-          console.log('Calling logout API...');
-          await logoutRepository.post(tokenData);
+          //console.log('Calling logout API...');
+          //await logoutRepository.post(tokenData);
         } catch (apiError) {
           console.warn("Logout API call failed:", apiError);
         }

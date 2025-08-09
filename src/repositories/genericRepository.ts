@@ -6,12 +6,27 @@ const genericRepository = <IList, IItem>(method: string) => {
   const handleRequest = async <T>(request: Promise<HttpResponseWrapper<T>>): Promise<HttpResponseWrapper<T>> => {
     try {
       const data = await request;
-      return {
+     /*  return {
         response: data.response ?? null,
         error: false,
         statusCode: data.statusCode ?? 200,
         message: data.message ?? undefined,
+      }; */
+      if (data.response) {
+      return {
+        response: data.response ?? null,
+        statusCode: data.statusCode ?? 200,
+        message: data.message ?? undefined,
+        error: false,
       };
+    } else {
+      return {
+        response: null,
+        statusCode: data.statusCode ,
+        message: data.message,
+        error: true,
+      };
+    }
     } catch (error: any) {
       return {
         response: null,
