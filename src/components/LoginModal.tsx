@@ -19,7 +19,10 @@ const LoginModal: FC<LoginProps> = ({ open, handleClose }) => {
     const [resendEmailOpen, setResendEmailOpen] = useState(false);
     const [forgotPassOpen, setForgotPassOpen] = useState(false);
     const [loginError, setLoginError] = useState<string>("");
-
+    const resentpassword = () => {
+        navigate("/recoverypassword");
+         handleModalClose();
+        };
     const formik = useFormik({
         initialValues: {
             email: "",
@@ -127,7 +130,7 @@ const LoginModal: FC<LoginProps> = ({ open, handleClose }) => {
                         <Link
                             component="button"
                             variant="body2"
-                            onClick={() => setForgotPassOpen(true)}
+                            onClick={() => resentpassword()}
                             disabled={isLoading}
                         >
                             Forgot Password?

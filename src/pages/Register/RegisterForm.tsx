@@ -114,7 +114,7 @@ const RegisterForm = () => {
         Longitude: 0.225214,
         Password: "",
         passwordconfirm: "",
-        countryId: 0,
+        countryId: 1,
         stateId: 0,
         UserType: 1,
     });
@@ -288,7 +288,7 @@ const RegisterForm = () => {
    
     return (
         <Container maxWidth="md">
-            <Fade in timeout={800}>             
+            <Fade in timeout={800}>            
 
                         {/* Form Section */}
                         <form onSubmit={formik.handleSubmit}>
@@ -300,7 +300,6 @@ const RegisterForm = () => {
                                         Personal Information
                                     </Typography>
                                 </Grid>
-
                                 <Grid size={{xs:12,sm:6}}>
                                     <TextField
                                         fullWidth
@@ -414,27 +413,37 @@ const RegisterForm = () => {
                                                 },
                                             }}
                                         >
-                                            <PhoneInput
+                                           <PhoneInput
                                                 country="IQ"
+                                                defaultCountry="IQ"
                                                 placeholder="Enter phone number"
-                                                value={
-                                                    formik.values.PhoneNumber
-                                                        ? `${formik.values.CountryCode || "+964"}${formik.values.PhoneNumber}`
-                                                        : undefined
-                                                }
+                                                value={`${formik.values.CountryCode || "+964"}${formik.values.PhoneNumber || ""}`}
                                                 onChange={(value) => {
-                                                    if (value) {
-                                                        const match = value.match(/^(\+\d{1,4})(.*)$/);
-                                                        if (match) {
-                                                            const countryCode = match[1];
-                                                            const phoneNumber = match[2];
-                                                            formik.setFieldValue("CountryCode", countryCode);
-                                                            formik.setFieldValue("PhoneNumber", phoneNumber);
-                                                        } else {
-                                                            formik.setFieldValue("CountryCode", "+964");
-                                                            formik.setFieldValue("PhoneNumber", value.replace(/^\+964/, "") || "");
+                                                    if (value) {                                                       
+                                                        const cleanValue = value.replace(/\s/g, '');                                                      
+                                                        if (cleanValue.startsWith('+964')) {
+                                                        const afterCountryCode = cleanValue.substring(4);                                                          
+                                                        const phoneNumber = afterCountryCode.startsWith('0') 
+                                                        ? afterCountryCode.substring(1) 
+                                                        : afterCountryCode;                                                        
+                                                        formik.setFieldValue("CountryCode", "+964");
+                                                        formik.setFieldValue("PhoneNumber", phoneNumber);
                                                         }
-                                                    } else {
+                                                        
+                                                        else {
+                                                            const match = cleanValue.match(/^(\+\d{1,4})(0?)(.*)$/);
+                                                            if (match) {
+                                                                const countryCode = match[1];
+                                                                const phoneNumber = match[3]; 
+                                                                
+                                                                formik.setFieldValue("CountryCode", countryCode);
+                                                                formik.setFieldValue("PhoneNumber", phoneNumber);
+                                                            } else {                                                                
+                                                                formik.setFieldValue("CountryCode", "+964");
+                                                                formik.setFieldValue("PhoneNumber", cleanValue.replace(/^\+?0?/, ""));
+                                                            }
+                                                        }
+                                                    } else {                                                       
                                                         formik.setFieldValue("CountryCode", "+964");
                                                         formik.setFieldValue("PhoneNumber", "");
                                                     }

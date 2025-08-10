@@ -13,6 +13,8 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './Login';
 import RegisterForm from './pages/Register/RegisterForm';
+import ConfirmEmail from './pages/ConfirmEmail/ConfirmEmail';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
 
 function App() { 
 
@@ -23,7 +25,9 @@ function App() {
         <Route path="/" element={<Layout />}>  
         <Route index element={<Dashboard />} /> 
         <Route path="/register" element={<RegisterForm/>}/>
-        <Route path="/login/" element={<Login/>} /> 
+        <Route path="/login/" element={<Login/>} />
+        <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
+        <Route path="/recoverypassword/" element={<ResetPassword/>}/>
               <Route
                 path="/Categories/*"
                 element={
