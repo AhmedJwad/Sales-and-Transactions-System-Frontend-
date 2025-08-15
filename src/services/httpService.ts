@@ -11,7 +11,7 @@ export const axiosInstance = axios.create({
   },
 });
 
-axiosInstance.interceptors.request.use(
+/* axiosInstance.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("jwtToken");
     if (token && config.headers) {
@@ -20,13 +20,47 @@ axiosInstance.interceptors.request.use(
     return config;
   },
   (error) => Promise.reject(error)
-);
+); */
+axiosInstance.interceptors.request.use(
+  (config) => {
+    
+    const getAccessToken = () => {
+      try {
+        const encryptedData = localStorage.getItem('jwtToken');
+        if (!encryptedData) return null;
+        
+        const decryptedData = atob(encryptedData);
+        const tokenData = JSON.parse(decryptedData);
+        return tokenData?.token || null;
+      } catch (error) {
+        return null;
+      }
+    };
 
+    const token = getAccessToken();
+    if (token && config.headers) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+/* axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      localStorage.removeItem("jwtToken");
+      window.location.href = "/login";
+    }
+    return Promise.reject(error);
+  }
+); */
 axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
       localStorage.removeItem("jwtToken");
+      localStorage.removeItem("userData");
       window.location.href = "/login";
     }
     return Promise.reject(error);

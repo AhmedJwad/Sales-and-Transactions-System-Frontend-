@@ -7,7 +7,7 @@ import { TokenDTO } from "../types/TokenDTO";
 
 // Constants for security
 const STORAGE_KEYS = {
-  TOKEN_DATA: 'tokenData',
+  TOKEN_DATA: 'jwtToken',
   USER_DATA: 'userData',
 } as const;
 
@@ -35,10 +35,11 @@ interface AuthContextProps {
   userRole: Role | null;
   username: string | null;
   email: string | null;
-  photo: string | null;
+  photo: string | null;  
   isLoading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
   logout: () => Promise<void>;
+  processAuthResponse: (loginResponse: LoginResponseDto) => void;  
 }
 
 // Utility functions for secure token handling
@@ -128,7 +129,7 @@ const SecureStorage = {
   setTokenData: (tokenData: TokenDTO): void => {
     try {
       const encryptedData = btoa(JSON.stringify(tokenData));
-      sessionStorage.setItem(STORAGE_KEYS.TOKEN_DATA, encryptedData);
+      localStorage.setItem(STORAGE_KEYS.TOKEN_DATA, encryptedData);
     } catch (error) {
       console.error('Failed to store token data:', error);
     }
@@ -137,7 +138,7 @@ const SecureStorage = {
   // Get complete token data
   getTokenData: (): TokenDTO | null => {
     try {
-      const encryptedData = sessionStorage.getItem(STORAGE_KEYS.TOKEN_DATA);
+      const encryptedData = localStorage.getItem(STORAGE_KEYS.TOKEN_DATA);
       if (!encryptedData) return null;
       
       const decryptedData = atob(encryptedData);
@@ -187,7 +188,7 @@ const SecureStorage = {
   // Clear all stored data
   clearAll: (): void => {
     try {
-      sessionStorage.removeItem(STORAGE_KEYS.TOKEN_DATA);
+      localStorage.removeItem(STORAGE_KEYS.TOKEN_DATA);
       localStorage.removeItem(STORAGE_KEYS.USER_DATA);
     } catch (error) {
       console.error('Failed to clear storage:', error);
@@ -206,7 +207,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
   const [isLoading, setIsLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [photo, setPhoto] = useState<string | null>(null);
+  const [photo, setPhoto] = useState<string | null>(null); 
 
   const navigate = useNavigate();
   
@@ -220,7 +221,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     setIsAuthenticated(false);
     setUserRole(null);
     setUsername(null);
-    setEmail(null);
+    setEmail(null); 
     setRetryCount(0);
     SecureStorage.clearAll();
   }, []);
@@ -234,7 +235,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
         setIsAuthenticated(true);
         setUsername(userData.username);
         setEmail(userData.Email);
-        setUserRole(userData.Role);
+        setUserRole(userData.Role);       
         setPhoto(userData.Photo); 
         SecureStorage.setUserData(userData);
         return true;
@@ -256,15 +257,12 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       console.error('Username and password are required');
       return false;
     }
-
-    setIsLoading(true);
-    
+    setIsLoading(true);    
     try {
       const requestData: LoginRequestDto = {
         email: username.trim(),
         password: password,
       };
-
       console.log('Attempting login...');
       const response = await loginRepository.post(requestData);
       const loginResponse = response.response as unknown as LoginResponseDto;
@@ -420,7 +418,41 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       console.log('Logout completed');
     }
   }, [navigate, logoutRepository, clearAuthState]);
+  // update user info
+  const processAuthResponse = useCallback((loginResponse: LoginResponseDto) => {
+  if (!loginResponse?.token) {
+    throw new Error('Invalid response: missing token');
+  }
 
+  // Validate token before storing
+  if (!TokenUtils.isTokenValid(loginResponse.token)) {
+    throw new Error('Received invalid or expired token');
+  }
+
+  // Create complete TokenDTO
+  const tokenData: TokenDTO = {
+    token: loginResponse.token,
+    refreshToken: loginResponse.refreshToken || loginResponse.token,
+    expiration: loginResponse.expiration || new Date(Date.now() + 3600000).toISOString(),
+    refreshTokenExpiration: loginResponse.refreshTokenExpiration || new Date(Date.now() + 86400000).toISOString()
+  };
+
+  // Store token data
+  SecureStorage.setTokenData(tokenData);
+
+  // Update user state
+  if (!updateUserState(loginResponse.token)) {
+    throw new Error('Failed to process user data');
+  }
+
+  // Optionally: Navigate based on role
+  const userData = TokenUtils.extractUserData(loginResponse.token);
+  if (userData?.Role === "Admin") {
+    navigate("/home");
+  } else {
+    navigate("/");
+  }
+}, [navigate, updateUserState]);
   // Initialize auth state on app load
   useEffect(() => {
     const initializeAuth = async () => {
@@ -439,10 +471,10 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
             setUsername(userData.username);
             setEmail(userData.Email);
             setUserRole(userData.Role);
-            setPhoto(userData.Photo);
+            setPhoto(userData.Photo);           
           } else {
             // Extract user data from token
-            updateUserState(tokenData.token);
+            updateUserState(tokenData.token);           
           }
 
           // Schedule refresh if needed (don't wait for it)
@@ -534,11 +566,12 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       username,
       email,
       photo,
-      isLoading,
+      isLoading,     
       login,
       logout,
+      processAuthResponse     
     }),
-    [isAuthenticated, userRole, username, email, isLoading, login, logout]
+    [isAuthenticated, userRole, username, email, isLoading, login, logout,processAuthResponse ]
   );
 
   return (

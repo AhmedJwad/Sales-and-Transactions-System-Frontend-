@@ -14,12 +14,13 @@ const validationSchema = Yup.object({
 });
 
 const ResetPassword:FC=()=>{
-     const [isLoading, setIsLoading] = useState(false); 
+    const [isLoading, setIsLoading] = useState(false); 
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
     const navigate = useNavigate();
      const [initialValues] = useState({
-             Email: "",           
+             Email: "",
+                        
          });
      const formik=useFormik({
        initialValues,

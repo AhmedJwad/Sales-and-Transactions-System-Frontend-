@@ -12,7 +12,7 @@ import {
     Tooltip,
     Divider,
   } from "@mui/material";
-  import { FC, useState } from "react";
+  import { FC, useEffect, useState } from "react";
   import { useNavigate } from "react-router-dom";
   import { useThemeContext } from "../ThemeContext";
   import MenuIcon from "@mui/icons-material/Menu";
@@ -35,12 +35,20 @@ const Header: FC<HeaderProps> = ({ toggleSidebar }) => {
     console.log("fullImagePath:", fullImagePath)
   // Estado para manejar el menú de usuario
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-
+  const [imgVersion, setImgVersion] = useState(0);
   const { isDarkMode, toggleTheme } = useThemeContext();
+  
 
   const handleLogout = () => {
      logout();      
   };
+  const navigatetoEdituser = () => {
+     navigate("/Edituser"); 
+     handleMenuClose();     
+  };
+  useEffect(() => {
+  setImgVersion(v => v + 1);
+}, [fullImagePath]);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -113,7 +121,7 @@ const Header: FC<HeaderProps> = ({ toggleSidebar }) => {
               }}
             >
               <Box sx={{ p: 2, textAlign: "center" }}>
-                {/* Información del usuario */}
+                {/* user info */}
                 <Avatar
                   alt="User Avatar"
                   src={fullImagePath}
@@ -125,7 +133,7 @@ const Header: FC<HeaderProps> = ({ toggleSidebar }) => {
               </Box>
               <Divider />
               {/* Link para editar perfil */}
-              <MenuItem onClick={() => navigate("/edit-user")}>
+              <MenuItem onClick={navigatetoEdituser}>
                 {"Edit Profile"}
               </MenuItem>
               {/* Link para cerrar sesión */}

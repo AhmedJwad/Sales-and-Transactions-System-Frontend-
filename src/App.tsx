@@ -15,6 +15,8 @@ import Login from './Login';
 import RegisterForm from './pages/Register/RegisterForm';
 import ConfirmEmail from './pages/ConfirmEmail/ConfirmEmail';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
+import RecoveryPassword from './pages/ResetPassword/RecoveryPassword';
+import EditProfileForm from './pages/EditProfile/EditProfileForm';
 
 function App() { 
 
@@ -25,9 +27,15 @@ function App() {
         <Route path="/" element={<Layout />}>  
         <Route index element={<Dashboard />} /> 
         <Route path="/register" element={<RegisterForm/>}/>
-        <Route path="/login/" element={<Login/>} />
+        <Route path="/login/" element={<Login/>} />       
         <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
+        <Route path="/api/Accounts/ResetPassword" element={<RecoveryPassword />} />
         <Route path="/recoverypassword/" element={<ResetPassword/>}/>
+         <Route path="/Edituser/" element={
+           <PrivateRoute allowedRoles={["User", "Admin"]}>
+          <EditProfileForm/>
+          </PrivateRoute>
+          }/>
               <Route
                 path="/Categories/*"
                 element={

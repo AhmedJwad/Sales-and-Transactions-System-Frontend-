@@ -12,4 +12,5 @@ export interface UserDTO{
   Longitude: number;
   Password: string;
   PasswordConfirm: string;
+  Photo:string | null;
 }
