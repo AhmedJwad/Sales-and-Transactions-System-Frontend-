@@ -5,6 +5,7 @@ import {
   Divider,
   Grid,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useFormik } from "formik";
 import { FC, useEffect, useState } from "react";
@@ -12,6 +13,7 @@ import * as Yup from "yup";
 import LoadingComponent from "../../components/LoadingComponent";
 import genericRepository from "../../repositories/genericRepository";
 import { CategoryDto } from "../../types/CategoryDto";
+import ImageUploader from "../../components/ImageUploader";
 
 interface Props {
   id?: number | null;
@@ -21,9 +23,10 @@ interface Props {
 const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
   const numericId = Number(id);
   const [loading, setLoading] = useState(false);
-  const [category, setCategory] = useState<CategoryDto>({ id: 0, name: "" ,subcategories:null});
+  const [category, setCategory] = useState<CategoryDto>({ id: 0, name: "" ,subcategories:null, photo:""});
 
-  const repository = genericRepository<CategoryDto[], CategoryDto>("categories");
+  const repository = genericRepository<CategoryDto[], CategoryDto>("categories/full");
+  const reposcategory = genericRepository<CategoryDto[], CategoryDto>("categories");
 
   const validationSchema = Yup.object({
     name: Yup.string().required("requiredField"),
@@ -32,12 +35,13 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
   const getCategoryById = async () => {
     setLoading(true);
     try {
-      const result = await repository.getOne(numericId);
+      const result = await reposcategory.getOne(numericId);
       if (!result.error && result.response) {
         setCategory({
           id: result.response.id,
           name: result.response.name,
           subcategories:null,
+          photo:result.response.photo,
         });
       }
     } catch (error) {
@@ -51,7 +55,7 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
     if (id) {
       getCategoryById();
     } else {
-      setCategory({ id: 0, name: "" ,subcategories:null});
+      setCategory({ id: 0, name: "" ,subcategories:null, photo:""});      
     }
   }, [id]);
 
@@ -64,6 +68,7 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
           await repository.put({ ...values, id: numericId });
         } else {
           await repository.post(values);
+          console.log("category:", values);
         }
         onClose();
       } catch (error) {
@@ -97,6 +102,33 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
                 error={formik.touched.name && Boolean(formik.errors.name)}
                 helperText={formik.touched.name && formik.errors.name}
               />
+               <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                                    Photo
+                                  </Typography>
+                                   <Grid size={{xs:12, sm:6}}>
+                                              {formik.values.photo && (
+                                                <Box mb={2} textAlign="center">
+                                                    <img
+                                                    src={`${"https://localhost:7027/"}${formik.values.photo}`}
+                                                    alt="User"
+                                                    style={{
+                                                        width: 300,
+                                                        height: 300,
+                                                        borderRadius: "50%",
+                                                        objectFit: "cover",
+                                                        border: "2px solid #ccc"
+                                                    }}
+                                                    />
+                                                </Box>
+                                            )}
+                                        </Grid>
+                                  <ImageUploader
+                                    onImageSelected={(base64) => {
+                                      const current = formik.values.photo;
+                                      formik.setFieldValue("photo", base64);
+                                    }}
+                                    initialImage={formik.values.photo?.[0]}
+                                  />                
             </Grid>
 
             <Grid>

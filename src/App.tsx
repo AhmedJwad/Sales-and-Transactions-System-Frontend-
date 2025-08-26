@@ -17,85 +17,77 @@ import ConfirmEmail from './pages/ConfirmEmail/ConfirmEmail';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import RecoveryPassword from './pages/ResetPassword/RecoveryPassword';
 import EditProfileForm from './pages/EditProfile/EditProfileForm';
+import HomeLayout from './pages/Home/HomeLayout';
+import Home from './pages/Home/Home';
+import Products from './pages/Home/Products/Products';
 
 function App() { 
 
   return (
     <BrowserRouter>
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={<Layout />}>  
-        <Route index element={<Dashboard />} /> 
-        <Route path="/register" element={<RegisterForm/>}/>
-        <Route path="/login/" element={<Login/>} />       
-        <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
-        <Route path="/api/Accounts/ResetPassword" element={<RecoveryPassword />} />
-        <Route path="/recoverypassword/" element={<ResetPassword/>}/>
-         <Route path="/Edituser/" element={
-           <PrivateRoute allowedRoles={["User", "Admin"]}>
-          <EditProfileForm/>
-          </PrivateRoute>
-          }/>
-              <Route
-                path="/Categories/*"
-                element={
-                   <PrivateRoute allowedRoles={["User", "Admin"]}>                
-                   <CategoryConfigRouter/>
-                   </PrivateRoute>                                 
-                }
-              />       
-              <Route
-                path="/SubCategories/*"
-                element={ 
-                  <PrivateRoute allowedRoles={["User", "Admin"]}>                
-                  <SubcategoryConfigRouter/>
-                  </PrivateRoute>                             
-                }
-              />     
-              <Route
-                path="/Brands/*"
-                element={
-                  <PrivateRoute allowedRoles={["User", "Admin"]}> 
-                  <BrandConfigRouter/>
-                  </PrivateRoute>
-                }
-              />  
-              <Route
-                path="/Products/*"
-                element={
-                   <PrivateRoute allowedRoles={["User", "Admin"]}> 
-                  <ProductConfigRouter/>
-                  </PrivateRoute>
-                }
-              />  
-              <Route
-                path="/Countries/"
-                element={
-                   <PrivateRoute allowedRoles={["User", "Admin"]}> 
-                  <CountryConfigRouter/>
-                  </PrivateRoute>
-                }
-              />
-               <Route
-                path="/States/"
-                element={
-                   <PrivateRoute allowedRoles={["User", "Admin"]}> 
-                  <StateRouter/>
-                  </PrivateRoute>
-                }
-              />
-              <Route
-                path="/Cities/"
-                element={
-                   <PrivateRoute allowedRoles={["User", "Admin"]}> 
-                  <CitiesRouter/>
-                  </PrivateRoute>
-                }
-              />              
-        </Route>      
-      </Routes>
-    </AuthProvider>
-  </BrowserRouter>
+      <AuthProvider>
+        <Routes>  
+          {/* Home layout */}
+          <Route path="/" element={<HomeLayout />}>
+            <Route index element={<Home />} /> 
+            <Route path="/products/:subcategoryId" element={<Products/>}/>
+            <Route path="login" element={<Login />} />
+          </Route>     
+          
+          {/* Admin layout */}
+          <Route path="/admin" element={<Layout />}>  
+            <Route index element={<Dashboard />} /> 
+            <Route path="register" element={<RegisterForm/>}/>
+            <Route path="login" element={<Login/>} />       
+            <Route path="categories/*" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}>                
+                <CategoryConfigRouter/>
+              </PrivateRoute>                                 
+            } />       
+            <Route path="subcategories/*" element={ 
+              <PrivateRoute allowedRoles={["User", "Admin"]}>                
+                <SubcategoryConfigRouter/>
+              </PrivateRoute>                             
+            } />     
+            <Route path="brands/*" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}> 
+                <BrandConfigRouter/>
+              </PrivateRoute>
+            } />  
+            <Route path="products/*" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}> 
+                <ProductConfigRouter/>
+              </PrivateRoute>
+            } />  
+            <Route path="countries/*" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}> 
+                <CountryConfigRouter/>
+              </PrivateRoute>
+            } />
+            <Route path="states/*" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}> 
+                <StateRouter/>
+              </PrivateRoute>
+            } />
+            <Route path="cities/*" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}> 
+                <CitiesRouter/>
+              </PrivateRoute>
+            } />
+            <Route path="edituser" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}>
+                <EditProfileForm/>
+              </PrivateRoute>
+            } />
+          </Route>
+
+          {/* Routes خارج الـ layouts */}
+          <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
+          <Route path="/api/Accounts/ResetPassword" element={<RecoveryPassword />} />
+          <Route path="/recoverypassword" element={<ResetPassword/>}/>
+        </Routes>
+      </AuthProvider>
+    </BrowserRouter>
   )
 }
 

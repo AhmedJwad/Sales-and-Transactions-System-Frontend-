@@ -12,11 +12,27 @@ const SubcategoriesList = () => {
   const [rows, setRows] = useState<any[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+  const renderImageCell = (params: any) => {
+    const noImage = "https://localhost:7027/images/products/no-image.png";
+    const imagePath =
+      params.value && params.value !== "/no-image.png"
+        ? `https://localhost:7027/${params.value}`
+        : noImage;
+
+    return (
+      <img
+        src={imagePath}
+        alt="category"
+        style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+      />
+    );
+  };
 
   const columns = [
     { field: "id", headerName: "ID", flex: 1 },
     { field: "name", headerName: "Name", flex: 3 },
     { field: "category", headerName: "Category", flex: 6 },
+    { field: "photo", headerName: "Image", flex: 6, renderCell: renderImageCell },
   ];
 
   const repository = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
@@ -44,7 +60,7 @@ const SubcategoriesList = () => {
     try {
       setLoading(true);
      const result= await repository.delete(id);
-     if(!result.error)
+     if(result.error)
      {
       await getSubcategories();
      }else

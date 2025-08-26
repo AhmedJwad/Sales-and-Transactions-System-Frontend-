@@ -15,6 +15,7 @@ import {
   import genericRepository from "../../repositories/genericRepository";
   import { CategoryDto } from "../../types/CategoryDto";
   import { SubcategoryDto } from "../../types/SubcategoryDto";
+import ImageUploader from "../../components/ImageUploader";
   
   interface Props {
     id?: number | null;
@@ -28,10 +29,12 @@ import {
     const [initialValues, setInitialValues] = useState({
       name: "",
       categoryId: 0,
+      photo:"",
     });
   
     const categoryRepo = genericRepository<CategoryDto[], CategoryDto>("categories");
-    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
+    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory/full");
+    const subcategoryRepoget = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
   
     const fetchCategories = async () => {
       try {
@@ -47,11 +50,12 @@ import {
     const getSubcategoryById = async () => {
       setLoading(true);
       try {
-        const result = await subcategoryRepo.getOne(numericId);
+        const result = await subcategoryRepoget.getOne(numericId);
         if (!result.error && result.response) {
           setInitialValues({
             name: result.response.name,
             categoryId: result.response.categoryId,
+            photo:result.response.photo ?? "",
           });
         }
       } catch (error) {
@@ -66,7 +70,7 @@ import {
       if (id) {
         getSubcategoryById();
       } else {
-        setInitialValues({ name: "", categoryId: 0 });
+        setInitialValues({ name: "", categoryId: 0 , photo:""});
       }
     }, [id]);
   
@@ -150,6 +154,33 @@ import {
                     </MenuItem>
                   ))}
                 </TextField>
+                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                                                    Photo
+                                                  </Typography>
+                                                   <Grid size={{xs:12, sm:6}}>
+                                                              {formik.values.photo && (
+                                                                <Box mb={2} textAlign="center">
+                                                                    <img
+                                                                    src={`${"https://localhost:7027/"}${formik.values.photo}`}
+                                                                    alt="User"
+                                                                    style={{
+                                                                        width: 300,
+                                                                        height: 300,
+                                                                        borderRadius: "50%",
+                                                                        objectFit: "cover",
+                                                                        border: "2px solid #ccc"
+                                                                    }}
+                                                                    />
+                                                                </Box>
+                                                            )}
+                                                        </Grid>
+                                                  <ImageUploader
+                                                    onImageSelected={(base64) => {
+                                                      const current = formik.values.photo;
+                                                      formik.setFieldValue("photo", base64);
+                                                    }}
+                                                    initialImage={formik.values.photo?.[0]}
+                                                  />            
               </Grid>
   
               <Grid>

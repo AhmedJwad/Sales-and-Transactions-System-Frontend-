@@ -94,14 +94,14 @@ const ProductEdit: FC = () => {
   const updateAsync = async (updatedProduct: ProductDtoRequest) => {
     const result = await repo.put({ ...updatedProduct, id: numericId });
     if (!result.error && result.response) {
-      navigate("/products");
+      navigate("/admin/products");
     } else {
       console.error("Error updating product:", result.message);
     }
   };
 
   const handleReturn = () => {
-    navigate("/products");
+    navigate("/admin/products");
   };
   const addImagesAsync = async (images: string[]) => {
     const imageDTO: ProductImageUploadDTO = {

@@ -260,11 +260,11 @@ const EditProfileForm =()=>{
                 if (!result.error && result.statusCode === 200)
                 { 
                      const tokenData = (result.response as unknown as { token: LoginResponseDto }).token;
-                    processAuthResponse(tokenData);                      
-                    setSuccessMessage("Your profile has been updated successfully.");
-                    setTimeout(() => {
-                        navigate("/");
+                    processAuthResponse(tokenData);                         
+                    setTimeout(() => {  
+                        setSuccessMessage("Your profile has been updated successfully.");                      
                     }, 3000);
+                    navigate("/admin");
                 } else {
                     console.log("Error updating your profile:", result.error);
                     setErrorMessage(result.message || "Registration failed. Please try again.");

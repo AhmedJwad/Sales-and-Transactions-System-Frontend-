@@ -43,7 +43,7 @@ const Header: FC<HeaderProps> = ({ toggleSidebar }) => {
      logout();      
   };
   const navigatetoEdituser = () => {
-     navigate("/Edituser"); 
+     navigate("/admin/Edituser"); 
      handleMenuClose();     
   };
   useEffect(() => {

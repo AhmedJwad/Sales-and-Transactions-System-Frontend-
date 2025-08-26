@@ -13,9 +13,24 @@ const CategoriesList = () => {
   const [rows, setRows] = useState<CategoryDto[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editId, setEditId] = useState<number | null>(null);
+const renderImageCell = (params: any) => {
+    const noImage = "https://localhost:7027/images/products/no-image.png";
+    const imagePath =
+      params.value && params.value !== "/no-image.png"
+        ? `https://localhost:7027/${params.value}`
+        : noImage;
 
+    return (
+      <img
+        src={imagePath}
+        alt="category"
+        style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+      />
+    );
+  };
   const columns = [   
     { field: "name", headerName: "Name", flex: 12 },
+    { field: "photo", headerName: "Image", flex: 6, renderCell: renderImageCell },
   ];
 
   

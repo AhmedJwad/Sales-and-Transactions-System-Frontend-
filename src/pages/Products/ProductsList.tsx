@@ -134,11 +134,11 @@ const ProductList = () => {
  
 
   const handleCreateClick = () => {
-    navigate("/products/create");
+    navigate("/admin/products/create");
   };
 
   const handleEditClick = (id: number) => {
-    navigate(`/products/edit/${id}`);
+    navigate(`/admin/products/edit/${id}`);
   };
   useEffect(() => {
     const init = async () => {

@@ -57,7 +57,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}            
             component={Link}
-            to="/"
+            to="/admin"
           >
             <ListItemIcon>
               <IconHome/>
@@ -75,7 +75,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/Countries"
+            to="/admin/Countries"
               >
             <ListItemIcon>
              <IconMap/>
@@ -94,7 +94,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/States"
+            to="/admin/States"
               >
             <ListItemIcon>
              <IconMap2/>
@@ -113,7 +113,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/Cities"
+            to="/admin/Cities"
               >
             <ListItemIcon>
              <IconMap2/>
@@ -133,7 +133,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/"
+            to="/admin"
           >
             <ListItemIcon>
              <IconLayoutNavbarCollapse/>
@@ -155,7 +155,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/Categories"
+            to="/admin/Categories"
           >
             <ListItemIcon>
              <IconCategory/>
@@ -172,7 +172,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/Subcategories"
+            to="/admin/Subcategories"
           >
             <ListItemIcon>
               <IconCategoryPlus/>
@@ -189,7 +189,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/Brands"
+            to="/admin/Brands"
           >
             <ListItemIcon>
              <IconCategory2/>
@@ -201,7 +201,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
           </ListItemButton>         
           </Collapse> 
           )}
-          {(userRole === "Admin" || userRole === "User" && 
+          {(userRole === "Admin" || userRole === "User") && 
           <ListItemButton
             sx={{
               bgcolor: "var(--color-background-100)",
@@ -209,7 +209,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               borderRadius: 1,
             }}
             component={Link}
-            to="/Products"
+            to="/admin/Products"
           >
             <ListItemIcon>
              <IconBrandProducthunt/>
@@ -219,7 +219,7 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               primary="Products"
             />
           </ListItemButton>                  
-          )}        
+          }        
            
         </List>
             

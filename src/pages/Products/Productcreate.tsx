@@ -79,7 +79,7 @@ const ProductCreate: FC = () => {
       : await repo.post(updatedProduct);  
     console.log("Product after post", updatedProduct);  
     if (!result.error && result.response) {
-      navigate("/products");
+      navigate("/admin/products");
     } else {
       console.error("Error submitting product:", result.message);
     }  
@@ -87,7 +87,7 @@ const ProductCreate: FC = () => {
   
 
   const handleReturn = () => {
-    navigate("/products");
+    navigate("/admin/products");
   };
 
   useEffect(() => {

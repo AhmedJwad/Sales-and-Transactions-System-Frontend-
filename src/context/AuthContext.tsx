@@ -294,7 +294,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       // Navigate based on role
       const userData = TokenUtils.extractUserData(loginResponse.token);
       if (userData?.Role === "Admin") {
-        navigate("/home");
+        navigate("/admin");
       } else {
         navigate("/");
       }
@@ -414,7 +414,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     } finally {
       // Always clear auth data and navigate
       clearAuthState();
-      navigate("/");
+      navigate("/admin");
       console.log('Logout completed');
     }
   }, [navigate, logoutRepository, clearAuthState]);

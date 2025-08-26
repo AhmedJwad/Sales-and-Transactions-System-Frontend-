@@ -20,6 +20,7 @@
     "axios": "^1.10.0",
     "formik": "^2.4.6",
     "google-map-react": "^2.2.5",
+    "lucide-react": "^0.540.0",
     "multiselect-react-dropdown": "^2.0.25",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",

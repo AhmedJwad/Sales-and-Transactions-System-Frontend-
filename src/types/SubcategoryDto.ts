@@ -1,4 +1,5 @@
 import { CategoryDto } from "./CategoryDto";
+import { ProductDTO } from "./ProductDTO";
 
 export interface SubcategoryDto {
     id: number;
@@ -8,4 +9,6 @@ export interface SubcategoryDto {
     prosubcategories: any; 
     brands: any;           
     productCategoriesNumber: number;
+    photo:string|null;
+    products:ProductDTO[] |null;
   }
