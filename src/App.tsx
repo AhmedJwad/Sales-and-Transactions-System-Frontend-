@@ -20,6 +20,9 @@ import EditProfileForm from './pages/EditProfile/EditProfileForm';
 import HomeLayout from './pages/Home/HomeLayout';
 import Home from './pages/Home/Home';
 import Products from './pages/Home/Products/Products';
+import ProductList from './pages/Home/Products/ProductList';
+import ColoursRouter from './pages/Colours/ColoursRouter';
+import SizesRouter from './pages/Sizes/SizesRouter';
 
 function App() { 
 
@@ -29,9 +32,10 @@ function App() {
         <Routes>  
           {/* Home layout */}
           <Route path="/" element={<HomeLayout />}>
-            <Route index element={<Home />} /> 
-            <Route path="/products/:subcategoryId" element={<Products/>}/>
+            <Route index element={<Home />} />         
             <Route path="login" element={<Login />} />
+            <Route path="/products" element={<ProductList/>}/>     
+            <Route path="/products/:subcategoryId" element={<Products/>}/>
           </Route>     
           
           {/* Admin layout */}
@@ -79,9 +83,19 @@ function App() {
                 <EditProfileForm/>
               </PrivateRoute>
             } />
+            <Route path="colors/" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}>
+                <ColoursRouter/>
+              </PrivateRoute>
+            }/>
+            <Route path="Sizes/" element={
+              <PrivateRoute allowedRoles={["User", "Admin"]}>
+                <SizesRouter/>
+              </PrivateRoute>
+            }/>
           </Route>
 
-          {/* Routes خارج الـ layouts */}
+       
           <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
           <Route path="/api/Accounts/ResetPassword" element={<RecoveryPassword />} />
           <Route path="/recoverypassword" element={<ResetPassword/>}/>

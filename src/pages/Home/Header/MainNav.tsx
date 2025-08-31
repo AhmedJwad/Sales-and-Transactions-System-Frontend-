@@ -102,7 +102,23 @@ const MainNav=() => {
         >
           {item.name}
         </Typography>
+        
       ))}
+      <Typography
+            variant="body2"
+            onClick={() => navigate("/products")}
+            sx={{
+              fontWeight: 400,
+              color: '#666',
+              fontSize: '20px',
+              cursor: 'pointer',
+              minWidth: 'max-content',
+              '&:hover': { color: '#1976d2', fontWeight: 500 },
+              transition: 'all 0.2s ease'
+            }}
+          >
+    جميع المنتجات
+  </Typography>
 
       <Menu
         anchorEl={anchorEl}

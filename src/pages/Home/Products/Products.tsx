@@ -2,7 +2,10 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom"
 import { ProductDTO } from "../../../types/ProductDTO";
 import genericRepository from "../../../repositories/genericRepository";
-import { Box, Button, Card, CardContent, CardMedia, Grid, Typography } from "@mui/material";
+import { Box, Button, Card, CardContent, CardMedia, Grid, TextField, Typography } from "@mui/material";
+import LoadingComponent from "../../../components/LoadingComponent";
+import Pagination from '@mui/material/Pagination';
+import Autocomplete from '@mui/material/Autocomplete';
 
 
 const Products=()=>{
@@ -12,6 +15,17 @@ const Products=()=>{
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined); 
     const ProductRepo=genericRepository<ProductDTO[], ProductDTO>(`product/getproductbysubcategory/${subcategoryId}`);
+      const [page, setPage] = useState(1);      
+        const [pageSize] = useState(10);
+        const [searchText, setSearchText] = useState("");
+         const filteredProducts = products.filter((prod) =>
+            prod.name.toLowerCase().includes(searchText.toLowerCase())
+        );
+        
+        const paginatedProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize);
+        const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => {
+        setPage(value);
+    };
     const fetchProducts=async()=>{
         try {
             setLoading(true)
@@ -40,11 +54,50 @@ const Products=()=>{
     },[subcategoryId]);
     return(
         <Box sx={{p:{xs:2, md:4}}}>
-            <Typography variant="h4" sx={{mb:3 , fontWeight:"bold"}}>
+            {loading? (<LoadingComponent/>):(
+            <>
+             <Typography variant="h4" sx={{mb:3 , fontWeight:"bold"}}>
                    Products in SubCategory {subcategoryId}
             </Typography>
+              <Box sx={{ display: 'flex', justifyContent: 'center', mb: 3 }}>
+                            <Autocomplete
+                                freeSolo
+                                options={products.map((p) => p.name)}
+                                inputValue={searchText}
+                                onInputChange={(event, newInputValue) => {
+                                setSearchText(newInputValue);
+                                setPage(1);
+                                }}
+                                sx={{ width: 700 }} 
+                                renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    label="Search Products"
+                                    variant="outlined"
+                                    sx={{ 
+                                    width: '100%', 
+                                    height: 50,                
+                                    '& .MuiInputBase-root': { 
+                                        height: '100%',          
+                                        fontSize: '18px'         
+                                    },
+                                    '& .MuiInputLabel-root': { fontSize: '20px' } 
+                                    }}
+                                />
+                                )}
+                            />
+                            </Box>
+                            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4, mb:4 }}>
+                            <Pagination
+                                count={Math.ceil(filteredProducts.length / pageSize)}
+                                page={page}
+                                onChange={handlePageChange}
+                                variant="outlined"
+                                color="primary"
+                            />
+                            </Box>
             <Grid container spacing={3}>
-                {products.map((prod)=>(
+                {paginatedProducts.map((prod)=>(
                     <Grid size={{xs:12, sm:6, md:4}} key={prod.id}>  
                     <Card>
                        <CardMedia
@@ -65,6 +118,8 @@ const Products=()=>{
                     </Grid>
                 ))}                
             </Grid>
+            </>
+        )}           
         </Box>
     )
 

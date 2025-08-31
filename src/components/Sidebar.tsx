@@ -9,10 +9,12 @@ import {
     IconCategory,
     IconCategory2,
     IconCategoryPlus,
+    IconColorPicker,
     IconHome,
     IconLayoutNavbarCollapse,
     IconMap,
-    IconMap2,   
+    IconMap2,
+    IconResize,   
   } from "@tabler/icons-react";
 import Collapse from '@mui/material/Collapse';
 import ExpandLess from '@mui/icons-material/ExpandLess';
@@ -198,7 +200,41 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
               primary="Brands"
             />
-          </ListItemButton>         
+          </ListItemButton>
+           <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/admin/colors"
+          >
+            <ListItemIcon>
+             <IconColorPicker/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Colors"
+            />
+          </ListItemButton>  
+           <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/admin/sizes"
+          >
+            <ListItemIcon>
+             <IconResize/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="sizes"
+            />
+          </ListItemButton>                          
           </Collapse> 
           )}
           {(userRole === "Admin" || userRole === "User") && 
