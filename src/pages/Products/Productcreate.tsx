@@ -5,6 +5,7 @@ import genericRepository from "../../repositories/genericRepository";
 import { ProductDtoRequest } from "../../types/ProductDtorequest";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
 import ProductForm from "./ProductForm";
+import { ColourDTO } from "../../types/ColoutDTO";
 
 const ProductCreate: FC = () => {
   const { id } = useParams();
@@ -22,17 +23,21 @@ const ProductCreate: FC = () => {
     brandId: 1,
     hasSerial: false,
     productCategoryIds: [],
+    ProductColorIds:[],
     productImages: [],
     serialNumbers: [],
   });
 
   const [nonSelectedSubcategories, setNonSelectedSubcategories] = useState<SubcategoryDto[]>([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState<SubcategoryDto[]>([]);
+  const [nonSelectedColors, setNonSelectedColors] = useState<ColourDTO[]>([]);
+  const [selectedSubColors, setSelectedColors] = useState<ColourDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const repo = genericRepository<ProductDtoRequest[], ProductDtoRequest>("Product/full");
   const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory/combo");
+  const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combo");
 
   const fetchSubcategories = async () => {
     setLoading(true);
@@ -42,6 +47,22 @@ const ProductCreate: FC = () => {
         setNonSelectedSubcategories(result.response);
       } else {
         console.error("Error fetching Subcategories:", result.message);
+      }
+    } catch (error: any) {
+      console.error("Unexpected error:", error.message || error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  const fetchColors = async () => {
+    setLoading(true);
+    try {
+      const result = await ColorRepo.getAll();
+      if (!result.error && result.response) {
+        setNonSelectedColors(result.response);
+        console.log("colors:", result.response)
+      } else {
+        console.error("Error fetching Colors:", result.message);
       }
     } catch (error: any) {
       console.error("Unexpected error:", error.message || error);
@@ -60,9 +81,12 @@ const ProductCreate: FC = () => {
         setProduct(productData);
 
         const selectedSubs = nonSelectedSubcategories.filter(sub =>
-          productData.productCategoryIds?.includes(sub.id)
+          productData.productCategoryIds?.includes(sub.id));
+        const selectedcolr = nonSelectedColors.filter(col =>
+          productData.ProductColorIds?.includes(col.id)
         );
         setSelectedSubcategories(selectedSubs);
+        setSelectedColors(selectedcolr);
       } else {
         console.error("Error fetching product by ID:", result.message);
       }
@@ -78,7 +102,7 @@ const ProductCreate: FC = () => {
       ? await repo.put({ ...updatedProduct, id: numericId })
       : await repo.post(updatedProduct);  
     console.log("Product after post", updatedProduct);  
-    if (!result.error && result.response) {
+    if (!result.error) {
       navigate("/admin/products");
     } else {
       console.error("Error submitting product:", result.message);
@@ -89,13 +113,17 @@ const ProductCreate: FC = () => {
   const handleReturn = () => {
     navigate("/admin/products");
   };
-
-  useEffect(() => {
-    fetchSubcategories();
+useEffect(() => {
+  const fetchData = async () => {
+    await fetchSubcategories();
+    await fetchColors();
     if (numericId > 0) {
-      fetchProductbyId();
+      await fetchProductbyId();
     }
-  }, [numericId]);
+  };
+  fetchData();
+}, [numericId]);
+  
 
   return loading ? (
     <LoadingComponent />
@@ -105,6 +133,8 @@ const ProductCreate: FC = () => {
       isEdit={false}
       nonSelectedSubcategories={nonSelectedSubcategories}
       selectedSubcategories={selectedSubcategories}
+      selectedColors={selectedSubColors}
+      nonSelectedColors={nonSelectedColors}
       onValidSubmit={createOrUpdateAsync}
       returnAction={handleReturn}
     />

@@ -2662,6 +2662,11 @@ rc-virtual-list@^3.2.0, rc-virtual-list@^3.5.1:
     rc-resize-observer "^1.0.0"
     rc-util "^5.36.0"
 
+react-color-selector@^1.2.4:
+  version "1.2.4"
+  resolved "https://registry.yarnpkg.com/react-color-selector/-/react-color-selector-1.2.4.tgz#acfea77588f5427074c3b1964efbfa437e85ee8b"
+  integrity sha512-m9jvyaXMiBm27oNq9tvw/EnRATer0oSfFNeHQ96WHw4rBF1Zxh0pN0plEG08gAovursLFJWOqKOvyQeAviR5Zg==
+
 react-color@^2.19.3:
   version "2.19.3"
   resolved "https://registry.yarnpkg.com/react-color/-/react-color-2.19.3.tgz#ec6c6b4568312a3c6a18420ab0472e146aa5683d"

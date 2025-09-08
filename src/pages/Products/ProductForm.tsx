@@ -1,4 +1,4 @@
-import { FC, useRef, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import CarouselView from "../../components/CarouselView";
@@ -12,18 +12,23 @@ import {
   Grid,
   Button,
   TextField,
-  Typography,  
+  Typography,
 } from "@mui/material";
 import ImageUploader from "../../components/ImageUploader";
+import { ColourDTO } from "../../types/ColoutDTO";
+
 interface ProductFormProps {
   product: ProductDtoRequest;
   isEdit?: boolean;
   nonSelectedSubcategories: SubcategoryDto[];
   selectedSubcategories: SubcategoryDto[];
+  nonSelectedColors: ColourDTO[];
+  selectedColors: ColourDTO[];
   onValidSubmit: (values: ProductDtoRequest) => Promise<void> | void;
   returnAction: () => void;
-  addImageAction?: (images: string[]) => void;
-  removeImageAction?: (images:string[]) => void;
+  addImageAction?: (images: string[], selectedColor?: { id: number; hexCode: string }) => void;
+  //addImageAction?: (images: string[], selectedColor?: ColourDTO) => void;
+  removeImageAction?: (images: string[]) => void;
 }
 
 const ProductForm: FC<ProductFormProps> = ({
@@ -31,18 +36,29 @@ const ProductForm: FC<ProductFormProps> = ({
   isEdit = false,
   nonSelectedSubcategories,
   selectedSubcategories,
+  nonSelectedColors,
+  selectedColors,
   onValidSubmit,
   returnAction,
   addImageAction,
   removeImageAction,
 }) => {
-    const [loading] = useState(false);
-  const [selected, setSelected] = useState<MultipleSelectorModel[]>(
+  const [loading] = useState(false);
+
+  // 🟢 Subcategories state
+  const [selectedCategories, setSelectedCategories] = useState<MultipleSelectorModel[]>(
     selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }))
   );
-
-  const [nonSelected] = useState<MultipleSelectorModel[]>(
+  const [nonSelectedCategories] = useState<MultipleSelectorModel[]>(
     nonSelectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }))
+  );
+
+  // 🟢 Colors state
+  const [selectedColorsState, setSelectedColorsState] = useState<MultipleSelectorModel[]>(
+    selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode  }))
+  );
+  const [nonSelectedColorsState] = useState<MultipleSelectorModel[]>(
+    nonSelectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode }))
   );
 
   const formik = useFormik<ProductDtoRequest>({
@@ -57,20 +73,42 @@ const ProductForm: FC<ProductFormProps> = ({
       desiredProfit: Yup.number().min(0).required("Desired profit is required"),
     }),
     onSubmit: async (values) => {
-      values.productCategoryIds = selected.map((x) => parseInt(x.key));
+      // 🟢 Add selected categories + colors IDs to payload
+      values.productCategoryIds = selectedCategories.map((x) => parseInt(x.key));
+      values.ProductColorIds = selectedColorsState.map((x) => parseInt(x.key));
       await onValidSubmit(values);
     },
   });
 
-  const handleSelectorChange = (newSelected: MultipleSelectorModel[]) => {
-    setSelected(newSelected);
+  const handleCategoryChange = (newSelected: MultipleSelectorModel[]) => {
+    setSelectedCategories(newSelected);
   };
- 
 
+  const handleColorChange = (newSelected: MultipleSelectorModel[]) => {
+    setSelectedColorsState(newSelected);
+  };
+  const getContrastColor = (hexColor: string) => {
+  const hex = hexColor.replace('#', '');
+  const r = parseInt(hex.substr(0, 2), 16);
+  const g = parseInt(hex.substr(2, 2), 16);
+  const b = parseInt(hex.substr(4, 2), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? '#000000' : '#ffffff';
+};
+useEffect(() => {
+  // Categories
+  const selectedCatMapped = selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }));  
+  setSelectedCategories(selectedCatMapped);
+  // Colors
+  const selectedColorMapped = selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode }));  
+  setSelectedColorsState(selectedColorMapped);  
+}, [selectedSubcategories, nonSelectedSubcategories, selectedColors, nonSelectedColors]);
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Typography variant="h6">{isEdit ? "👜 Edit Product":"👜 Create New Product"}</Typography>
+        <Typography variant="h6">
+          {isEdit ? "👜 Edit Product" : "👜 Create New Product"}
+        </Typography>
         <Box>
           <Button
             variant="contained"
@@ -145,60 +183,125 @@ const ProductForm: FC<ProductFormProps> = ({
                 Categories:
               </Typography>
               <MultipleSelector
-                selected={selected}
-                nonSelected={nonSelected}
-                onChange={handleSelectorChange}
+                selected={selectedCategories}
+                nonSelected={nonSelectedCategories}
+                onChange={handleCategoryChange}
               />
+              {/* Colors Preview */}
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  Selected Colors:
+                </Typography>              
+
+                {/* MultipleSelector for selection (unchanged) */}
+               <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginBottom: '8px' }}>
+                  {selectedColorsState.map((option) => (
+                    <span
+                      key={option.key}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: option.value, 
+                        borderRadius: '50%',
+                        border: `1px solid ${getContrastColor(option.value)}`,
+                        cursor: 'pointer'
+                      }}
+                      title={option.value} 
+                      onClick={() => {                      
+                        const newSelected = selectedColorsState.filter(c => c.key !== option.key);
+                        handleColorChange(newSelected);
+                      }}
+                    ></span>
+                  ))}
+                </div>
+
+                <MultipleSelector
+                  selected={selectedColorsState}
+                  nonSelected={nonSelectedColorsState}
+                  onChange={handleColorChange}
+                />
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '8px' }}>
+                  {nonSelectedColorsState.map((option) => (
+                    <span
+                      key={option.key}
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '24px',
+                        height: '24px',
+                        backgroundColor: option.value, 
+                        borderRadius: '50%',
+                        border: `1px solid ${getContrastColor(option.value)}`,
+                        cursor: 'pointer'
+                      }}
+                      title={option.value} 
+                      onClick={() => {                      
+                        handleColorChange([...selectedColorsState, option]);
+                      }}
+                    ></span>
+                  ))}</div>
             </Grid>
 
             {/* Column 3: Image Uploader */}
-            <Grid size={{xs:12, md:4}}>            
-                    <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                      Photo
-                    </Typography>
-                    <ImageUploader
-                      onImageSelected={(base64) => {
-                        const current = formik.values.productImages ?? [];
-                        formik.setFieldValue("productImages", [...current, base64]);
-                      }}
-                      initialImage={formik.values.productImages?.[0]}
-                    />                
-                
-             {isEdit && (
-                        <Box
-                          mt={2}
-                          width="100%"                 
-                          display="flex"
-                          justifyContent="center"       
-                          alignItems="center"         
-                          textAlign="center"            
-                          gap={2}
-                        >
-                          <Button
-                              variant="outlined"
-                              color="primary"
-                              onClick={() => addImageAction?.(formik.values.productImages ?? [])}
-                            >
-                              Add Image
-                            </Button>
-                          <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={()=>removeImageAction?.(formik.values.productImages??[])}
-                          >
-                            Remove Image
-                          </Button>                            
-                        </Box>
-                      )}
+            <Grid size={{xs:12, md:4}}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Photo
+              </Typography>
+              <ImageUploader
+                onImageSelected={(base64) => {
+                  const current = formik.values.productImages ?? [];
+                  formik.setFieldValue("productImages", [...current, base64]);
+                }}
+                initialImage={formik.values.productImages?.[0]}
+              />           
+
+              {isEdit && (
+                <Box
+                  mt={2}
+                  width="100%"
+                  display="flex"
+                  justifyContent="center"
+                  alignItems="center"
+                  textAlign="center"
+                  gap={2}
+                >
+                 <Button
+                  variant="outlined"
+                  color="primary"
+                  onClick={() => {
+                    const color = selectedColorsState[0]
+                      ? { id: parseInt(selectedColorsState[0].key), hexCode: selectedColorsState[0].value }
+                      : undefined;
+
+                    addImageAction?.(formik.values.productImages ?? [], color);
+                  }}
+                >
+                  Add Image
+                </Button>
+
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => removeImageAction?.(formik.values.productImages ?? [])}
+                  >
+                    Remove Image
+                  </Button>
+                </Box>
+              )}
             </Grid>
           </Grid>
 
           {/* Image Preview */}
-          {isEdit && formik.values.productImages && formik.values.productImages.length > 0 && (
-            <Box mt={4}>
-              <CarouselView images={formik.values.productImages} />
-            </Box>
-          )}
+          {isEdit &&
+            formik.values.productImages &&
+            formik.values.productImages.length > 0 && (
+              <Box mt={4}>
+                <CarouselView images={formik.values.productImages} />
+              </Box>
+            )}
         </form>
       )}
     </Box>

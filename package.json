@@ -26,6 +26,7 @@
     "multiselect-react-dropdown": "^2.0.25",
     "react": "^19.1.0",
     "react-color": "^2.19.3",
+    "react-color-selector": "^1.2.4",
     "react-dom": "^19.1.0",
     "react-dropdown": "^1.11.0",
     "react-image-gallery": "^1.4.0",

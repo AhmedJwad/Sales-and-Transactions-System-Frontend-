@@ -1,4 +1,5 @@
 import { BrandDto } from "./BrandDto";
+import { productColorDTO } from "./productColorDTO";
 import { ProductImageDTO } from "./ProductImageDTO";
 import { ProductSubCategoryDTO } from "./ProductSubCategoryDTO";
 import { SerialNumberDTO } from "./SerialNumberDTO";
@@ -19,6 +20,7 @@ export interface ProductDTO {
   stock: number;
   hasSerial: boolean;
   productsubCategories:ProductSubCategoryDTO[]; 
+  productColor:productColorDTO[];  
   brandId: number;
   brand:BrandDto;
   productCategoriesNumber: number;

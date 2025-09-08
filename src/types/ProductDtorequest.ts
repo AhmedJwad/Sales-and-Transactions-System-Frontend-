@@ -10,7 +10,8 @@ export interface ProductDtoRequest {
     stock: number;   
     brandId: number;  
     hasSerial: boolean;  
-    productCategoryIds?: number[];   
+    productCategoryIds?: number[];
+    ProductColorIds?: number[];   
     productImages?: string[];        
     serialNumbers?: string[];       
   }
