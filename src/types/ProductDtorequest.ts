@@ -1,3 +1,4 @@
+import { BrandDto } from "./BrandDto";
 
 export interface ProductDtoRequest {
     id: number;  
@@ -11,8 +12,11 @@ export interface ProductDtoRequest {
     brandId: number;  
     hasSerial: boolean;  
     productCategoryIds?: number[];
-    ProductColorIds?: number[];   
+    ProductColorIds?: number[]; 
+    ProductSizeIds?:number[];  
     productImages?: string[];        
-    serialNumbers?: string[];       
+    serialNumbers?: string[];
+    BrandId?:number;   
+      
   }
   

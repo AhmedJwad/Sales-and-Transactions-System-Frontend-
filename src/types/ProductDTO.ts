@@ -1,6 +1,7 @@
 import { BrandDto } from "./BrandDto";
 import { productColorDTO } from "./productColorDTO";
 import { ProductImageDTO } from "./ProductImageDTO";
+import { ProductSizeDTO } from "./ProductSizeDTO";
 import { ProductSubCategoryDTO } from "./ProductSubCategoryDTO";
 import { SerialNumberDTO } from "./SerialNumberDTO";
 
@@ -19,8 +20,10 @@ export interface ProductDTO {
   desiredProfit: number;
   stock: number;
   hasSerial: boolean;
-  productsubCategories:ProductSubCategoryDTO[]; 
+  productSubCategories:ProductSubCategoryDTO[]; 
+  productsubCategories?:ProductSubCategoryDTO[];
   productColor:productColorDTO[];  
+  productSize:ProductSizeDTO[];
   brandId: number;
   brand:BrandDto;
   productCategoriesNumber: number;
@@ -28,4 +31,5 @@ export interface ProductDTO {
   productImagesNumber: number;
   mainImage: string;
   serialNumbers:SerialNumberDTO[];
+  
   }

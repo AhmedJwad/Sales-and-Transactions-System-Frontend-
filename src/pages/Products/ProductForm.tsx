@@ -13,9 +13,13 @@ import {
   Button,
   TextField,
   Typography,
+  MenuItem,
 } from "@mui/material";
 import ImageUploader from "../../components/ImageUploader";
 import { ColourDTO } from "../../types/ColoutDTO";
+import { SizeDTO } from "../../types/SizeDTO";
+import { BrandDto } from "../../types/BrandDto";
+import genericRepository from "../../repositories/genericRepository";
 
 interface ProductFormProps {
   product: ProductDtoRequest;
@@ -24,6 +28,8 @@ interface ProductFormProps {
   selectedSubcategories: SubcategoryDto[];
   nonSelectedColors: ColourDTO[];
   selectedColors: ColourDTO[];
+  nonSelectedSizes: SizeDTO[];
+  selectedSizes: SizeDTO[];
   onValidSubmit: (values: ProductDtoRequest) => Promise<void> | void;
   returnAction: () => void;
   addImageAction?: (images: string[], selectedColor?: { id: number; hexCode: string }) => void;
@@ -38,28 +44,32 @@ const ProductForm: FC<ProductFormProps> = ({
   selectedSubcategories,
   nonSelectedColors,
   selectedColors,
+  nonSelectedSizes,
+  selectedSizes,
   onValidSubmit,
   returnAction,
   addImageAction,
   removeImageAction,
 }) => {
   const [loading] = useState(false);
-
   // 🟢 Subcategories state
   const [selectedCategories, setSelectedCategories] = useState<MultipleSelectorModel[]>(
     selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }))
   );
   const [nonSelectedCategories] = useState<MultipleSelectorModel[]>(
-    nonSelectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }))
-  );
-
+    nonSelectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name })));
   // 🟢 Colors state
   const [selectedColorsState, setSelectedColorsState] = useState<MultipleSelectorModel[]>(
-    selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode  }))
-  );
+    selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode  })));
   const [nonSelectedColorsState] = useState<MultipleSelectorModel[]>(
-    nonSelectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode }))
+    nonSelectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode })));
+  // 🟢 Sizes state
+  const [selectedSizesstate, setSelectedSizesstate] = useState<MultipleSelectorModel[]>(
+    selectedSizes.map((x) => ({ key: x.id.toString(), value: x.name  })));
+  const [nonSelectedSizesState] = useState<MultipleSelectorModel[]>(nonSelectedSizes.map((x) => ({ key: x.id.toString(), value: x.name }))
   );
+  const [brand ,setBrand]=useState<BrandDto[]>([]);
+  const brandRepo=genericRepository<BrandDto[], BrandDto>("Brand/combo");
 
   const formik = useFormik<ProductDtoRequest>({
     initialValues: product,
@@ -76,6 +86,7 @@ const ProductForm: FC<ProductFormProps> = ({
       // 🟢 Add selected categories + colors IDs to payload
       values.productCategoryIds = selectedCategories.map((x) => parseInt(x.key));
       values.ProductColorIds = selectedColorsState.map((x) => parseInt(x.key));
+      values.ProductSizeIds=selectedSizesstate.map((x)=>parseInt(x.key));
       await onValidSubmit(values);
     },
   });
@@ -87,6 +98,9 @@ const ProductForm: FC<ProductFormProps> = ({
   const handleColorChange = (newSelected: MultipleSelectorModel[]) => {
     setSelectedColorsState(newSelected);
   };
+   const handlesizeChange = (newSelected: MultipleSelectorModel[]) => {
+   setSelectedSizesstate(newSelected);
+  };
   const getContrastColor = (hexColor: string) => {
   const hex = hexColor.replace('#', '');
   const r = parseInt(hex.substr(0, 2), 16);
@@ -95,6 +109,24 @@ const ProductForm: FC<ProductFormProps> = ({
   const brightness = (r * 299 + g * 587 + b * 114) / 1000;
   return brightness > 128 ? '#000000' : '#ffffff';
 };
+const fetchBrands=async()=>{      
+        try {
+            const result=await brandRepo.getAll();
+            if(!result.error && result.response)
+            {
+               setBrand(result.response)
+
+            }
+            else
+            {
+                console.error("Error fetching subcategories:", result.message);
+            }
+        } catch (error:any) {
+            console.error("Unexpected error:", error.message || error);  
+        }finally{
+           
+        }
+    }
 useEffect(() => {
   // Categories
   const selectedCatMapped = selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }));  
@@ -102,7 +134,10 @@ useEffect(() => {
   // Colors
   const selectedColorMapped = selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode }));  
   setSelectedColorsState(selectedColorMapped);  
-}, [selectedSubcategories, nonSelectedSubcategories, selectedColors, nonSelectedColors]);
+    const selectedsizeMapped =selectedSizes.map((x) => ({ key: x.id.toString(), value: x.name }));  
+ setSelectedSizesstate(selectedsizeMapped);  
+ fetchBrands();
+}, [selectedSubcategories, nonSelectedSubcategories, selectedColors, nonSelectedColors, selectedSizes, nonSelectedSizes]);
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -187,6 +222,14 @@ useEffect(() => {
                 nonSelected={nonSelectedCategories}
                 onChange={handleCategoryChange}
               />
+               <Typography variant="subtitle1" sx={{ mb: 1 }}>
+               Sizes:
+              </Typography>
+              <MultipleSelector
+                selected={selectedSizesstate}
+                nonSelected={nonSelectedSizesState}
+                onChange={handlesizeChange}
+              />
               {/* Colors Preview */}
                 <Typography variant="subtitle1" sx={{ mb: 1 }}>
                   Selected Colors:
@@ -243,6 +286,33 @@ useEffect(() => {
                       }}
                     ></span>
                   ))}</div>
+                   <TextField
+                                    style={{ marginTop: '20px' }}
+                                    select
+                                    id="BrandId"
+                                    name="BrandId"
+                                    label="Brand"
+                                    fullWidth
+                                    value={formik.values.BrandId}
+                                    onChange={formik.handleChange}
+                                    error={
+                                      formik.touched.BrandId &&
+                                      Boolean(formik.errors.BrandId)
+                                    }
+                                    helperText={
+                                      formik.touched.BrandId && formik.errors.BrandId
+                                    }
+                                    size="small"
+                                  >
+                                    <MenuItem value={0} disabled>
+                                      -- Select a brand --
+                                    </MenuItem>
+                                    {brand.map((cat) => (
+                                      <MenuItem key={cat.id} value={cat.id}>
+                                        {cat.name}
+                                      </MenuItem>
+                                    ))}
+                                  </TextField>
             </Grid>
 
             {/* Column 3: Image Uploader */}

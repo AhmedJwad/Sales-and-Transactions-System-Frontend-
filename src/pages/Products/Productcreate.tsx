@@ -6,6 +6,7 @@ import { ProductDtoRequest } from "../../types/ProductDtorequest";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
 import ProductForm from "./ProductForm";
 import { ColourDTO } from "../../types/ColoutDTO";
+import { SizeDTO } from "../../types/SizeDTO";
 
 const ProductCreate: FC = () => {
   const { id } = useParams();
@@ -26,18 +27,22 @@ const ProductCreate: FC = () => {
     ProductColorIds:[],
     productImages: [],
     serialNumbers: [],
+    ProductSizeIds:[],
   });
 
   const [nonSelectedSubcategories, setNonSelectedSubcategories] = useState<SubcategoryDto[]>([]);
   const [selectedSubcategories, setSelectedSubcategories] = useState<SubcategoryDto[]>([]);
   const [nonSelectedColors, setNonSelectedColors] = useState<ColourDTO[]>([]);
   const [selectedSubColors, setSelectedColors] = useState<ColourDTO[]>([]);
+  const [nonSelectedSizes, setNonSelectedSizes] = useState<SizeDTO[]>([]);
+  const [selectedSizes, setSelectedSizes] = useState<SizeDTO[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const repo = genericRepository<ProductDtoRequest[], ProductDtoRequest>("Product/full");
   const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory/combo");
   const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combo");
+  const Sizerepo=genericRepository<SizeDTO[], SizeDTO>("sizes/combo");
 
   const fetchSubcategories = async () => {
     setLoading(true);
@@ -61,6 +66,22 @@ const ProductCreate: FC = () => {
       if (!result.error && result.response) {
         setNonSelectedColors(result.response);
         console.log("colors:", result.response)
+      } else {
+        console.error("Error fetching Colors:", result.message);
+      }
+    } catch (error: any) {
+      console.error("Unexpected error:", error.message || error);
+    } finally {
+      setLoading(false);
+    }
+  };
+ const fetchSizes = async () => {
+    setLoading(true);
+    try {
+      const result = await Sizerepo.getAll();
+      if (!result.error && result.response) {
+      setNonSelectedSizes(result.response);
+        console.log("sizes:", result.response)
       } else {
         console.error("Error fetching Colors:", result.message);
       }
@@ -117,6 +138,7 @@ useEffect(() => {
   const fetchData = async () => {
     await fetchSubcategories();
     await fetchColors();
+    await fetchSizes();
     if (numericId > 0) {
       await fetchProductbyId();
     }
@@ -135,6 +157,8 @@ useEffect(() => {
       selectedSubcategories={selectedSubcategories}
       selectedColors={selectedSubColors}
       nonSelectedColors={nonSelectedColors}
+      selectedSizes={selectedSizes}
+      nonSelectedSizes={nonSelectedSizes}
       onValidSubmit={createOrUpdateAsync}
       returnAction={handleReturn}
     />

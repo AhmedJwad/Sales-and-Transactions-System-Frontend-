@@ -8,6 +8,7 @@ import { CategoryDto } from "../../types/CategoryDto";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
 import { useNavigate } from "react-router-dom";
 import { ColourDTO } from "../../types/ColoutDTO";
+import { SizeDTO } from "../../types/SizeDTO";
 
 
 const ProductList = () => {
@@ -18,6 +19,7 @@ const ProductList = () => {
   const [subcategoriesList, setSubcategoriesList] = useState<SubcategoryDto[]>([]);
   const [categoriesList, setCategoriesList] = useState<CategoryDto[]>([]); 
   const [colorList, setColorList] = useState<ColourDTO[]>([]); 
+  const [sizeList, setSizeList] = useState<SizeDTO[]>([]);   
   const navigate = useNavigate();
 
   const renderImageCell = (params: any) => {
@@ -55,7 +57,6 @@ const renderColorCell = (params: any) => {
   );
 };
 
-
   const columns = [
     { field: "id", headerName: "Id", flex: 1 },
     { field: "name", headerName: "Name", flex: 6 },
@@ -63,9 +64,10 @@ const renderColorCell = (params: any) => {
     { field: "price", headerName: "Price", flex: 3 },
     { field: "stock", headerName: "Stock", flex: 3 },
     //{ field: "brand", headerName: "Brand", flex: 6 },
-    { field: "categories", headerName: "Categories", flex: 6 },
+    { field: "brand", headerName: "Brand", flex: 6 },
     { field: "subcategories", headerName: "Subcategories", flex: 6 },
     { field: "color", headerName: "colors", flex: 6 , renderCell:renderColorCell},
+    { field: "sizes", headerName: "Sizes", flex: 6 },
     { field: "image", headerName: "Image", flex: 6, renderCell: renderImageCell },
   ];
 
@@ -73,23 +75,26 @@ const renderColorCell = (params: any) => {
   const categoryRepo = genericRepository<CategoryDto[], CategoryDto>("Categories");
   const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
    const Colrepository=genericRepository<ColourDTO[], ColourDTO>("colours");
+   const sizerepository=genericRepository<SizeDTO[], SizeDTO>("sizes");
+   
 
   const getProducts = async (
     categories: CategoryDto[],
     subcategories: SubcategoryDto[],  
-    color:ColourDTO[],        
+    color:ColourDTO[],
+    size:SizeDTO[],        
   ) => {
     setLoading(true);
     try {
       const data = await productRepo.getAll();
       if (!data.error && data.response) {
         const products = data.response.map((item: ProductDTO) => {
-          const subcategoryNames = item.productsubCategories
+          const subcategoryNames = item.productSubCategories
             .map((p) => subcategories.find((s) => s.id === p.subcategoryId)?.name)
             .filter(Boolean)
             .join(", ");
 
-          const categoryNames = item.productsubCategories
+          const categoryNames = item.productSubCategories
             .map((p) => {
               const sub = subcategories.find((s) => s.id === p.subcategoryId);
               return sub ? categories.find((c) => c.id === sub.categoryId)?.name : null;
@@ -99,7 +104,7 @@ const renderColorCell = (params: any) => {
             .join(", ");
 
          //const brandName = item.brand && !Array.isArray(item.brand) ? item.brand.name : "N/A";
-         const brandName = item.productsubCategories
+         const brandName = item.productSubCategories
                             .map((psc) => {
                               const sub = subcategories.find((s) => s.id === psc.subcategoryId);                             
                               return sub?.brands?.[0]?.name ?? null;
@@ -108,13 +113,15 @@ const renderColorCell = (params: any) => {
                             .filter((value, index, self) => self.indexOf(value) === index)
                             .join(", ");
                         console.log(brandName);
-          const imagePath =
-            item.productImages && item.productImages.length > 0
-              ? item.productImages[0].image
-              : "/no-image.png";
-              console.log("show products image", imagePath);
+              const imagePath =item.productImages && item.productImages.length > 0
+                            ? item.productImages[0]
+                            : "/no-image.png";
+
               const colorElements = item.productColor
                                     .map((p) => color.find((c) => c.id === p.colorId)?.hexCode)
+                                    .filter(Boolean);
+              const sizeElements = item.productSize
+                                    .map((p) => size.find((s) => s.id === p.sizeId)?.name)
                                     .filter(Boolean);
                                     
           return {
@@ -122,12 +129,13 @@ const renderColorCell = (params: any) => {
             name: item.name,
             description: item.description,
             price: item.price,
-            stock: item.stock,
-            brand: brandName,
-            subcategories: subcategoryNames,
+            stock: item.stock,          
+            subcategories: item.productSubCategories?.join(", ") ?? "",
             categories: categoryNames,
             image: imagePath,
-            color:colorElements,
+            color:item.productColor ?? [],
+            sizes:item.productSize ?? [],
+            brand:item.brand?.name,            
           };
         });
 
@@ -148,8 +156,8 @@ const renderColorCell = (params: any) => {
       setLoading(true);
       const result = await productRepo.delete(id);
       if (result.error) {
-        const [cats, subs, cols] = [categoriesList, subcategoriesList, colorList];
-        await getProducts(cats, subs, cols);
+        const [cats, subs, cols, sizl] = [categoriesList, subcategoriesList, colorList, sizeList];
+        await getProducts(cats, subs, cols, sizl);
       } else {
         console.error("Delete failed:", result.message || "Unknown error");
       }
@@ -159,8 +167,6 @@ const renderColorCell = (params: any) => {
       setLoading(false);
     }
   };
-
- 
 
   const handleCreateClick = () => {
     navigate("/admin/products/create");
@@ -173,21 +179,23 @@ const renderColorCell = (params: any) => {
     const init = async () => {
       setLoading(true);
       try {
-        const [catRes, subRes , colRes] = await Promise.all([
+        const [catRes, subRes , colRes, sizRes] = await Promise.all([
           categoryRepo.getAll(),
           subcategoryRepo.getAll(),
           Colrepository.getAll(),
+          sizerepository.getAll(),
         ]);
 
         const cats = catRes.response || [];
         const subs = subRes.response || [];
         const cols=colRes.response || [];
-        console.log("colors:", cols)
+        const sizl=sizRes.response || [];        
+        console.log("Size:", sizl)
         setCategoriesList(cats);
         setSubcategoriesList(subs);
         setColorList(cols);
-
-        await getProducts(cats, subs,cols,);
+        setSizeList(sizl)
+        await getProducts(cats, subs,cols,sizl);       
       } catch (error) {
         console.error("Initialization failed:", error);
       } finally {
