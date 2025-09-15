@@ -106,7 +106,7 @@ const MainNav=() => {
       ))}
       <Typography
             variant="body2"
-            onClick={() => navigate("/products")}
+            onClick={() => navigate("/homeproducts")}
             sx={{
               fontWeight: 400,
               color: '#666',

@@ -59,9 +59,13 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-      localStorage.removeItem("jwtToken");
-      localStorage.removeItem("userData");
-      window.location.href = "/login";
+     const publicPaths = ["/", "/homeproducts", "/homeproducts/:subcategoryId"];
+      const currentPath = window.location.pathname;
+      if (!publicPaths.includes(currentPath)) {
+        localStorage.removeItem("jwtToken");
+        localStorage.removeItem("userData");
+        window.location.href = "/admin/login";
+      }
     }
     return Promise.reject(error);
   }

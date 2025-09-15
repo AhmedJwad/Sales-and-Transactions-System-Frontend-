@@ -280,10 +280,10 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
       const tokenData: TokenDTO = {
         token: loginResponse.token,
         refreshToken: loginResponse.refreshToken || loginResponse.token,
-        expiration: loginResponse.expiration || new Date(Date.now() + 3600000).toISOString(),
-        refreshTokenExpiration: loginResponse.refreshTokenExpiration || new Date(Date.now() + 86400000).toISOString()
+        expiration: loginResponse.expiration, //|| new Date(Date.now() + 3600000).toISOString(),
+        refreshTokenExpiration: loginResponse.refreshTokenExpiration,// || new Date(Date.now() + 86400000).toISOString()
       };
-
+      console.log("Token data:", tokenData);
       // Store token data and update state
       SecureStorage.setTokenData(tokenData);
       
@@ -437,6 +437,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     refreshTokenExpiration: loginResponse.refreshTokenExpiration || new Date(Date.now() + 86400000).toISOString()
   };
 
+  
   // Store token data
   SecureStorage.setTokenData(tokenData);
 
@@ -448,8 +449,10 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
   // Optionally: Navigate based on role
   const userData = TokenUtils.extractUserData(loginResponse.token);
   if (userData?.Role === "Admin") {
-    navigate("/home");
-  } else {
+    navigate("/admin");
+  } else if (userData?.Role === "User") {
+  navigate("/"); 
+}else {
     navigate("/");
   }
 }, [navigate, updateUserState]);
@@ -494,7 +497,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
           }
 
         } else {
-          console.log('No valid token data found, starting as guest');
+          console.log('No valid token data found, starting as guest');         
           clearAuthState();
         }
 

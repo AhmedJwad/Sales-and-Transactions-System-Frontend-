@@ -16,7 +16,7 @@ const PrivateRoute: FC<PrivateRouteProps> = ({ children, allowedRoles }) => {
   }
 
   if (!isAuthenticated) {
-    return <Navigate to="/login" />;
+    return <Navigate to="/login" replace />;
   }
 
   if (!allowedRoles.includes(userRole ?? "")) {

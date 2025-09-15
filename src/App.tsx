@@ -20,9 +20,9 @@ import EditProfileForm from './pages/EditProfile/EditProfileForm';
 import HomeLayout from './pages/Home/HomeLayout';
 import Home from './pages/Home/Home';
 import Products from './pages/Home/Products/Products';
-import ProductList from './pages/Home/Products/ProductList';
 import ColoursRouter from './pages/Colours/ColoursRouter';
 import SizesRouter from './pages/Sizes/SizesRouter';
+import PublicProductList from './pages/Home/Products/PublicProductList';
 
 function App() { 
 
@@ -32,16 +32,16 @@ function App() {
         <Routes>  
           {/* Home layout */}
           <Route path="/" element={<HomeLayout />}>
-            <Route index element={<Home />} />         
-            <Route path="login" element={<Login />} />
-            <Route path="/products" element={<ProductList/>}/>     
-            <Route path="/products/:subcategoryId" element={<Products/>}/>
+            <Route index element={<Home />} />       
+            <Route path="login" element={<Login />} />   
+            <Route path="homeproducts" element={<PublicProductList/>}/>     
+            <Route path="homeproducts/:subcategoryId" element={<Products/>}/>
+            <Route path="register" element={<RegisterForm/>}/>
           </Route>     
           
           {/* Admin layout */}
           <Route path="/admin" element={<Layout />}>  
-            <Route index element={<Dashboard />} /> 
-            <Route path="register" element={<RegisterForm/>}/>
+            <Route index element={<Dashboard />} />             
             <Route path="login" element={<Login/>} />       
             <Route path="categories/*" element={
               <PrivateRoute allowedRoles={["User", "Admin"]}>                

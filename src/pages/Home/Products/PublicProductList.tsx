@@ -10,7 +10,7 @@ import { ColourDTO } from "../../../types/ColoutDTO";
 import { SizeDTO } from "../../../types/SizeDTO";
 import { ProductFilterDto } from "../../../types/ProductFilterDto";
 
-const ProductList = () => {
+const PublicProductList = () => {
     const [products, setProducts] = useState<ProductDTO[]>([]);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
@@ -265,4 +265,4 @@ const ProductList = () => {
     );
 };
 
-export default ProductList;
+export default PublicProductList;

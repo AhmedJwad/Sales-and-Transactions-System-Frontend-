@@ -107,7 +107,7 @@ var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/
           {subcategory.map((subcat) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={subcat.id}>
               <Card
-              onClick={() => navigate(`/products/${subcat.id}`)}
+              onClick={() => navigate(`/homeproducts/${subcat.id}`)}
                 sx={{
                   cursor: "pointer",
                   transition: "transform 0.3s, boxShadow 0.3s",
