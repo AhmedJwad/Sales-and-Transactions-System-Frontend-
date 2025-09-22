@@ -72,6 +72,7 @@ const renderColorCell = (params: any) => {
   ];
 
   const productRepo = genericRepository<ProductDTO[], ProductDTO>("Product");
+  const productRepolist = genericRepository<ProductDTO[], ProductDTO>("Product/Getfullproduct");
   const categoryRepo = genericRepository<CategoryDto[], CategoryDto>("Categories");
   const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
    const Colrepository=genericRepository<ColourDTO[], ColourDTO>("colours");
@@ -86,7 +87,7 @@ const renderColorCell = (params: any) => {
   ) => {
     setLoading(true);
     try {
-      const data = await productRepo.getAll();
+      const data = await productRepolist.getAll();
       if (!data.error && data.response) {
         const products = data.response.map((item: ProductDTO) => {
           const subcategoryNames = item.productSubCategories

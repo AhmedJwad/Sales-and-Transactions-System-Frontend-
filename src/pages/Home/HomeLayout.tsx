@@ -4,10 +4,12 @@ import { Link, Outlet } from "react-router-dom";
 import Header from "./Header/Header";
 import FooterHome from "./Footer/FooterHome";
 import { CategoryProvider } from "./CategoryContext";
+import { CartProvider } from "../../context/CartContext";
 
 const HomeLayout: FC = () => {
     return(
-       <CategoryProvider>
+      <CartProvider>
+       <CategoryProvider>        
          <div style={{display:"flex", flexDirection:"column", minHeight:"100vh"}}>
         {/*header*/}
         <Header/>
@@ -21,6 +23,7 @@ const HomeLayout: FC = () => {
       </Box>
     </div>
     </CategoryProvider>
+    </CartProvider>
     )   
 }
 export default HomeLayout

@@ -2,8 +2,12 @@ import { Box, IconButton, Typography, Badge, InputBase, Paper } from "@mui/mater
 import { ShoppingCart, Search } from "@mui/icons-material";
 import UserAccountDropdown from "./UserAccountDropdown";
 import MainNav from "./MainNav";
+import { useCart } from "../../../context/CartContext";
+
 
 const Header = () => {
+  const {order}=useCart();
+  const totalQuantity=order.OrderDetails.reduce((sum, item)=>sum + item.Quantity, 0)
   return (
     <Box
       component="header"
@@ -59,7 +63,7 @@ const Header = () => {
           </Typography>
           <UserAccountDropdown />
           <IconButton>
-            <Badge badgeContent={0} color="error">
+            <Badge badgeContent={totalQuantity} color="error">
               <ShoppingCart />
             </Badge>
           </IconButton>

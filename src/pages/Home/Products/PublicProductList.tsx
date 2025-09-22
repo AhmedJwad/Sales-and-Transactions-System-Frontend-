@@ -9,12 +9,14 @@ import { BrandDto } from "../../../types/BrandDto";
 import { ColourDTO } from "../../../types/ColoutDTO";
 import { SizeDTO } from "../../../types/SizeDTO";
 import { ProductFilterDto } from "../../../types/ProductFilterDto";
+import { useCart } from "../../../context/CartContext";
 
 const PublicProductList = () => {
+    const { addToCart } = useCart();
     const [products, setProducts] = useState<ProductDTO[]>([]);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-    const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`product`);
+    const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`Product/Getfullproduct`);
     const ProductFilterRepo = genericRepository<ProductDTO[], ProductDTO>("product/productfilter");
 
     const [page, setPage] = useState(1);
@@ -89,7 +91,7 @@ const PublicProductList = () => {
         fetchProducts();
         fetchFiltersData();
     }, []);
-
+      
     return (
         <Box sx={{ p: { xs: 2, md: 4 } }}>
             {loading ? <LoadingComponent /> : (
@@ -241,7 +243,14 @@ const PublicProductList = () => {
                                                 <Typography variant="h6">{prod.name}</Typography>
                                                 <Typography color="text.secondary">{prod.description}</Typography>
                                                 <Typography color="text.primary">{prod.price}</Typography>
-                                                <Button variant="contained" sx={{ mt: 2 }}>Buy Now</Button>
+                                                <Button variant="contained" onClick={()=>addToCart({
+                                                   ProductId: prod.id,
+                                                    Name: prod.name,
+                                                    Description: prod.description,
+                                                    Image: `https://localhost:7027/${prod.productImages[0]}`,
+                                                    Price: prod.price,
+                                                    Quantity: 1
+                                                })} sx={{ mt: 2 }}>Buy Now</Button>
                                             </CardContent>
                                         </Card>
                                     </Grid>

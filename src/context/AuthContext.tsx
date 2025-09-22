@@ -213,7 +213,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
   
   // Repository instances
   const loginRepository = genericRepository<LoginResponseDto, LoginRequestDto>("accounts/login");
-  const refreshRepository = genericRepository<LoginResponseDto, { refreshToken: string }>("accounts/refreshToken");
+  const refreshRepository = genericRepository<LoginResponseDto, { refreshToken: string }>("accounts/RefreshToken");
   const logoutRepository = genericRepository<any, TokenDTO>("accounts/Logout");
 
   // Clear auth state helper
