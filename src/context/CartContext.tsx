@@ -8,6 +8,7 @@ interface CartContextType {
     removeFromCart: (productId: number) => void,
     updateQuantity: (productId: number, qyt: number) => void,
     clearCart: () => void
+    setRemark: (remark: string) => void 
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -15,13 +16,15 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export const CartProvider = ({ children }: { children: ReactNode }) => {
     const [order, setOrder] = useState<OrderDTO>(() => {
         const savedCart = localStorage.getItem("cart");
-        return savedCart ? JSON.parse(savedCart) : { OrderStatus: 0, OrderDetails: [] };
+        return savedCart ? JSON.parse(savedCart) : { OrderStatus: 0, OrderDetails: [],Remarks:"" };
     });
 
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(order));
     }, [order]);
-
+    const setRemark = (remark: string) => {
+        setOrder(prev => ({ ...prev, Remarks: remark }));
+    };
     const addToCart = (item: OrderDetailDTO) => {
         setOrder((prev) => {
             const exist = prev.OrderDetails.find(d => d.ProductId === item.ProductId);
@@ -57,7 +60,7 @@ export const CartProvider = ({ children }: { children: ReactNode }) => {
     const clearCart = () => setOrder({ OrderStatus: 0, OrderDetails: [] });
 
     return (
-        <CartContext.Provider value={{ order, addToCart, removeFromCart, updateQuantity, clearCart }}>
+        <CartContext.Provider value={{ order, addToCart, removeFromCart, updateQuantity, clearCart, setRemark }}>
             {children}
         </CartContext.Provider>
     );

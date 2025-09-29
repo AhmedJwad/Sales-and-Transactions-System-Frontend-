@@ -3,11 +3,14 @@ import { ShoppingCart, Search } from "@mui/icons-material";
 import UserAccountDropdown from "./UserAccountDropdown";
 import MainNav from "./MainNav";
 import { useCart } from "../../../context/CartContext";
+import { useNavigate } from "react-router-dom";
+
 
 
 const Header = () => {
   const {order}=useCart();
   const totalQuantity=order.OrderDetails.reduce((sum, item)=>sum + item.Quantity, 0)
+   const navigate = useNavigate();  
   return (
     <Box
       component="header"
@@ -63,7 +66,7 @@ const Header = () => {
           </Typography>
           <UserAccountDropdown />
           <IconButton>
-            <Badge badgeContent={totalQuantity} color="error">
+            <Badge badgeContent={totalQuantity} color="error" onClick={() => navigate("/cart")}>
               <ShoppingCart />
             </Badge>
           </IconButton>

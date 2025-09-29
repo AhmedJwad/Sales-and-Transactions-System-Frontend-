@@ -23,6 +23,8 @@ import Products from './pages/Home/Products/Products';
 import ColoursRouter from './pages/Colours/ColoursRouter';
 import SizesRouter from './pages/Sizes/SizesRouter';
 import PublicProductList from './pages/Home/Products/PublicProductList';
+import Cart from './pages/Home/Cart/Cart';
+import ContinueShopping from './pages/Home/ReturnShopping/ContinueShopping';
 
 function App() { 
 
@@ -37,6 +39,9 @@ function App() {
             <Route path="homeproducts" element={<PublicProductList/>}/>     
             <Route path="homeproducts/:subcategoryId" element={<Products/>}/>
             <Route path="register" element={<RegisterForm/>}/>
+             <Route path="/cart" element={<Cart />} />
+             <Route path="/editprfile" element={<EditProfileForm/>}/>
+             <Route path="/ContinueShopping" element={<ContinueShopping/>}/>
           </Route>     
           
           {/* Admin layout */}

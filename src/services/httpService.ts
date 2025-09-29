@@ -59,7 +59,7 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-     const publicPaths = ["/", "/homeproducts", "/homeproducts/:subcategoryId"];
+     const publicPaths = ["/","/cart","/ContinueShopping", "/homeproducts", "/homeproducts/:subcategoryId"];
       const currentPath = window.location.pathname;
       if (!publicPaths.includes(currentPath)) {
         localStorage.removeItem("jwtToken");

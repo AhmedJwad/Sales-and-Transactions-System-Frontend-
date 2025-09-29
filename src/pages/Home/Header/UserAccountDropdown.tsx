@@ -1,39 +1,95 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { User } from "lucide-react";
 import LoginModal from "../../../components/LoginModal";
-import { Box, Button, Typography } from "@mui/material";
+import { Avatar, Box, Button, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
+import { useAuth } from "../../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 
 
 const UserAccountDropdown: React.FC = () => {
-   const [open, setOpen] = useState(false);
+       const { isAuthenticated, logout, email , photo} = useAuth();
+       const [open, setOpen] = useState(false);
+       const navigate = useNavigate();   
+            const fullImagePath = photo && photo !== "/no-image.png"
+              ? `https://localhost:7027/${photo}`
+              : "/path/to/user/avatar.png";
+              console.log("fullImagePath:", fullImagePath)
+            // State to handle the user menu
+            const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+            const [imgVersion, setImgVersion] = useState(0);          
+          
+            const handleLogout = () => {
+               logout();      
+            };
+            const navigatetoEdituser = () => {
+               navigate("/editprfile"); 
+               handleMenuClose();     
+            };
+            useEffect(() => {
+            setImgVersion(v => v + 1);
+          }, [fullImagePath]);
+          
+            const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+              setAnchorEl(event.currentTarget);
+            };
+          
+            const handleMenuClose = () => {
+              setAnchorEl(null);
+            };
   
   return (
     <Box>
-      <Button
-        color="inherit"
-        onClick={() => setOpen(true)}
-        sx={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: 1,
-          textTransform: 'none',
-          padding: '8px 16px',
-          borderRadius: '12px',
-          minWidth: 'auto',
-          '&:hover': {
-            backgroundColor: 'rgba(0, 0, 0, 0.04)',
-          }
-        }}
-      >
-        <User size={20} />        
-        <Typography variant="body2" sx={{ 
-          fontWeight: 500,
-          fontSize: '18px'
-        }}>
-          تسجيل الدخول
-        </Typography>
-      </Button>
+      {isAuthenticated ? (
+                <>
+                  {/* Botón con avatar de usuario */}
+                  <IconButton onClick={handleMenuOpen} color="inherit">
+                    <Avatar
+                      alt="User Avatar"
+                      src={fullImagePath}                
+                    />
+                    
+                  </IconButton>
+      
+                  {/* Menú que se abre al hacer clic en el avatar */}
+                  <Menu
+                    anchorEl={anchorEl}
+                    open={Boolean(anchorEl)}
+                    onClose={handleMenuClose}
+                    anchorOrigin={{
+                      vertical: "bottom",
+                      horizontal: "center",
+                    }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "center",
+                    }}
+                  >
+                    <Box sx={{ p: 2, textAlign: "center" }}>
+                      {/* user info */}
+                      <Avatar
+                        alt="User Avatar"
+                        src={fullImagePath}
+                        sx={{ width: 56, height: 56, margin: "auto" }}
+                      />
+                      <Typography variant="body1" sx={{ mt: 1 }}>
+                        {`${"hi"}, ${email}`}
+                      </Typography>
+                    </Box>
+                    <Divider />
+                    {/* Link para editar perfil */}
+                    <MenuItem onClick={navigatetoEdituser}>
+                      {"Edit Profile"}
+                    </MenuItem>
+                    {/* Link para cerrar sesión */}
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                  </Menu>
+                </>
+              ) : (
+                <Button color="inherit" onClick={() => setOpen(true)}>
+                  Login
+                </Button>
+              )}
       
       {open && <LoginModal open={open} handleClose={() => setOpen(false)} />}
     </Box>
