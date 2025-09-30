@@ -14,6 +14,7 @@ import {
     IconLayoutNavbarCollapse,
     IconMap,
     IconMap2,
+    IconMenuOrder,
     IconResize,   
   } from "@tabler/icons-react";
 import Collapse from '@mui/material/Collapse';
@@ -255,7 +256,26 @@ const Sidebar:React.FC<SidebarProps>=({open, toggleSidebar})=>{
               primary="Products"
             />
           </ListItemButton>                  
-          }        
+          } 
+          {(userRole === "Admin") && 
+          <ListItemButton
+            sx={{
+              bgcolor: "var(--color-background-100)",
+              mb: 1,
+              borderRadius: 1,
+            }}
+            component={Link}
+            to="/admin/orders"
+          >
+            <ListItemIcon>
+             <IconMenuOrder/>
+            </ListItemIcon>
+            <ListItemText
+              sx={{ color: isDarkMode ? "#fff" : "#5715c2" }}
+              primary="Orders"
+            />
+          </ListItemButton>                  
+          }               
            
         </List>
             

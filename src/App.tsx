@@ -25,6 +25,7 @@ import SizesRouter from './pages/Sizes/SizesRouter';
 import PublicProductList from './pages/Home/Products/PublicProductList';
 import Cart from './pages/Home/Cart/Cart';
 import ContinueShopping from './pages/Home/ReturnShopping/ContinueShopping';
+import OrderConfigRouter from './pages/Order/OrderConfigRouter';
 
 function App() { 
 
@@ -98,8 +99,12 @@ function App() {
                 <SizesRouter/>
               </PrivateRoute>
             }/>
-          </Route>
-
+             <Route path="orders/*" element={
+              <PrivateRoute allowedRoles={["Admin"]}>
+                <OrderConfigRouter/>
+              </PrivateRoute>
+            }/>      
+          </Route>           
        
           <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
           <Route path="/api/Accounts/ResetPassword" element={<RecoveryPassword />} />
