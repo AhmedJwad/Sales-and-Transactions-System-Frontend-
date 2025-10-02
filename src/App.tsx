@@ -26,6 +26,8 @@ import PublicProductList from './pages/Home/Products/PublicProductList';
 import Cart from './pages/Home/Cart/Cart';
 import ContinueShopping from './pages/Home/ReturnShopping/ContinueShopping';
 import OrderConfigRouter from './pages/Order/OrderConfigRouter';
+import OrderIndex from './pages/Order/OrderIndex';
+import OrderDetails from './pages/Order/OrderDetails';
 
 function App() { 
 
@@ -42,6 +44,8 @@ function App() {
             <Route path="register" element={<RegisterForm/>}/>
              <Route path="/cart" element={<Cart />} />
              <Route path="/editprfile" element={<EditProfileForm/>}/>
+             <Route path="/orders" element={<OrderIndex/>}/>
+             <Route path='/orderdetails/:id' element={<OrderDetails/>}/>
              <Route path="/ContinueShopping" element={<ContinueShopping/>}/>
           </Route>     
           

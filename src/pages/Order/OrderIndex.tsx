@@ -22,6 +22,7 @@ import {
 } from "@mui/material";
 import LoadingComponent from "../../components/LoadingComponent";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../hooks/useAuth";
 
 const OrderIndex = () => {
   const [loading, setLoading] = useState(false);
@@ -33,6 +34,7 @@ const OrderIndex = () => {
   const navigate = useNavigate();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { userRole } = useAuth();
 
   const getOrders = async () => {
     try {
@@ -66,7 +68,16 @@ const OrderIndex = () => {
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
-
+  const handleOrderdetailsClick = (id: number) => {
+    if(userRole==="Admin")
+    {
+      navigate(`/admin/orders/orderdetails/${id}`);
+    }else 
+    {
+      navigate(`/orderdetails/${id}`);
+    }
+   
+  };
   // Mobile Card View
   const MobileOrderCard = ({ row }: { row: OrderResponseDTO }) => {
     const noImage = "https://localhost:7027/images/products/no-image.png";
@@ -127,7 +138,7 @@ const OrderIndex = () => {
               <Button
                 variant="contained"
                 fullWidth
-                onClick={() => navigate(`/admin/orders/${row.id}`)}
+                onClick={() => handleOrderdetailsClick(row.id)}
               >
                Details
               </Button>
@@ -206,7 +217,7 @@ const OrderIndex = () => {
                           <Button
                             variant="contained"
                             size="small"
-                            onClick={() => navigate(`/admin/orders/${row.id}`)}
+                            onClick={() => navigate(`/admin/orders/orderdetails/${row.id}`)} 
                           >
                             Details
                           </Button>

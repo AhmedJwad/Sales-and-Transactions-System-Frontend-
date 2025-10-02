@@ -26,6 +26,10 @@ const UserAccountDropdown: React.FC = () => {
                navigate("/editprfile"); 
                handleMenuClose();     
             };
+            const navigattomyOrder=()=>{
+              navigate("/orders")
+              handleMenuClose();  
+            }
             useEffect(() => {
             setImgVersion(v => v + 1);
           }, [fullImagePath]);
@@ -80,6 +84,9 @@ const UserAccountDropdown: React.FC = () => {
                     {/* Link para editar perfil */}
                     <MenuItem onClick={navigatetoEdituser}>
                       {"Edit Profile"}
+                    </MenuItem>
+                    <MenuItem onClick={navigattomyOrder}>
+                      {"My Order"}
                     </MenuItem>
                     {/* Link para cerrar sesión */}
                     <MenuItem onClick={handleLogout}>Logout</MenuItem>
