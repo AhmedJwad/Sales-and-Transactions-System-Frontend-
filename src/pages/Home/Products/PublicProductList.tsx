@@ -243,6 +243,7 @@ const PublicProductList = () => {
                                                 <Typography variant="h6">{prod.name}</Typography>
                                                 <Typography color="text.secondary">{prod.description}</Typography>
                                                 <Typography color="text.primary">{prod.price}</Typography>
+                                                <Typography color="text.primary">{prod.stock}</Typography>
                                                 <Button variant="contained" onClick={()=>addToCart({
                                                    ProductId: prod.id,
                                                     Name: prod.name,

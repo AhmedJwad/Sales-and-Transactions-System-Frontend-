@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import genericRepository from "../../repositories/genericRepository";
 import { OrderResponseDTO} from "../../types/OrderResponseDTO";
@@ -21,15 +21,37 @@ import {
 } from "@mui/material";
 import LoadingComponent from "../../components/LoadingComponent";
 import { OrderDetailResponseDTO } from "../../types/OrderDetailResponseDTO";
+import Swal from 'sweetalert2';
+import 'sweetalert2/dist/sweetalert2.min.css';
+import { useAuth } from "../../hooks/useAuth";
+
+
+
+const orderStatusMap:Record<number, string>={
+  0: "New",
+  1: "Shipped",
+  2: "Sent",
+  3: "Confirmed",
+  4: "Cancelled"
+}
+enum OrderStatus {
+  New = 0,
+  Shipped = 1,
+  Sent = 2,
+  Confirmed = 3,
+  Cancelled = 4
+}
 
 const OrderDetails = () => {
   const { id } = useParams<{ id: string }>();
   const [order, setOrder] = useState<OrderResponseDTO | null>(null);
   const [loading, setLoading] = useState(false);
+  const [swalProps, setSwalProps] = useState({});
   const repository = genericRepository<OrderResponseDTO[], OrderResponseDTO>("orders");
-
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const navigate = useNavigate();
+  const { userRole } = useAuth();
 
   const getOrderDetails = async () => {
     if (!id) return;
@@ -57,6 +79,46 @@ const OrderDetails = () => {
     order.userPhoto && order.userPhoto !== "/no-image.png"
       ? `https://localhost:7027/${order.userPhoto}`
       : noImage;
+  const handleChangeStatus = async (Status: OrderStatus) => {
+  if (!order) return;
+
+  const result = await Swal.fire({
+    title: "Are you sure?",
+    text: `Do you want to set status to ${orderStatusMap[Status]}?`,
+    icon: "question",
+    showCancelButton: true,
+    confirmButtonText: "Yes",
+    cancelButtonText: "No",
+    
+  });
+
+  if (!result.isConfirmed) {
+    return;
+    }
+     try {
+      const response = await repository.put({ ...order, orderStatus: Status });
+      if (!response.error && response.response) {
+        console.log("order update:", order);
+        setOrder(response.response);        
+        navigate("/admin/orders")
+      } else {
+        await Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: "Failed to update order status",
+        });
+      }
+    } catch (error) {
+      console.error(error);
+      await Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "Failed to update order status",
+      });
+  }
+};
+ 
+
 
   return (
     <Box sx={{ p: 2 }}>
@@ -90,16 +152,39 @@ const OrderDetails = () => {
                 Lines: {order.lines}, Quantity: {order.quantity}, Value: {order.value}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Status: {order.orderStatus}
+               Sataus:{orderStatusMap[order.orderStatus as number]?? order.orderStatus}
               </Typography>
             </Grid>
           </Grid>
         </CardContent>
       </Card>
+      {}
+      <Box sx={{mt:2, display:"flex", gap:2}}>
+        {userRole==="Admin"?(
+          <>
+        <Button variant="contained" color="warning" onClick={()=>handleChangeStatus(OrderStatus.Cancelled)} >
+          Cancel
+        </Button>  
+         <Button variant="contained" color="info" onClick={()=>handleChangeStatus(OrderStatus.Shipped)}>
+          Dispatch
+        </Button>
+        <Button variant="contained" color="primary" onClick={() => handleChangeStatus(OrderStatus.Sent)}>
+          Send
+        </Button>
+        <Button variant="contained" color="success" onClick={() => handleChangeStatus(OrderStatus.Confirmed)}>
+          Confirm
+        </Button>
+        </>):
+        <>
+        </>
+        }      
+             
+       
+      </Box>
    
       {isMobile ? (
         <Box>
-          {order.orderDetailResponseDTOs.map((item: OrderDetailResponseDTO) => {
+          {order.orderDetailResponseDTOs?.map((item: OrderDetailResponseDTO) => {
             const itemImage = item.image
               ? `https://localhost:7027/${item.image}`
               : noImage;

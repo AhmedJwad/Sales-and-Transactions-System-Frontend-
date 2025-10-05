@@ -414,7 +414,7 @@ export const AuthProvider: FC<{ children: React.ReactNode }> = ({ children }) =>
     } finally {
       // Always clear auth data and navigate
       clearAuthState();
-      navigate("/admin");
+      navigate("/");
       console.log('Logout completed');
     }
   }, [navigate, logoutRepository, clearAuthState]);

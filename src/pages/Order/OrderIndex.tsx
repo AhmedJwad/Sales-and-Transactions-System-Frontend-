@@ -23,6 +23,13 @@ import {
 import LoadingComponent from "../../components/LoadingComponent";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+const orderStatusMap: Record<number, string> = {
+  0: "New",
+  1: "Shipped",
+  2: "Sent",
+  3: "Confirmed",
+  4: "Cancelled"
+};
 
 const OrderIndex = () => {
   const [loading, setLoading] = useState(false);
@@ -58,7 +65,11 @@ const OrderIndex = () => {
 
   useEffect(() => {
     getOrders();
+   
   }, []);
+  useEffect(() => {
+  console.log("userRole updated:", userRole);
+}, [userRole]);
 
   const filteredRows = rows.filter((row) =>
     row.userFullName?.toLowerCase().includes(search.toLowerCase())
@@ -72,6 +83,7 @@ const OrderIndex = () => {
     if(userRole==="Admin")
     {
       navigate(`/admin/orders/orderdetails/${id}`);
+      
     }else 
     {
       navigate(`/orderdetails/${id}`);
@@ -131,7 +143,9 @@ const OrderIndex = () => {
               <Typography variant="caption" color="text.secondary">
                 Order status
               </Typography>
-              <Typography variant="body1">{row.orderStatus}</Typography>
+              <Typography variant="body1">
+                {orderStatusMap[row.orderStatus as number]?? row.orderStatus}
+                </Typography>
             </Grid>
             
             <Grid size={{xs:6}}>
@@ -205,7 +219,9 @@ const OrderIndex = () => {
                         <TableCell>{row.lines}</TableCell>
                         <TableCell>{row.quantity}</TableCell>
                         <TableCell>{row.value}</TableCell>
-                        <TableCell>{row.orderStatus}</TableCell>
+                        <TableCell>
+                          {orderStatusMap[row.orderStatus as number]?? row.orderStatus}
+                          </TableCell>
                         <TableCell>
                           <img
                             src={imagePath}
@@ -217,7 +233,7 @@ const OrderIndex = () => {
                           <Button
                             variant="contained"
                             size="small"
-                            onClick={() => navigate(`/admin/orders/orderdetails/${row.id}`)} 
+                             onClick={() => handleOrderdetailsClick(row.id)}
                           >
                             Details
                           </Button>

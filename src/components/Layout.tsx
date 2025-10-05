@@ -5,6 +5,7 @@ import { Outlet } from "react-router-dom";
 import { useThemeContext } from "../ThemeContext";
 import Header from "./Header";
 import Sidebar from "./Sidebar";
+import { SidebarProvider } from "../context/SidebarContext";
 
 
 const Layout:FC=()=>{
@@ -14,6 +15,7 @@ const Layout:FC=()=>{
         setSidebarOpen(!sidebarOpen)
     };
     return(
+        <SidebarProvider>
         <div style={{
             display:"flex",
             flexDirection:"column",
@@ -26,18 +28,18 @@ const Layout:FC=()=>{
 
 
         }}>
-            <Header toggleSidebar={toggleSidebar}/>
+            <Header/>
             <div style={{
                 display:"flex",
                 flexGrow:1,
                 transition:"margin-left 0.3s ease",
 
             }}>
-             <Sidebar open={sidebarOpen} toggleSidebar={toggleSidebar} />
+             <Sidebar   />
                 <main
                 style={{
                     flexGrow: 1,
-                    marginLeft: sidebarOpen ? "0px" : "-240px",
+                    marginLeft: sidebarOpen ? "0px" : "0px",
                     transition: "margin-left 0.3s ease",
                     marginTop: "74px",
                     backgroundColor: "var(--color-background-000)",
@@ -60,6 +62,7 @@ const Layout:FC=()=>{
                </main>
             </div>
         </div>
+        </SidebarProvider>
     )
 }
 export default Layout;

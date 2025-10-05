@@ -29,30 +29,37 @@ import OrderConfigRouter from './pages/Order/OrderConfigRouter';
 import OrderIndex from './pages/Order/OrderIndex';
 import OrderDetails from './pages/Order/OrderDetails';
 
-function App() { 
 
+function App() {  
   return (
     <BrowserRouter>
       <AuthProvider>
         <Routes>  
           {/* Home layout */}
           <Route path="/" element={<HomeLayout />}>
-            <Route index element={<Home />} />       
-            <Route path="login" element={<Login />} />   
+            <Route index element={<Home />} />  
             <Route path="homeproducts" element={<PublicProductList/>}/>     
             <Route path="homeproducts/:subcategoryId" element={<Products/>}/>
             <Route path="register" element={<RegisterForm/>}/>
-             <Route path="/cart" element={<Cart />} />
-             <Route path="/editprfile" element={<EditProfileForm/>}/>
-             <Route path="/orders" element={<OrderIndex/>}/>
-             <Route path='/orderdetails/:id' element={<OrderDetails/>}/>
-             <Route path="/ContinueShopping" element={<ContinueShopping/>}/>
+            <Route path="/cart" element={<Cart />} />
+            <Route path="/editprfile" element={<EditProfileForm/>}/>
+            <Route path="/orders" element={<OrderIndex/>}/>               
+            <Route path="orderdetails/:id" element={
+              <PrivateRoute allowedRoles={["User"]}>
+                <OrderDetails/>
+              </PrivateRoute>
+            } />                 
+            <Route path="/ContinueShopping" element={<ContinueShopping/>}/>
           </Route>     
           
           {/* Admin layout */}
-          <Route path="/admin" element={<Layout />}>  
-            <Route index element={<Dashboard />} />             
-            <Route path="login" element={<Login/>} />       
+          <Route path="/admin" element={
+            <PrivateRoute allowedRoles={["User", "Admin"]}>
+              <Layout />
+            </PrivateRoute>
+          }>  
+            <Route index element={<Dashboard />} />          
+             <Route path="login" element={<Login/>} />  
             <Route path="categories/*" element={
               <PrivateRoute allowedRoles={["User", "Admin"]}>                
                 <CategoryConfigRouter/>
@@ -109,7 +116,7 @@ function App() {
               </PrivateRoute>
             }/>      
           </Route>           
-       
+           <Route path="login" element={<Login />} />   
           <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />
           <Route path="/api/Accounts/ResetPassword" element={<RecoveryPassword />} />
           <Route path="/recoverypassword" element={<ResetPassword/>}/>

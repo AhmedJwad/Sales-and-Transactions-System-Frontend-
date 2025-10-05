@@ -22,7 +22,7 @@ const PrivateRoute: FC<PrivateRouteProps> = ({ children, allowedRoles }) => {
   if (!allowedRoles.includes(userRole ?? "")) {
     return <Navigate to="/not-authorized" />;
   }
-
+   
   return <>{children}</>;
 };
 

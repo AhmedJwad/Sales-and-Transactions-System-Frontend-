@@ -16,6 +16,7 @@
     "@mui/lab": "^7.0.0-beta.15",
     "@mui/material": "^7.3.0",
     "@mui/x-data-grid": "^8.8.0",
+    "@sweetalert2/theme-material-ui": "^5.0.27",
     "@tabler/icons-react": "^3.34.0",
     "axios": "^1.10.0",
     "color-namer": "^1.4.0",
@@ -33,6 +34,8 @@
     "react-multiple-image-uploader": "^1.0.3",
     "react-phone-number-input": "^3.4.12",
     "react-router-dom": "^7.6.2",
+    "react-sweetalert2": "^0.6.0",
+    "sweetalert2": "^11.23.0",
     "yup": "^1.6.1"
   },
   "devDependencies": {
