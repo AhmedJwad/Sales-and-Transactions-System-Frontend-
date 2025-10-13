@@ -1,7 +1,8 @@
 import { Box, Container, Grid, Typography, Link } from "@mui/material";
 import { FC } from "react";
-
+import { useTranslation } from 'react-i18next';
 const FooterHome: FC = () => {
+  const{t}=useTranslation();
   return (
     <Box
       component="footer"
@@ -17,42 +18,42 @@ const FooterHome: FC = () => {
           {/* القسم الأول */}
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="h6" gutterBottom>
-              متجرنا
+              {t(`shop`)}
             </Typography>
             <Typography variant="body2">
-              جميع المنتجات أصلية 100% (أبل – مكياج – عناية – أجهزة منزلية).
+              {t(`allProductsOriginal`)}
             </Typography>
           </Grid>
          
           <Grid size={{ xs: 12, md: 4 }}>
-            <Typography variant="h6" gutterBottom>
-              روابط سريعة
+            <Typography variant="h6" gutterBottom>              
+              {t("quickLinks")}
             </Typography>
             <Box sx={{ display: "flex", flexDirection: "column", gap: 1 }}>
               <Link href="/" color="inherit" underline="hover">
-                الرئيسية
+                {t("home")}
               </Link>
               <Link href="/products" color="inherit" underline="hover">
-                المنتجات
+               {t(`allproducts`)}
               </Link>
               <Link href="/contact" color="inherit" underline="hover">
-                تواصل معنا
+               {t(`contact`)}
               </Link>
             </Box>
           </Grid>
        
           <Grid size={{ xs: 12, md: 4 }}>
             <Typography variant="h6" gutterBottom>
-              تواصل معنا
+              {t(`contactus`)}
             </Typography>
-            <Typography variant="body2">📍 العراق - بابل</Typography>
+            <Typography variant="body2">📍 {t(`iraq`)}</Typography>
             <Typography variant="body2">📧 info@store.com</Typography>
             <Typography variant="body2">📞 +964 770 000 0000</Typography>
           </Grid>
         </Grid>       
         <Box sx={{ textAlign: "center", mt: 4, pt: 2, borderTop: "1px solid #555" }}>
           <Typography variant="body2">
-            © {new Date().getFullYear()} متجرنا. جميع الحقوق محفوظة.
+            © {new Date().getFullYear()} {t(`footerRights`)}
           </Typography>
         </Box>
       </Container>

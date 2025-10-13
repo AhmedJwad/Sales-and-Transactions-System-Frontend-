@@ -26,7 +26,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useSidebar } from "../context/SidebarContext";
-
+import { useTranslation } from 'react-i18next';
 const Header: React.FC = () => {
   const { isExpanded, isMobileOpen, toggleSidebar, toggleMobileSidebar } = useSidebar();
   const { isAuthenticated, logout, email, photo } = useAuth();
@@ -34,12 +34,15 @@ const Header: React.FC = () => {
   const [open, setOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const navigate = useNavigate();
+  const { t, i18n} = useTranslation();
 
   const fullImagePath =
     photo && photo !== "/no-image.png"
       ? `https://localhost:7027/${photo}`
       : "/path/to/user/avatar.png";
-
+  const changeLanguage=(lng:any)=>{
+    i18n.changeLanguage(lng)
+  }
   const handleToggle = () => {
     if (window.innerWidth >= 991) {
       toggleSidebar();
@@ -95,7 +98,7 @@ const Header: React.FC = () => {
               aria-label="menu"
               onClick={handleToggle}
               sx={{
-                mr: 2,
+                 ...(document.documentElement.dir === "rtl" ? { ml: 2, mr: 0 } : { mr: 2, ml: 0 }),
                 transition: "all 0.3s ease",
                 bgcolor: "rgba(255, 255, 255, 0.1)",
                 "&:hover": {
@@ -124,7 +127,35 @@ const Header: React.FC = () => {
               Admin Dashboard
             </Typography>
           </Box>
-
+           {/* Language Toggle */}
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, mx: 1 }}>
+              <button
+                  onClick={() => changeLanguage('en')}
+                  style={{
+                      padding: '6px 12px',
+                      borderRadius: 4,
+                      border: 'none',
+                      cursor: 'pointer',
+                      backgroundColor: '#1976d2',
+                      color: '#fff',
+                  }}
+              >
+                  EN
+              </button>
+              <button
+                  onClick={() => changeLanguage('ar')}
+                  style={{
+                      padding: '6px 12px',
+                      borderRadius: 4,
+                      border: 'none',
+                      cursor: 'pointer',
+                      backgroundColor: '#1976d2',
+                      color: '#fff',
+                  }}
+              >
+                  العربية
+              </button>
+          </Box>
           {/* Theme Toggle */}
           <Tooltip title={isDarkMode ? "Light Mode" : "Dark Mode"} arrow>
             <IconButton
@@ -145,7 +176,7 @@ const Header: React.FC = () => {
               {isDarkMode ? <IconSun size={20} /> : <IconMoon size={20} />}
             </IconButton>
           </Tooltip>
-
+        
           {/* User Section */}
           {isAuthenticated ? (
             <>

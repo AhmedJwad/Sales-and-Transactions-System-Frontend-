@@ -31,16 +31,19 @@ import {
 } from "@tabler/icons-react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import i18n from '../i18n';
 
 const SIDEBAR_WIDTH = 260;
 
-const Sidebar = () => {
+const Sidebar = () => { 
   const { isDarkMode } = useThemeContext();
   const location = useLocation();
   const [openCategories, setOpenCategories] = useState(false);
-  const { isExpanded, isMobileOpen, toggleMobileSidebar } = useSidebar();
+  const { isExpanded, isMobileOpen, toggleMobileSidebar, isRtl } = useSidebar();
+  
   const { isAuthenticated, userRole } = useAuth();
+ 
 
   const handleCategoriesClick = () => {
     setOpenCategories(!openCategories);
@@ -102,13 +105,14 @@ const Sidebar = () => {
       path: "/admin/sizes",
     },
   ];
-
+  
   return (
     <Drawer
-      variant="permanent"
-      anchor="left"
+      key={isRtl ? "right" : "left"}
+      variant="persistent"
+      anchor={isRtl ? "right" : "left"}
       open={isExpanded || isMobileOpen}
-      sx={{
+      sx={{       
         width: isExpanded || isMobileOpen ? SIDEBAR_WIDTH : 0,
         flexShrink: 0,
         transition: "width 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
@@ -120,35 +124,28 @@ const Sidebar = () => {
           overflowX: "hidden",
           overflowY: "auto",
           backgroundColor: isDarkMode ? "#1a1a1a" : "#ffffff",
-          borderRight: isDarkMode
-            ? "1px solid rgba(255, 255, 255, 0.12)"
-            : "1px solid rgba(0, 0, 0, 0.12)",
+          borderRight: !isRtl
+            ? isDarkMode
+              ? "1px solid rgba(255, 255, 255, 0.12)"
+              : "1px solid rgba(0, 0, 0, 0.12)"
+            : "none",
+          borderLeft: isRtl
+            ? isDarkMode
+              ? "1px solid rgba(255, 255, 255, 0.12)"
+              : "1px solid rgba(0, 0, 0, 0.12)"
+            : "none",
           boxShadow: isDarkMode
             ? "4px 0 20px rgba(0, 0, 0, 0.5)"
             : "4px 0 20px rgba(0, 0, 0, 0.08)",
-          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-          transform: isExpanded || isMobileOpen ? "translateX(0)" : "translateX(-100%)",
-          "&::-webkit-scrollbar": {
-            width: "6px",
-          },
-          "&::-webkit-scrollbar-track": {
-            background: "transparent",
-          },
-          "&::-webkit-scrollbar-thumb": {
-            background: isDarkMode ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)",
-            borderRadius: "3px",
-            "&:hover": {
-              background: isDarkMode ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.3)",
-            },
-          },
-        },
-      }}
-    >
+          transition: "transform 0.3s cubic-bezier(0.4, 0, 0.2, 1)",      
+    },
+  }}
+>
       {/* Sidebar Header */}
-      <Box
+      <Box 
         sx={{
           p: 3,
-          pb: 2,
+          pb: 2,          
           background: isDarkMode
             ? "linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(33, 150, 243, 0.1) 100%)"
             : "linear-gradient(135deg, rgba(25, 118, 210, 0.1) 0%, rgba(21, 101, 192, 0.1) 100%)",

@@ -6,22 +6,23 @@ import FooterHome from "./Footer/FooterHome";
 import { CategoryProvider } from "./CategoryContext";
 import { CartProvider } from "../../context/CartContext";
 
+
 const HomeLayout: FC = () => {
     return(
       <CartProvider>
        <CategoryProvider>        
-         <div style={{display:"flex", flexDirection:"column", minHeight:"100vh"}}>
+         <Box sx={{display:"flex", flexDirection:"column", minHeight:"100vh"}}>
         {/*header*/}
-        <Header/>
+        <Header/>       
          {/* Main Content */}
-       <Container maxWidth={false} sx={{ flex: 1, py: 4 }}>
+      <Container maxWidth={false} sx={{ flexGrow: 1, py: 4 ,mt:"70px"}}>
         <Outlet />
       </Container>
       {/*footer*/}
       <Box component="footer" sx={{p:2 , bgcolor:"grey.100", textAlign:"center"}}>
         <FooterHome/>
       </Box>
-    </div>
+    </Box>
     </CategoryProvider>
     </CartProvider>
     )   

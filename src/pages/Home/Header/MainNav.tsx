@@ -1,152 +1,145 @@
-import { FC, useEffect, useState } from 'react';
-import { Box, Typography, Menu, MenuItem } from '@mui/material';
-import { ChevronDown } from 'lucide-react';
-import genericRepository from '../../../repositories/genericRepository';
-import { CategoryDto } from '../../../types/CategoryDto';
-import { useNavigate } from 'react-router-dom'; 
+import { FC, useEffect, useState } from "react";
+import { AppBar, Toolbar, Typography, Menu, MenuItem, Button } from "@mui/material";
+import { ChevronDown, AlignJustify, Phone } from "lucide-react";
+import genericRepository from "../../../repositories/genericRepository";
+import { CategoryDto } from "../../../types/CategoryDto";
+import { useNavigate } from "react-router-dom";
 import { useCategory } from "../CategoryContext";
+import { useTranslation } from 'react-i18next';
 
-
-const MainNav=() => {
+const MainNav: FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [loading, setLoading] = useState(false);
-  const [category, setCategory]=useState<CategoryDto[]>([]);
+  const [category, setCategory] = useState<CategoryDto[]>([]);
   const { setCategoryId } = useCategory();
   const navigate = useNavigate();
+  const {t}=useTranslation();
 
-  var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/combo");
-  
-  const fetchcategories = async () => {
-  
-    setLoading(true);
-    try {
-      const result = await categoryRepository.getAll();
-      if (!result.error && result.response) {
-        setCategory(result.response);
-      } else {
-        console.error("Error fetching Subcategories:", result.message);
+  const categoryRepository = genericRepository<CategoryDto[], CategoryDto>("Categories/combo");
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryRepository.getAll();
+        if (!result.error && result.response) setCategory(result.response);
+      } catch (err) {
+        console.error(err);
       }
-    } catch (error: any) {
-      console.error("Unexpected error:", error.message || error);
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    fetchCategories();
+  }, []);
 
-  const menuItems = category;
-
-  const handleClick = (event: React.MouseEvent<HTMLElement>) => {
+  
+   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
     setCategoryId(0);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleClose = () => setAnchorEl(null);
+  const handleCategorySelect = (id: number) => {
+    setCategoryId(id);
+    navigate("/");
+    handleClose();
   };
-    const handleCategorySelect = (id: number) => {
-     setCategoryId(id); 
-      navigate("/");         
-  };
-  useEffect(()=>{
-    fetchcategories();
- } ,[])
+  
+ 
+
   return (
-    <Box
+    <AppBar
+      position="sticky"
+      color="primary"
       sx={{
-        display: { xs: 'none', md: 'flex' },
-        alignItems: 'center',
-        gap: 3,
-        padding: '12px 0',
-        borderBottom: '1px solid #e0e0e0',
-        backgroundColor: '#fff',
-        overflowX: 'auto',
-        whiteSpace: 'nowrap',
-        position: 'sticky',  
         top: 0,
+        bgcolor: "#FF8C00",
         zIndex: (theme) => theme.zIndex.appBar,
+        boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
       }}
     >
-      
-      <Box
-        sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', minWidth: 'max-content' }}
-        onClick={handleClick}
-      >
-        <Typography
-          variant="body2"
-          sx={{
-            fontWeight: 500,
-            color: '#333',
-            fontSize: '20px',
-            '&:hover': { color: '#1976d2' }
-          }}
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>     
+        <Button
+          onClick={handleClick}
+          startIcon={<AlignJustify />}
+          endIcon={<ChevronDown />}
+          sx={{ color: "#fff", fontWeight: 600, minWidth: 150,justifyContent: "space-between", }}
         >
-          كل الأقسام
-        </Typography>
-        <ChevronDown size={16} style={{ marginLeft: '4px', marginRight: '4px' }} />
-      </Box>
+          {t(`allcategories`)}
+        </Button>        
+        <Typography sx={{ display: { xs: "none", md: "flex" }, gap: 4 }}>
+          <Button
+          onClick={() => {
+            setCategoryId(0);
+            navigate("/");
+          }}
+          sx={{ color: "#fff" }}
+        >
+         {t(`home`)}
+        </Button>
 
-      {menuItems.map((item, index) => (
-        <Typography
-          key={index}
-          variant="body2"
-          onClick={() => handleCategorySelect(item.id)}
-          sx={{
-            fontWeight: 400,
-            color: '#666',
-            fontSize: '20px',
-            cursor: 'pointer',
-            minWidth: 'max-content',
-            '&:hover': { color: '#1976d2', fontWeight: 500 },
-            transition: 'all 0.2s ease'
+        <Button
+          onClick={() => {
+            setCategoryId(0);
+            navigate("/shop");
           }}
+          sx={{ color: "#fff" }}
         >
-          {item.name}
-        </Typography>
-        
-      ))}
-      <Typography
-            variant="body2"
+          {t(`shop`)}
+        </Button>
+
+        <Button
+          onClick={() => {
+            setCategoryId(0);
+            navigate("/single-page");
+          }}
+          sx={{ color: "#fff" }}
+        >
+          Single Page
+        </Button>
+
+        <Button
+          onClick={() => {
+            setCategoryId(0);
+            navigate("/contact");
+          }}
+          sx={{ color: "#fff" }}
+        >
+          {t(`contact`)}
+        </Button>
+          <Button
+            key="AllProducts"
             onClick={() => navigate("/homeproducts")}
-            sx={{
-              fontWeight: 400,
-              color: '#666',
-              fontSize: '20px',
-              cursor: 'pointer',
-              minWidth: 'max-content',
-              '&:hover': { color: '#1976d2', fontWeight: 500 },
-              transition: 'all 0.2s ease'
-            }}
+            sx={{ color: "#fff" }}
           >
-    جميع المنتجات
-  </Typography>
+            {t(`allproducts`)}
+          </Button>
+        </Typography>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleClose}
-        PaperProps={{
-          sx: {
-            minWidth: '200px',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-            borderRadius: '8px'
-          }
-        }}
-      >
-        {menuItems.map((item, index) => (
+        {/* زر الهاتف */}
+        <Button
+          variant="contained"
+          startIcon={<Phone />}
+          sx={{ bgcolor: "#FF0000", "&:hover": { bgcolor: "#CC0000" } }}
+        >
+          +0123 456 7890
+        </Button>
+
+        {/* قائمة الأقسام */}
+        <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={handleClose}>
           <MenuItem
-            key={index}
-            onClick={() => handleCategorySelect(item.id)}
-            sx={{
-              fontSize: '14px',
-              padding: '12px 16px',
-              '&:hover': { backgroundColor: '#f5f5f5' }
+            onClick={() => {
+              setCategoryId(0);
+              navigate("/");
+              handleClose();
             }}
           >
-            {item.name}
+            {t(`allcategories`)}
           </MenuItem>
-        ))}
-      </Menu>
-    </Box>
+          {category.map((c) => (
+            <MenuItem key={c.id} onClick={() => handleCategorySelect(c.id)}>
+              {c.name}
+            </MenuItem>
+          ))}          
+        </Menu>
+      </Toolbar>
+    </AppBar>
   );
 };
 

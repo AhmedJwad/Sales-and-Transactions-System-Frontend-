@@ -11,7 +11,6 @@ import { ColourDTO } from "../../../types/ColoutDTO";
 import { SizeDTO } from "../../../types/SizeDTO";
 import { ProductFilterDto } from "../../../types/ProductFilterDto";
 
-
 const Products=()=>{
     const{subcategoryId}=useParams<{subcategoryId:string}>();
     const [products, setProducts]=useState<ProductDTO[]>([]);
@@ -19,7 +18,7 @@ const Products=()=>{
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined); 
     const ProductRepo=genericRepository<ProductDTO[], ProductDTO>(`product/getproductbysubcategory/${subcategoryId}`);
-      const ProductFilterRepo = genericRepository<ProductDTO[], ProductDTO>("product/productfilter");
+      const ProductFilterRepo = genericRepository<ProductDTO[], ProductDTO>("product/productfilter");       
       const [page, setPage] = useState(1);      
         const [pageSize] = useState(10);
         const [searchText, setSearchText] = useState("");
@@ -97,7 +96,9 @@ const Products=()=>{
             fetchFiltersData();
             fetchProducts();
         }
-    },[subcategoryId]);
+    },[subcategoryId]); 
+    
+    
     return(
          <Box sx={{ p: { xs: 2, md: 4 } }}>
                     {loading ? <LoadingComponent /> : (

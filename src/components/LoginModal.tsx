@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { CssBaseline, Link, Modal, TextField, Typography, Alert } from "@mui/material";
 import { Box } from "@mui/system";
 import { LoadingButton } from "@mui/lab";
+import { useTranslation } from 'react-i18next';
 
 interface LoginProps{
     open: boolean;
@@ -13,6 +14,7 @@ interface LoginProps{
 }
 
 const LoginModal: FC<LoginProps> = ({ open, handleClose }) => {
+    const {t}=useTranslation();
     const { login } = useAuth();
     const navigate = useNavigate();
     const [isLoading, setIsLoading] = useState(false);
@@ -146,7 +148,7 @@ const LoginModal: FC<LoginProps> = ({ open, handleClose }) => {
                         fullWidth
                         disabled={!formik.isValid || isLoading}
                     >
-                        Login
+                        {t(`signIn`)}
                     </LoadingButton>
 
                     {/* Links to Register and Confirmation */}

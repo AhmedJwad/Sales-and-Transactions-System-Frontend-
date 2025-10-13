@@ -286,7 +286,7 @@ const RegisterForm = () => {
 
    
     return (
-        <Container maxWidth="md">
+        <Container maxWidth="md" sx={{mt:5}}>
             <Fade in timeout={800}>            
 
                         {/* Form Section */}

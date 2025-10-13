@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { User } from "lucide-react";
 import LoginModal from "../../../components/LoginModal";
 import { Avatar, Box, Button, Divider, IconButton, Menu, MenuItem, Typography } from "@mui/material";
 import { useAuth } from "../../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-
+import { useTranslation } from 'react-i18next';
 
 
 const UserAccountDropdown: React.FC = () => {
+       const { t} = useTranslation();
        const { isAuthenticated, logout, email , photo} = useAuth();
        const [open, setOpen] = useState(false);
        const navigate = useNavigate();   
@@ -94,7 +94,7 @@ const UserAccountDropdown: React.FC = () => {
                 </>
               ) : (
                 <Button color="inherit" onClick={() => setOpen(true)}>
-                  Login
+                 {t('login')}
                 </Button>
               )}
       

@@ -1,92 +1,92 @@
-import { Box, IconButton, Typography, Badge, InputBase, Paper } from "@mui/material";
-import { ShoppingCart, Search } from "@mui/icons-material";
+import {
+  Box,
+  IconButton,
+  Typography,
+  Badge,
+  InputBase,
+  Paper,
+  MenuItem,
+  Select,
+  Menu,
+  Button,
+  AppBar,
+} from "@mui/material";
+import { ShoppingCart, Search, FavoriteBorder, Tune } from "@mui/icons-material";
 import UserAccountDropdown from "./UserAccountDropdown";
-import MainNav from "./MainNav";
 import { useCart } from "../../../context/CartContext";
 import { useNavigate } from "react-router-dom";
-
-
+import MainNav from "./MainNav";
+import { useTranslation } from 'react-i18next';
 
 const Header = () => {
-  const {order}=useCart();
-  const totalQuantity=order.OrderDetails.reduce((sum, item)=>sum + item.Quantity, 0)
-   const navigate = useNavigate();  
+  const { t, i18n} = useTranslation();
+  const { order } = useCart();
+  const totalQuantity = order.OrderDetails.reduce(
+    (sum, item) => sum + item.Quantity,
+    0
+  );
+  const navigate = useNavigate();
+  const changeLanguage=(lng:any)=>{
+    i18n.changeLanguage(lng)
+  }
+  
+
   return (
-    <Box
-      component="header"
-      sx={{
-        position: "sticky", 
-        top: 0,
-        zIndex: 1300, 
-        bgcolor: "white",
-        borderBottom: 1,
-        borderColor: "grey.300",
-      }}
-    >
-      {/* Top Bar: Logo, Search, Account, Cart */}
+    
+    <AppBar component="header" position="fixed" sx={{ bgcolor: "white",  borderColor: "grey.300" }}>   
+
+      {/* 🔹 Top Info Bar */}
       <Box
         sx={{
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          px: { xs: 2, md: 3 },
-          py: { xs: 1, md: 1 },
-          gap: 2,
+          px: { xs: 2, md: 6 },
+          py: 0.5,
+          bgcolor: "grey.100",
+          fontSize: 14,
         }}
       >
-        <Typography variant="h5" sx={{ fontWeight: "bold", color: "red" }}>
-          miswag
+        <Box sx={{ display: "flex", gap: 2 ,color: "grey.700"}}>
+          <Typography sx={{ cursor: "pointer", "&:hover": { color: "orange" } }}> {t('help')}</Typography>
+          <Typography sx={{ cursor: "pointer", "&:hover": { color: "orange" } }}>{t('support')}</Typography>
+          <Typography sx={{ cursor: "pointer", "&:hover": { color: "orange" } }}>{t('contact')}</Typography>
+        </Box>
+
+        <Typography sx={{ color: "grey.700" }}>
+          Call Us: (+012) 1234 567890
         </Typography>
 
-        <Paper
-          component="form"
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            flex: 1,
-            mx: 3,
-            bgcolor: "grey.100",
-            borderRadius: 3,
-            height: 40,
-          }}
-        >
-          <InputBase
-            sx={{ ml: 2, flex: 1 }}
-            placeholder="ابحث عن منتج او ماركة او قسم"
-            inputProps={{ "aria-label": "search" }}
-          />
-          <IconButton type="submit" sx={{ p: "10px" }} aria-label="search">
-            <Search />
-          </IconButton>
-        </Paper>
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Typography sx={{ cursor: "pointer", "&:hover": { color: "red" } }}>
-            العربية
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 ,color: "grey.700"}}>
+          <Typography>USD ▾</Typography>
+          <Typography>
+             <button onClick={() => changeLanguage('en')}>EN</button>
+            <button onClick={() => changeLanguage('ar')}>العربية</button>
           </Typography>
-          <UserAccountDropdown />
+          
+            {/* Icons */}
+           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
           <IconButton>
-            <Badge badgeContent={totalQuantity} color="error" onClick={() => navigate("/cart")}>
+            <Tune />
+          </IconButton>
+          <IconButton>
+            <FavoriteBorder />
+          </IconButton>
+          <IconButton onClick={() => navigate("/cart")}>
+            <Badge badgeContent={totalQuantity} color="error">
               <ShoppingCart />
             </Badge>
           </IconButton>
+          <Typography sx={{ fontWeight: "bold" }}>$0.00</Typography>
         </Box>
-      </Box>
-
-      {/* Main Navigation */}
-      <Box
-        sx={{
-          px: { xs: 2, md: 4 },
-          py: { xs: 1, md: 1.5 },
-          bgcolor: "background.paper",
-          borderTop: "1px solid",
-          borderColor: "divider",
-        }}
-      >
+          <UserAccountDropdown />
+        </Box>
+      </Box>   
+       <Box>  
         <MainNav />
-      </Box>
-    </Box>
-  );
+      </Box>       
+    </AppBar>    
+  );  
 };
 
 export default Header;

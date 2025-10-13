@@ -14,37 +14,17 @@ import genericRepository from "../../repositories/genericRepository";
 import { CategoryDto } from "../../types/CategoryDto";
 import { useNavigate } from "react-router-dom";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
+import { ProductDTO } from "../../types/ProductDTO";
 
-const products = [
-  {
-    id: 1,
-    name: "iPhone 15 Pro",
-    category: "Mobiles",
-    price: "$999",
-    image: "https://via.placeholder.com/250",
-  },
-  {
-    id: 2,
-    name: "Gaming Laptop",
-    category: "Laptops",
-    price: "$1200",
-    image: "https://via.placeholder.com/250",
-  },
-  {
-    id: 3,
-    name: "DSLR Camera",
-    category: "Cameras",
-    price: "$750",
-    image: "https://via.placeholder.com/250",
-  },
-];
 const Home: FC = () => {
  const { setCategoryId , categoryId } = useCategory();
  const navigate = useNavigate();
  const [loading, setLoading] = useState(false);
  const [category, setCategory]=useState<CategoryDto[]>([]);
- const [subcategory, setSubcategoies]=useState<SubcategoryDto[]>([]);     
+ const [subcategory, setSubcategoies]=useState<SubcategoryDto[]>([]);  
+  const [products, setProducts]=useState<ProductDTO[]>([]);   
 var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/combo");
+const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`Product/Getfullproduct`);
   const fetchcategories = async () => {  
     setLoading(true);
     try {
@@ -80,12 +60,32 @@ var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/
   const handleCategorySelect = (id: number) => {
     setCategoryId(id);    
   };
+  const fetchProducts=async()=>{
+        try {
+            setLoading(true)
+            var result=await ProductRepo.getAll();
+            if(!result.error && result.response)
+            {
+                setProducts(result.response)
+                console.log("Prodcts:", result.response)
+            }else
+            {
+                console.error("Error fetch products:", result.error);
+             
+            }            
+        } catch (error) {
+             console.error("Network error:", error);               
+        }finally{
+            setLoading(false);
+        }
+    }
    useEffect(()=>{
     if(categoryId)
     {
       fetchsubcategories();
     }
       fetchcategories();
+      fetchProducts();
    } ,[categoryId])
 
   return (
@@ -219,7 +219,7 @@ var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/
           Latest Products
         </Typography>
         <Grid container spacing={3}>
-          {products.map((prod) => (
+          {products.slice(0, 3).map((prod) => (
             <Grid size={{ xs: 12, sm: 6, md: 4 }} key={prod.id}>
               <Card
                 sx={{
@@ -234,7 +234,7 @@ var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/
                 <CardMedia
                   component="img"
                   height="200"
-                  image={prod.image}
+                  image={`https://localhost:7027/${prod.productImages[0]}`}
                   alt={prod.name}
                 />
                 <CardContent>
@@ -244,7 +244,7 @@ var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/
                     color="text.secondary"
                     sx={{ mb: 1 }}
                   >
-                    Category: {prod.category}
+                    Category: {prod.name}
                   </Typography>
                   <Typography
                     variant="subtitle1"

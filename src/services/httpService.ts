@@ -59,9 +59,10 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response && error.response.status === 401) {
-     const publicPaths = ["/","/cart","/ContinueShopping", "/homeproducts", "/homeproducts/:subcategoryId"];
+     const publicPaths = ["/","/cart","/ContinueShopping", "/homeproducts", "/homeproducts/:subcategoryId", "/register"];
       const currentPath = window.location.pathname;
-      if (!publicPaths.includes(currentPath)) {
+      const isPublic = publicPaths.includes(currentPath) || currentPath.startsWith("/homeproducts/");
+      if (!isPublic) {
         localStorage.removeItem("jwtToken");
         localStorage.removeItem("userData");
         window.location.href = "/admin/login";
