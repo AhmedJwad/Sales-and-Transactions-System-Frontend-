@@ -1,6 +1,7 @@
+import { CategoryTranslationDTO } from "./CategoryTranslationDTO";
+
 export interface CategoryDto {
-    id: number;
-    name: string;
-    subcategories: any[] | null; 
-    photo:string|null;
+  id: number;
+  photo: string | null; 
+  categoryTranslations: CategoryTranslationDTO[];
   }

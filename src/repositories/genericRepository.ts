@@ -40,7 +40,12 @@ const genericRepository = <IList, IItem>(method: string) => {
   return {   
     getAll: (params: Record<string, any> | null = null): Promise<HttpResponseWrapper<IList>> =>
       handleRequest(httpService.get<IList>(`${method}`, params)),
-
+      getAllByQuery: <T>(query: string): Promise<HttpResponseWrapper<T>> => { 
+        const match = query.match(/method=([^&]+)/);
+        const customMethod = match ? match[1] : method;
+        const newQuery = query.replace(/method=[^&]+&?/, "");
+        return handleRequest(httpService.get<T>(`${customMethod}${newQuery}`));
+      },
     getOne: (id: string | number): Promise<HttpResponseWrapper<IItem>> =>
       handleRequest(httpService.get<IItem>(`${method}/${id}`)),
   
@@ -51,6 +56,7 @@ const genericRepository = <IList, IItem>(method: string) => {
    
     delete: (id: string | number): Promise<HttpResponseWrapper<IItem>> =>
       handleRequest(httpService.delete<IItem>(`${method}/${id}`)),
+    
   };
 };
 

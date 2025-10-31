@@ -17,6 +17,13 @@ type Props = IDatagrid & {
   onDelete?: (id: number) => void;
   onCreateClick?: () => void;
   onEditClick?: (id: number) => void;
+
+  // ✅ نضيف هنا البراميترات الجديدة
+  page: number;
+  pageSize: number;
+  rowCount: number; // عدد السجلات الكلي (من الـ backend)
+  onPageChange?: (newPage: number) => void;
+  onPageSizeChange?: (newPageSize: number) => void;
 };
 
 const DataGridCustom = ({
@@ -27,8 +34,13 @@ const DataGridCustom = ({
   onDelete,
   onCreateClick,
   onEditClick,
+  page,
+  pageSize,
+  rowCount,
+  onPageChange,
+  onPageSizeChange,
 }: Props) => {
-  const [filter, setFilter] = useState(""); 
+  const [filter, setFilter] = useState("");
 
   const handleFilterChange = (event: ChangeEvent<HTMLInputElement>) => {
     setFilter(event.target.value);
@@ -73,10 +85,17 @@ const DataGridCustom = ({
   };
 
   return (
-    <Box sx={{ width: "100%", minWidth: "1000px", overflowX: "auto", justifyContent: "center" }}>
-    <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
-      <Typography variant="h6">{title}</Typography>
-      <Box display="flex" alignItems="center">
+    <Box
+      sx={{
+        width: "100%",
+        minWidth: "1000px",
+        overflowX: "auto",
+        justifyContent: "center",
+      }}
+    >
+      <Toolbar sx={{ display: "flex", justifyContent: "space-between" }}>
+        <Typography variant="h6">{title}</Typography>
+        <Box display="flex" alignItems="center">
           <TextField
             variant="standard"
             placeholder="Search"
@@ -92,20 +111,19 @@ const DataGridCustom = ({
       </Toolbar>
 
       <DataGrid
-          rows={filteredRows}
-          columns={[...columns, actionColumn]}
-          pageSizeOptions={[10, 20, 50]}
-          initialState={{
-            pagination: {
-              paginationModel: {
-                page: 0,
-                pageSize: 10,
-              },
-            },
-          }}
-          autoHeight
-          disableRowSelectionOnClick          
-        />
+        rows={filteredRows}
+        columns={[...columns, actionColumn]}
+        pageSizeOptions={[10, 20, 50]}
+        paginationMode="server" // ✅ مهم لتفعيل الترقيم من السيرفر
+        paginationModel={{ page, pageSize }} // ✅ تمرير القيم من props
+        onPaginationModelChange={(model) => {
+          onPageChange?.(model.page);
+          onPageSizeChange?.(model.pageSize);
+        }}
+        rowCount={rowCount} // ✅ العدد الكلي من السيرفر
+        autoHeight
+        disableRowSelectionOnClick
+      />
     </Box>
   );
 };

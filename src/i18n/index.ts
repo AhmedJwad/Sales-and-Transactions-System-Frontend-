@@ -12,17 +12,17 @@ const resources = {
 };
 
 i18n
-  .use(LanguageDetector) // يكتشف اللغة (localStorage, navigator,...)
+  .use(LanguageDetector) 
   .use(initReactI18next)
   .init({
     resources,
     lng: localStorage.getItem('lang') || 'en',
     fallbackLng: 'en',
     interpolation: { escapeValue: false },
-    react: { useSuspense: false }, // لسهولة التعامل بدون Suspense
+    react: { useSuspense: false },
   });
 
-// ضبط خاصية اللغة واتجاه النص في ملف الـ HTML عند التحميل أو تغيير اللغة
+
 const setDocumentLangAndDir = (lng:any) => {
   const base = lng.startsWith('ar') ? 'ar' : 'en';
   const dir = base === 'ar' ? 'rtl' : 'ltr';
