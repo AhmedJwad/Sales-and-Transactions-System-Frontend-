@@ -1,4 +1,3 @@
-// src/pages/Categories/CategoriesCreate.tsx
 import {
   Box,
   Button,
@@ -7,13 +6,13 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useFormik } from "formik";
+import { useFormik, FieldArray } from "formik";
 import { FC, useEffect, useState } from "react";
 import * as Yup from "yup";
 import LoadingComponent from "../../components/LoadingComponent";
 import genericRepository from "../../repositories/genericRepository";
-import { CategoryDto } from "../../types/CategoryDto";
 import ImageUploader from "../../components/ImageUploader";
+import { CategoryDto } from "../../types/CategoryDto";
 
 interface Props {
   id?: number | null;
@@ -23,13 +22,25 @@ interface Props {
 const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
   const numericId = Number(id);
   const [loading, setLoading] = useState(false);
-  const [category, setCategory] = useState<CategoryDto>({ id: 0, name: "" ,subcategories:null, photo:""});
+  const [category, setCategory] = useState<CategoryDto>({
+    id: 0,
+    photo: "",
+    categoryTranslations: [
+      {id:0, categoryId:0, language: "en", name: "" },
+      { id:0, categoryId:0,language: "ar", name: "" },
+    ],   
+  });
 
   const repository = genericRepository<CategoryDto[], CategoryDto>("categories/full");
   const reposcategory = genericRepository<CategoryDto[], CategoryDto>("categories");
 
   const validationSchema = Yup.object({
-    name: Yup.string().required("requiredField"),
+    categoryTranslations: Yup.array().of(
+      Yup.object({
+        language: Yup.string().required("Required"),
+        name: Yup.string().required("Required"),
+      })
+    ),
   });
 
   const getCategoryById = async () => {
@@ -37,12 +48,7 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
     try {
       const result = await reposcategory.getOne(numericId);
       if (!result.error && result.response) {
-        setCategory({
-          id: result.response.id,
-          name: result.response.name,
-          subcategories:null,
-          photo:result.response.photo,
-        });
+        setCategory(result.response);
       }
     } catch (error) {
       console.log(error);
@@ -55,7 +61,14 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
     if (id) {
       getCategoryById();
     } else {
-      setCategory({ id: 0, name: "" ,subcategories:null, photo:""});      
+      setCategory({
+        id: 0,
+        photo: "",
+      categoryTranslations: [
+      {id:0, categoryId:0, language: "en", name: "" },
+      { id:0, categoryId:0,language: "ar", name: "" },
+    ],   
+      });
     }
   }, [id]);
 
@@ -64,19 +77,23 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
     validationSchema,
     onSubmit: async (values) => {
       try {
+        const payload = {
+       photo: values.photo,
+       categoryTranslations: values.categoryTranslations.map((t) => ({
+        language: t.language,
+        name: t.name,
+          })),
+        };
         if (numericId) {
-          await repository.put({ ...values, id: numericId });
+          await repository.put({ ...payload, id: numericId });
         } else {
-          await repository.post(values);
-          console.log("category:", values);
+          await repository.post(payload);
         }
         onClose();
       } catch (error) {
         console.log(error);
       }
     },
-    validateOnBlur: false,
-    validateOnMount: true,
     enableReinitialize: true,
   });
 
@@ -88,50 +105,63 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
         <form onSubmit={formik.handleSubmit}>
           <Divider sx={{ my: 2 }} />
 
-          <Grid container spacing={2}>
-            <Grid>
-              <TextField
-                id="name"
-                name="name"
-                size="small"
-                fullWidth
-                label="Name"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
+          <Grid container spacing={2}>           
+            {formik.values.categoryTranslations.map((t, index) => (
+              <Grid key={index} size={{xs:12}}>
+                <Typography variant="subtitle1">
+                  Name ({t.language.toUpperCase()})
+                </Typography>
+                <TextField
+                  name={`categoryTranslations[${index}].name`}
+                  size="small"
+                  fullWidth
+                  label={`Name (${t.language})`}
+                  value={formik.values.categoryTranslations[index].name}
+                  onChange={formik.handleChange}
+                  error={
+                    !!formik.errors.categoryTranslations &&
+                    !!formik.errors.categoryTranslations[index]
+                  }
+                  helperText={
+                    formik.errors.categoryTranslations &&
+                    (formik.errors.categoryTranslations[index] as any)?.name
+                  }
+                />
+              </Grid>
+            ))}
+
+            {/* الصورة */}
+            <Grid size={{xs:12}}>
+              <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                Photo
+              </Typography>
+
+              {formik.values.photo && formik.values.photo.startsWith("categories/") && (
+                <Box mb={2} textAlign="center">
+                  <img
+                    src={`https://localhost:7027/${formik.values.photo}`}
+                    alt="Category"
+                    style={{
+                      width: 300,
+                      height: 300,
+                      borderRadius: "10%",
+                      objectFit: "cover",
+                      border: "2px solid #ccc",
+                    }}
+                  />
+                </Box>
+              )}
+
+              <ImageUploader
+                onImageSelected={(base64) => {
+                  formik.setFieldValue("photo", base64);
+                }}
+                initialImage={formik.values.photo!}
               />
-               <Typography variant="subtitle1" sx={{ mb: 1 }}>
-                                    Photo
-                                  </Typography>
-                                   <Grid size={{xs:12, sm:6}}>
-                                              {formik.values.photo && (
-                                                <Box mb={2} textAlign="center">
-                                                    <img
-                                                    src={`${"https://localhost:7027/"}${formik.values.photo}`}
-                                                    alt="User"
-                                                    style={{
-                                                        width: 300,
-                                                        height: 300,
-                                                        borderRadius: "50%",
-                                                        objectFit: "cover",
-                                                        border: "2px solid #ccc"
-                                                    }}
-                                                    />
-                                                </Box>
-                                            )}
-                                        </Grid>
-                                  <ImageUploader
-                                    onImageSelected={(base64) => {
-                                      const current = formik.values.photo;
-                                      formik.setFieldValue("photo", base64);
-                                    }}
-                                    initialImage={formik.values.photo?.[0]}
-                                  />                
             </Grid>
 
-            <Grid>
+            {/* زر الحفظ */}
+            <Grid size={{xs:12}}>
               <Button type="submit" variant="outlined">
                 Save
               </Button>

@@ -48,15 +48,13 @@ const CategoriesList = () => {
  
   const getCategories = async () => {
   setLoading(true);
-  try {
-    // ✅ جلب عدد السجلات من السيرفر أولاً
+  try {   
     const recordsResponse = await numberRepository.getAllByQuery<number>(
       `/recordsNumber`
     );
     const totalRecords = !recordsResponse.error && recordsResponse.response
       ? Number(recordsResponse.response)
-      : 10; 
-     console.log("totalRecords:", totalRecords)
+      : 10;     
     setRowCount(totalRecords);   
     const totalPagesResponse = await numberRepository.getAllByQuery<number>(
       `/totalPages`
@@ -64,16 +62,12 @@ const CategoriesList = () => {
     const pages = !totalPagesResponse.error && totalPagesResponse.response
       ? Number(totalPagesResponse.response)
       : 1;
-
-    setTotalPages(pages);
-     console.log("totalRpages:", pages)
-
-    // ✅ التأكد أن الصفحة الحالية ضمن الحد
+    setTotalPages(pages);     
     const currentPage = page >= pages ? pages - 1 : page;
 
-    // ✅ جلب بيانات الصفوف حسب pagination
+   
     const queryParams = new URLSearchParams({
-      Page: (currentPage + 1).toString(),       // الباكيند يبدأ من 1
+      Page: (currentPage + 1).toString(),      
       RecordsNumber: pageSize.toString(),
       Language: i18n.language || "en",
     });
@@ -98,8 +92,15 @@ const CategoriesList = () => {
   const handleDelete = async (id: number) => {
     try {
       setLoading(true);
-      await repository.delete(id);
-      await getCategories();
+      const result= await repository.delete(id);
+        if(result.error)
+        {
+          await getCategories();
+        }else
+        {
+        console.error("Delete failed:", result.message || "Unknown error");
+        }               
+      
     } catch (error) {
       console.error(error);
     } finally {
