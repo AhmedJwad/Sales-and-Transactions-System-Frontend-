@@ -15,7 +15,9 @@ import {
   import genericRepository from "../../repositories/genericRepository";
   import { CategoryDto } from "../../types/CategoryDto";
   import { SubcategoryDto } from "../../types/SubcategoryDto";
-import ImageUploader from "../../components/ImageUploader";
+  import ImageUploader from "../../components/ImageUploader";
+  import { useTranslation } from "react-i18next";
+import { Language } from "@mui/icons-material";
   
   interface Props {
     id?: number | null;
@@ -23,18 +25,20 @@ import ImageUploader from "../../components/ImageUploader";
   }
   
   const SubcategoryCreate: FC<Props> = ({ id, onClose }) => {
+    const { i18n } = useTranslation()
     const numericId = Number(id);
     const [categories, setCategories] = useState<CategoryDto[]>([]);
     const [loading, setLoading] = useState(false);
-    const [initialValues, setInitialValues] = useState({
-      name: "",
+    const [initialValues, setInitialValues] = useState<SubcategoryDto>({
+      id:0,
       categoryId: 0,
       photo:"",
+      subcategoryTranslations:[],
     });
   
-    const categoryRepo = genericRepository<CategoryDto[], CategoryDto>("categories");
+    const categoryRepo = genericRepository<CategoryDto[], CategoryDto>(`categories/combo?lang=${i18n.language || "en"}`);
     const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory/full");
-    const subcategoryRepoget = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
+    const subcategoryRepoget = genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory`);
   
     const fetchCategories = async () => {
       try {
@@ -52,11 +56,15 @@ import ImageUploader from "../../components/ImageUploader";
       try {
         const result = await subcategoryRepoget.getOne(numericId);
         if (!result.error && result.response) {
-          setInitialValues({
-            name: result.response.name,
-            categoryId: result.response.categoryId,
-            photo:result.response.photo ?? "",
-          });
+         const translations = result.response.subcategoryTranslations;
+        const en = translations.find(t => t.language.toLowerCase() === "en") ?? { id: 0, subcategoryId: result.response.id, language: "en", name: "" };
+        const ar = translations.find(t => t.language.toLowerCase() === "ar") ?? { id: 0, subcategoryId: result.response.id, language: "ar", name: "" };
+        setInitialValues({
+          id: result.response.id,
+          categoryId: result.response.categoryId,
+          photo: result.response.photo ?? "",
+          subcategoryTranslations: [en, ar],
+        });
         }
       } catch (error) {
         console.log(error);
@@ -70,15 +78,32 @@ import ImageUploader from "../../components/ImageUploader";
       if (id) {
         getSubcategoryById();
       } else {
-        setInitialValues({ name: "", categoryId: 0 , photo:""});
+        setInitialValues({id:0, categoryId: 0 , photo:"", subcategoryTranslations:[{
+          id:0,
+          name:"",
+          language:"en",
+          subcategoryId:0,
+        },
+      {
+          id:0,
+          name:"",
+          language:"ar",
+          subcategoryId:0,
+        }],
+      });
       }
-    }, [id]);
+    }, [id, i18n.language]);
   
-    const validationSchema = Yup.object({
-      name: Yup.string().required("Name is required"),
+    const validationSchema = Yup.object({      
       categoryId: Yup.number()
         .required("Category is required")
         .min(1, "Please select a category"),
+        subcategoryTranslations:Yup.array().of(
+          Yup.object({
+             name:Yup.string().required("Name is required"),
+          })
+        )
+
     });
   
     const formik = useFormik({
@@ -86,10 +111,19 @@ import ImageUploader from "../../components/ImageUploader";
       validationSchema,
       onSubmit: async (values) => {
         try {
+          const payload={
+            categoryId:values.categoryId,
+             photo:values.photo,   
+            SubcategoryTranslations:values.subcategoryTranslations.map((t)=>({
+              Language:t.language,
+              name:t.name,
+            }))         
+          }
+          console.log("payload:", payload);
           if (numericId) {
-            await subcategoryRepo.put({ ...values, id: numericId });
+            await subcategoryRepo.put({ ...payload, id: numericId });
           } else {
-            await subcategoryRepo.post(values);
+            await subcategoryRepo.post(payload);
           }
           onClose();
         } catch (error) {
@@ -106,26 +140,33 @@ import ImageUploader from "../../components/ImageUploader";
         {loading ? (
           <LoadingComponent />
         ) : (
-          <form onSubmit={formik.handleSubmit}>
-            <Typography variant="h6">
-              {numericId ? "Edit Subcategory" : "Create Subcategory"}
-            </Typography>
-            <Divider sx={{ my: 2 }} />
-  
+          <form onSubmit={formik.handleSubmit}>            
+            <Divider sx={{ my: 2 }} />  
             <Grid container spacing={2}>
-              <Grid>
-                <TextField
-                  id="name"
-                  name="name"
-                  fullWidth
-                  label="Subcategory Name"
-                  value={formik.values.name}
-                  onChange={formik.handleChange}
-                  error={formik.touched.name && Boolean(formik.errors.name)}
-                  helperText={formik.touched.name && formik.errors.name}
-                  size="small"
+              {formik.values.subcategoryTranslations.map((t, index)=>(
+                <Grid key={index} size={{xs:12}}>
+                  <Typography variant="subtitle1">
+                    name({t.language.toLocaleUpperCase()})
+                  </Typography>
+                   <TextField                    
+                      name={`subcategoryTranslations[${index}].name`}
+                      size="small"
+                      fullWidth
+                      label={`Name (${t.language})`}
+                      value={formik.values.subcategoryTranslations[index].name}
+                      onChange={formik.handleChange}
+                     error={
+                        formik.touched.subcategoryTranslations?.[index]?.name &&
+                        (formik.errors.subcategoryTranslations?.[index] as any)?.name
+                      }
+                      helperText={
+                        formik.touched.subcategoryTranslations?.[index]?.name &&
+                        (formik.errors.subcategoryTranslations?.[index] as any)?.name
+                      }           
                 />
-              </Grid>
+                </Grid>
+              ))}
+             
   
               <Grid>
                 <TextField

@@ -15,15 +15,19 @@ import { CategoryDto } from "../../types/CategoryDto";
 import { useNavigate } from "react-router-dom";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
 import { ProductDTO } from "../../types/ProductDTO";
+import { useTranslation } from "react-i18next";
+import categoryPlaceholder from "@/assets/category.png";
 
 const Home: FC = () => {
+   const { i18n } = useTranslation()
  const { setCategoryId , categoryId } = useCategory();
  const navigate = useNavigate();
  const [loading, setLoading] = useState(false);
  const [category, setCategory]=useState<CategoryDto[]>([]);
  const [subcategory, setSubcategoies]=useState<SubcategoryDto[]>([]);  
-  const [products, setProducts]=useState<ProductDTO[]>([]);   
-var categoryRepository=genericRepository<CategoryDto[],CategoryDto>("Categories/combo");
+ const [products, setProducts]=useState<ProductDTO[]>([]);   
+const language= i18n.language || "en";
+var categoryRepository=genericRepository<CategoryDto[],CategoryDto>(`Categories/combo?lang=${language}`);
 const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`Product/Getfullproduct`);
   const fetchcategories = async () => {  
     setLoading(true);
@@ -86,7 +90,7 @@ const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`Product/Getfull
     }
       fetchcategories();
       fetchProducts();
-   } ,[categoryId])
+   } ,[categoryId, i18n.language])
 
   return (
   <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -175,12 +179,12 @@ const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`Product/Getfull
                   },
                 }}
               >
-                <CardMedia
+               <CardMedia
                   onClick={() => handleCategorySelect(cat.id)}
                   component="img"
                   height="160"
-                  image={`https://localhost:7027/${cat.photo}`}
-                  alt={cat.name}
+                  image={cat.photo ? `https://localhost:7027/${cat.photo}` : `${import.meta.env.BASE_URL}assets/category.png`}
+                  alt={cat.name ?? "Category image"}
                 />
                 <CardContent>
                   <Typography

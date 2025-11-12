@@ -1,14 +1,15 @@
 import { CategoryDto } from "./CategoryDto";
 import { ProductDTO } from "./ProductDTO";
+import { SubcategoryTranslationDTO } from "./SubcategoryTranslationDTO";
 
 export interface SubcategoryDto {
-    id: number;
-    name: string;
-    categoryId: number;
-    category: CategoryDto | null;
-    prosubcategories: any; 
-    brands: any;           
-    productCategoriesNumber: number;
-    photo:string|null;
-    products:ProductDTO[] |null;
-  }
+  id: number;
+  photo: string | null;
+  categoryId: number;
+  category?: CategoryDto | null; 
+  prosubcategories?: any[] | null; 
+  brands?: any[] | null;
+  subcategoryTranslations: SubcategoryTranslationDTO[];
+  productCategoriesNumber?: number |null;
+ products?:ProductDTO[] |null;
+}

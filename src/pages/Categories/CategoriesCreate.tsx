@@ -24,11 +24,11 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
   const [loading, setLoading] = useState(false);
   const [category, setCategory] = useState<CategoryDto>({
     id: 0,
-    photo: "",
+    photo: "",   
     categoryTranslations: [
       {id:0, categoryId:0, language: "en", name: "" },
       { id:0, categoryId:0,language: "ar", name: "" },
-    ],   
+    ], 
   });
 
   const repository = genericRepository<CategoryDto[], CategoryDto>("categories/full");
@@ -68,6 +68,7 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
       {id:0, categoryId:0, language: "en", name: "" },
       { id:0, categoryId:0,language: "ar", name: "" },
     ],   
+     subcategories: [],
       });
     }
   }, [id]);
@@ -77,8 +78,12 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
     validationSchema,
     onSubmit: async (values) => {
       try {
-        const payload = {
-       photo: values.photo,
+      const payload = {
+       photo:values.photo 
+         ? values.photo.startsWith("data:image") 
+           ? values.photo       
+           : values.photo       
+           : null,     
        categoryTranslations: values.categoryTranslations.map((t) => ({
         language: t.language,
         name: t.name,
@@ -104,7 +109,6 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
       ) : (
         <form onSubmit={formik.handleSubmit}>
           <Divider sx={{ my: 2 }} />
-
           <Grid container spacing={2}>           
             {formik.values.categoryTranslations.map((t, index) => (
               <Grid key={index} size={{xs:12}}>
