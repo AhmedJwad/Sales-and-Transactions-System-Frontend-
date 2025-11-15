@@ -17,7 +17,7 @@ import {
   import { SubcategoryDto } from "../../types/SubcategoryDto";
   import ImageUploader from "../../components/ImageUploader";
   import { useTranslation } from "react-i18next";
-import { Language } from "@mui/icons-material";
+
   
   interface Props {
     id?: number | null;
@@ -118,8 +118,7 @@ import { Language } from "@mui/icons-material";
               Language:t.language,
               name:t.name,
             }))         
-          }
-          console.log("payload:", payload);
+          }          
           if (numericId) {
             await subcategoryRepo.put({ ...payload, id: numericId });
           } else {
@@ -216,8 +215,7 @@ import { Language } from "@mui/icons-material";
                                                             )}
                                                         </Grid>
                                                   <ImageUploader
-                                                    onImageSelected={(base64) => {
-                                                      const current = formik.values.photo;
+                                                    onImageSelected={(base64) => {                                                     
                                                       formik.setFieldValue("photo", base64);
                                                     }}
                                                     initialImage={formik.values.photo?.[0]}

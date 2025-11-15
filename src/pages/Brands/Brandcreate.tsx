@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { useFormik } from "formik";
 import { Box, Button, Divider, Grid, MenuItem, TextField, Typography } from "@mui/material";
 import LoadingComponent from "../../components/LoadingComponent";
+import { useTranslation } from "react-i18next";
 
 interface props {
     id?:number | null;
@@ -14,17 +15,21 @@ interface props {
 
 
 const BrandCreate:FC<props>=({id, onClose})=>{
-
+    const { i18n } = useTranslation()
     const numericId = Number(id);
-    const [subcategories, setsubcategories]=useState<SubcategoryDto[]>([]);
-    const [brands, setbrands]=useState<BrandDto[]>([]);
+    const [subcategories, setsubcategories]=useState<SubcategoryDto[]>([]);    
     const [loading , setloading ]=useState(false);
-    const [initialValues, setinitialValues]=useState({
-        name:"",
-        subcategoryId:0,        
+    const [initialValues, setinitialValues]=useState<BrandDto>({
+        id:0,        
+        subcategoryId:0,       
+        brandTranslations:[
+           {id:0, brandId:0, language:"en", name:""},
+           {id:0, brandId:0, language:"ar" , name:""}
+        ]     
     })
-    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory");
-    const brandRepo=genericRepository<BrandDto[], BrandDto>("Brand");
+    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combo?lang=${i18n.language}` ||`en`);
+    const brandRepo=genericRepository<BrandDto[], BrandDto>("Brand/full");
+    const brandbyIdRepoget = genericRepository<BrandDto[], BrandDto>(`Brand`);
 
     const fetchsubcategories=async()=>{
         setloading(true)
@@ -48,12 +53,16 @@ const BrandCreate:FC<props>=({id, onClose})=>{
     const getBrandbyId=async()=>{
         setloading(true);
         try {
-            const result=await brandRepo.getOne(numericId);
+            const result=await brandbyIdRepoget.getOne(numericId);
             if(!result.error && result.response)
             {
+                const translation=result.response.brandTranslations;
+                const en=translation.find(t=>t.language.toLowerCase()=="en")??{id:0, brandId:0, language:"en", name:""};
+                const ar=translation.find(t=>t.language.toLowerCase()=="ar")??{id:0, brandId:0, language:"ar", name:""}
                 setinitialValues({
-                    name:result.response.name,
-                    subcategoryId:result.response.subcategoryId,
+                    id:result.response.id,                    
+                    brandTranslations: [ en, ar ],
+                    subcategoryId:result.response.subcategoryId,                                    
                 });
             } else{
                 console.error("Error fetching brand by Id " , result.message)
@@ -70,15 +79,28 @@ const BrandCreate:FC<props>=({id, onClose})=>{
         {
             getBrandbyId()
         }else{
-            setinitialValues({name:"" , subcategoryId:0})
-        }
-    },[id])
+            setinitialValues({
+                id:0,        
+                subcategoryId:0,                
+                brandTranslations:[
+                {id:0, brandId:0, language:"en", name:""},
+                {id:0, brandId:0, language:"ar" , name:""}
+                ]                
+                        
+                })               
+        }    
+        console.log("brandin useEffect:", initialValues)   
+    },[id, i18n.language])
 
-    const validationSchema=Yup.object({
-        name:Yup.string().required("name is required"),
+    const validationSchema=Yup.object({       
         subcategoryId:Yup.number()
         .required("Subcategory is required")
-        .min(1,"please select a subcategory")       
+        .min(1,"please select a subcategory"),
+        brandTranslations:Yup.array().of(
+            Yup.object({
+              name:Yup.string().required("Name is required"),
+            })
+        )    
     })
 
     const formik=useFormik({
@@ -86,11 +108,22 @@ const BrandCreate:FC<props>=({id, onClose})=>{
         validationSchema,
         onSubmit:async(values)=>{
             try {
+             
+                const payload={
+                                subcategoryId:values.subcategoryId,                               
+                                brandTranslations:values.brandTranslations.map((t)=>({
+                                language:t.language,
+                                name:t.name,
+                                })) , 
+                                                                
+                            }
+                 console.log("brandtoserver:", payload);
                 if(numericId) 
                 {
-                    await brandRepo.put( {... values , id:numericId});
+                    await brandRepo.put( {...payload , id:numericId});
                 }else {
-                    await brandRepo.post(values)
+                    await brandRepo.post(payload)
+                    console.log("payload:", payload)
                 }
                 onClose();               
             } catch (error) {
@@ -108,17 +141,30 @@ const BrandCreate:FC<props>=({id, onClose})=>{
             </Typography>
             <Divider sx={{ my: 2 }} />
             <Grid container spacing={2}>
-             <TextField
-             id="name"
-             name="name"
-             fullWidth
-             label="Brand Name"
-             value={formik.values.name}
-             onChange={formik.handleChange}
-             error={formik.touched.name && Boolean(formik.errors.name)}
-             helperText={formik.touched.name && formik.errors.name}
-             size="small"
-             />
+                {formik.values.brandTranslations.map((t, index)=>(
+                    <Grid key={index} size={{xs:12}}>
+                         <Typography variant="subtitle1">
+                            name({t.language.toLocaleUpperCase()})
+                        </Typography>
+                            <TextField                               
+                                name={`brandTranslations[${index}].name`}
+                                size="small"
+                                fullWidth
+                                label={`Name (${t.language})`}
+                                value={formik.values.brandTranslations[index].name}
+                                onChange={formik.handleChange}
+                                error={
+                                    formik.touched.brandTranslations?.[index]?.name &&
+                                    (formik.errors.brandTranslations?.[index] as any)?.name
+                                }
+                                helperText={
+                                    formik.touched.brandTranslations?.[index]?.name &&
+                                    (formik.errors.brandTranslations?.[index] as any)?.name
+                                }           
+                                />
+                    </Grid>
+                ))}        
+             
             <Grid>
                 <TextField
                   select
@@ -142,7 +188,7 @@ const BrandCreate:FC<props>=({id, onClose})=>{
                   </MenuItem>
                   {subcategories.map((cat) => (
                     <MenuItem key={cat.id} value={cat.id}>
-                      {cat.name}
+                      {cat.subcategoryTranslations[0].name}
                     </MenuItem>
                   ))}
                 </TextField>

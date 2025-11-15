@@ -1,10 +1,11 @@
+import { BrandTranslationDTO } from "./BrandTranslationDTO";
 import { SubcategoryDto } from "./SubcategoryDto";
 
 
 export interface BrandDto{
-    id:number,
-    name:string,
+    id:number,  
     subcategoryId:number,
-    subcategory:SubcategoryDto | null,
-    products: any;
+    subcategory?:SubcategoryDto | null,
+    products?: any | null;
+    brandTranslations: BrandTranslationDTO[];
 }
