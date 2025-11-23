@@ -1,10 +1,9 @@
 import { BrandDto } from "./BrandDto";
+import { ProductionTranslationsDTO } from "./ProductionTranslationsDTO";
 
 export interface ProductDtoRequest {
-    id: number;  
-    name: string;      
-    barcode: string;   
-    description?: string;   
+    id: number; 
+    barcode: string;  
     price: number;     
     cost: number;   
     desiredProfit: number; 
@@ -16,7 +15,11 @@ export interface ProductDtoRequest {
     ProductSizeIds?:number[];  
     productImages?: string[];        
     serialNumbers?: string[];
-    BrandId?:number;   
+    BrandId?:number; 
+    productionTranslations:ProductionTranslationsDTO[];  
+    Name: string;
+    Description: string;
+
       
   }
   

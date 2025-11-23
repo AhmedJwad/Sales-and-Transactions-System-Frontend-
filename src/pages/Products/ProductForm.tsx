@@ -20,6 +20,8 @@ import { ColourDTO } from "../../types/ColoutDTO";
 import { SizeDTO } from "../../types/SizeDTO";
 import { BrandDto } from "../../types/BrandDto";
 import genericRepository from "../../repositories/genericRepository";
+import { useTranslation } from "react-i18next";
+import i18n from "../../i18n";
 
 interface ProductFormProps {
   product: ProductDtoRequest;
@@ -54,10 +56,10 @@ const ProductForm: FC<ProductFormProps> = ({
   const [loading] = useState(false);
   // 🟢 Subcategories state
   const [selectedCategories, setSelectedCategories] = useState<MultipleSelectorModel[]>(
-    selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }))
+    selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.subcategoryTranslations?.[0].name }))
   );
   const [nonSelectedCategories] = useState<MultipleSelectorModel[]>(
-    nonSelectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name })));
+    nonSelectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.subcategoryTranslations?.[0].name })));
   // 🟢 Colors state
   const [selectedColorsState, setSelectedColorsState] = useState<MultipleSelectorModel[]>(
     selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode  })));
@@ -70,20 +72,39 @@ const ProductForm: FC<ProductFormProps> = ({
   );
   const [brand ,setBrand]=useState<BrandDto[]>([]);
   const brandRepo=genericRepository<BrandDto[], BrandDto>("Brand/combo");
+  const { i18n } = useTranslation();
 
   const formik = useFormik<ProductDtoRequest>({
-    initialValues: product,
+    initialValues:{      
+      ...product,
+    productionTranslations: product.productionTranslations?.length
+      ? product.productionTranslations
+      : [
+          { Language: "ar", Name: "", Description: "" },
+          { Language: "en", Name: "", Description: "" }
+        ],
+    },
     enableReinitialize: true,
-    validationSchema: Yup.object({
-      name: Yup.string().required("Name is required"),
-      description: Yup.string().required("Description is required"),
+    validationSchema: Yup.object({      
       price: Yup.number().min(0).required("Price is required"),
       cost: Yup.number().min(0).required("Cost is required"),
       stock: Yup.number().min(0).required("Stock is required"),
       desiredProfit: Yup.number().min(0).required("Desired profit is required"),
+      productionTranslations:Yup.array().of(
+        Yup.object({
+            Name:Yup.string().required("Name is required"),
+            Description:Yup.string().required("Description is required"),
+        })
+      )
     }),
     onSubmit: async (values) => {
       // 🟢 Add selected categories + colors IDs to payload
+      const currentLanguage = i18n.language; 
+      const selectedTranslation = values.productionTranslations.find(
+        t => t.Language === currentLanguage
+      );
+      values.Name = selectedTranslation?.Name ?? '';
+      values.Description = selectedTranslation?.Description ?? '';
       values.productCategoryIds = selectedCategories.map((x) => parseInt(x.key));
       values.ProductColorIds = selectedColorsState.map((x) => parseInt(x.key));
       values.ProductSizeIds=selectedSizesstate.map((x)=>parseInt(x.key));
@@ -129,7 +150,7 @@ const fetchBrands=async()=>{
     }
 useEffect(() => {
   // Categories
-  const selectedCatMapped = selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.name }));  
+  const selectedCatMapped = selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.subcategoryTranslations?.[0].name }));  
   setSelectedCategories(selectedCatMapped);
   // Colors
   const selectedColorMapped = selectedColors.map((x) => ({ key: x.id.toString(), value: x.hexCode }));  
@@ -137,7 +158,7 @@ useEffect(() => {
     const selectedsizeMapped =selectedSizes.map((x) => ({ key: x.id.toString(), value: x.name }));  
  setSelectedSizesstate(selectedsizeMapped);  
  fetchBrands();
-}, [selectedSubcategories, nonSelectedSubcategories, selectedColors, nonSelectedColors, selectedSizes, nonSelectedSizes]);
+}, [selectedSubcategories, nonSelectedSubcategories, selectedColors, nonSelectedColors, selectedSizes, nonSelectedSizes, i18n.language]);
   return (
     <Box>
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
@@ -167,28 +188,31 @@ useEffect(() => {
           <Grid container spacing={4}>
             {/* Column 1: Basic Info */}
             <Grid size={{xs:12, md:4}}>
-              <TextField
-                fullWidth
-                label="Name"
-                name="name"
-                value={formik.values.name}
-                onChange={formik.handleChange}
-                error={formik.touched.name && Boolean(formik.errors.name)}
-                helperText={formik.touched.name && formik.errors.name}
-                sx={{ mb: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Description"
-                name="description"
-                multiline
-                minRows={3}
-                value={formik.values.description}
-                onChange={formik.handleChange}
-                error={formik.touched.description && Boolean(formik.errors.description)}
-                helperText={formik.touched.description && formik.errors.description}
-                sx={{ mb: 2 }}
-              />
+             {formik.values.productionTranslations.map((t, index) => (
+                  <Box key={index} mb={3} p={2} border="1px solid #e0e0e0" borderRadius={2}>
+                    <Typography fontWeight="bold">
+                      Language: {t.Language}
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      label={`Name (${t.Language})`}
+                      name={`productionTranslations[${index}].Name`}
+                      value={t.Name}
+                      onChange={formik.handleChange}
+                      sx={{ mb: 2 }}
+                    />
+                    <TextField
+                      fullWidth
+                      label={`Description (${t.Language})`}
+                      name={`productionTranslations[${index}].Description`}
+                      value={t.Description}
+                      onChange={formik.handleChange}
+                      sx={{ mb: 2 }}
+                    />
+                  </Box>
+                
+                ))}
+                
               <TextField
                 fullWidth
                 label="Price"
@@ -309,7 +333,7 @@ useEffect(() => {
                                     </MenuItem>
                                     {brand.map((cat) => (
                                       <MenuItem key={cat.id} value={cat.id}>
-                                        {cat.name}
+                                        {cat.brandTranslations?.[0].name}
                                       </MenuItem>
                                     ))}
                                   </TextField>

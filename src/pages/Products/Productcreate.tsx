@@ -7,16 +7,18 @@ import { SubcategoryDto } from "../../types/SubcategoryDto";
 import ProductForm from "./ProductForm";
 import { ColourDTO } from "../../types/ColoutDTO";
 import { SizeDTO } from "../../types/SizeDTO";
+import { useTranslation } from "react-i18next";
 
 const ProductCreate: FC = () => {
+  const { i18n } = useTranslation() 
   const { id } = useParams();
   const numericId = id ? parseInt(id, 10) : 0;
 
   const [product, setProduct] = useState<ProductDtoRequest>({
-    id: 0,
-    name: "",
-    description: "",
+    id: 0,  
     barcode: "5E5C2D9C45D0",
+    Name:"",
+    Description:"",
     price: 0,
     cost: 0,
     desiredProfit: 0,
@@ -28,6 +30,10 @@ const ProductCreate: FC = () => {
     productImages: [],
     serialNumbers: [],
     ProductSizeIds:[],
+    productionTranslations: [
+    { Language: "ar", Name: "", Description: "" },
+    { Language: "en", Name: "", Description: "" }
+  ]
   });
 
   const [nonSelectedSubcategories, setNonSelectedSubcategories] = useState<SubcategoryDto[]>([]);
@@ -40,7 +46,7 @@ const ProductCreate: FC = () => {
   const navigate = useNavigate();
 
   const repo = genericRepository<ProductDtoRequest[], ProductDtoRequest>("Product/full");
-  const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory/combo");
+  const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combo?lang=${i18n.language || "en"}`);
   const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combo");
   const Sizerepo=genericRepository<SizeDTO[], SizeDTO>("sizes/combo");
 
@@ -118,7 +124,8 @@ const ProductCreate: FC = () => {
     }
   };
 
-  const createOrUpdateAsync = async (updatedProduct: ProductDtoRequest) => {    
+  const createOrUpdateAsync = async (updatedProduct: ProductDtoRequest) => {  
+      
     const result = numericId > 0
       ? await repo.put({ ...updatedProduct, id: numericId })
       : await repo.post(updatedProduct);  
@@ -128,8 +135,7 @@ const ProductCreate: FC = () => {
     } else {
       console.error("Error submitting product:", result.message);
     }  
-  };
-  
+  };  
 
   const handleReturn = () => {
     navigate("/admin/products");
@@ -144,7 +150,7 @@ useEffect(() => {
     }
   };
   fetchData();
-}, [numericId]);
+}, [numericId , i18n.language]);
   
 
   return loading ? (

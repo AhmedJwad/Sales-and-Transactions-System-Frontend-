@@ -14,7 +14,6 @@ const BrandsList=()=>{
     const [rows, setRows]=useState<any[]>([]);
     const [dialogOpen, setDialogOpen]=useState(false);
     const [editId, setEditId]=useState<number| null>(null);
-
     const [page, setPage] = useState(0);
     const [pageSize, setPageSize] = useState(10);
     const [rowCount, setRowCount] = useState(0);
@@ -26,7 +25,7 @@ const BrandsList=()=>{
        { field:"subcategory" , headerName:"SubCategory" ,flex:3}
     ];
     const repository=genericRepository<BrandDto[], BrandDto>("Brand");
-     const numberRepository = genericRepository<number, number>("Brand");
+    const numberRepository = genericRepository<number, number>("Brand");
     const getBrands=async()=>{
         setLoading(true);       
         try {
@@ -52,7 +51,7 @@ const BrandsList=()=>{
                 RecordsNumber: pageSize.toString(),
                 Language: i18n.language || "en",
                 });   
-            const data=await  await repository.getAllByQuery<BrandDto[]>(`?${queryParams}`);;        
+            const data=await  await repository.getAllByQuery<BrandDto[]>(`?${queryParams}`);      
             if(!data.error && data.response)
             {
                 const brands=data.response.map((item:BrandDto)=>({
