@@ -17,8 +17,8 @@ const ProductCreate: FC = () => {
   const [product, setProduct] = useState<ProductDtoRequest>({
     id: 0,  
     barcode: "5E5C2D9C45D0",
-    Name:"",
-    Description:"",
+    name:"",
+    description:"",
     price: 0,
     cost: 0,
     desiredProfit: 0,
@@ -31,9 +31,10 @@ const ProductCreate: FC = () => {
     serialNumbers: [],
     ProductSizeIds:[],
     productionTranslations: [
-    { Language: "ar", Name: "", Description: "" },
-    { Language: "en", Name: "", Description: "" }
-  ]
+    { language: "ar", name: "", description: "" },
+    { language: "en", name: "", description: "" }
+  ],
+ 
   });
 
   const [nonSelectedSubcategories, setNonSelectedSubcategories] = useState<SubcategoryDto[]>([]);
@@ -106,11 +107,10 @@ const ProductCreate: FC = () => {
       if (!result.error && result.response) {
         const productData = result.response;
         setProduct(productData);
-
         const selectedSubs = nonSelectedSubcategories.filter(sub =>
-          productData.productCategoryIds?.includes(sub.id));
+        productData.productCategoryIds?.includes(sub.id));
         const selectedcolr = nonSelectedColors.filter(col =>
-          productData.ProductColorIds?.includes(col.id)
+        productData.ProductColorIds?.includes(col.id)
         );
         setSelectedSubcategories(selectedSubs);
         setSelectedColors(selectedcolr);
@@ -125,10 +125,9 @@ const ProductCreate: FC = () => {
   };
 
   const createOrUpdateAsync = async (updatedProduct: ProductDtoRequest) => {  
-      
     const result = numericId > 0
       ? await repo.put({ ...updatedProduct, id: numericId })
-      : await repo.post(updatedProduct);  
+      : await repo.post(updatedProduct);        
     console.log("Product after post", updatedProduct);  
     if (!result.error) {
       navigate("/admin/products");

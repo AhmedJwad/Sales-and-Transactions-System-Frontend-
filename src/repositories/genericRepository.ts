@@ -12,6 +12,7 @@ const genericRepository = <IList, IItem>(method: string) => {
         statusCode: data.statusCode ?? 200,
         message: data.message ?? undefined,
       }; */
+      
       if (data.response) {
       return {
         response: data.response ?? null,

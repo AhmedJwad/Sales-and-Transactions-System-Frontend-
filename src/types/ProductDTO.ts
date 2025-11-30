@@ -1,11 +1,14 @@
 import { BrandDto } from "./BrandDto";
 import { CategoryDto } from "./CategoryDto";
 import { CategoryProductDto } from "./CategoryProductDto";
+import { ColourDTO } from "./ColoutDTO";
 import { productColorDTO } from "./productColorDTO";
 import { ProductImageDTO } from "./ProductImageDTO";
+import { ProductionTranslationsDTO } from "./ProductionTranslationsDTO";
 import { ProductSizeDTO } from "./ProductSizeDTO";
 import { ProductSubCategoryDTO } from "./ProductSubCategoryDTO";
 import { SerialNumberDTO } from "./SerialNumberDTO";
+import { SizeDTO } from "./SizeDTO";
 
 
 export interface ProductDTO {
@@ -23,8 +26,8 @@ export interface ProductDTO {
   stock: number;
   hasSerial: boolean;
   categories:CategoryProductDto[];   
-  productColor:productColorDTO[];  
-  productSize:ProductSizeDTO[];
+  colors:ColourDTO[];  
+  sizes:SizeDTO[];
   brandId: number;
   brand:BrandDto;
   productCategoriesNumber: number;
@@ -32,5 +35,6 @@ export interface ProductDTO {
   productImagesNumber: number;
   mainImage: string;
   serialNumbers:SerialNumberDTO[];
+  productionTranslations:ProductionTranslationsDTO[] |null;
   
   }

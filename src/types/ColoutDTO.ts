@@ -2,6 +2,6 @@ export interface ColourDTO {
   id: number;
   name: string;
   hexCode: string;
-  productColor: any[];   
+  productColor: any[] | null;   
   productImage: string | null;
 }

@@ -10,17 +10,18 @@ import { ColourDTO } from "../../../types/ColoutDTO";
 import { SizeDTO } from "../../../types/SizeDTO";
 import { ProductFilterDto } from "../../../types/ProductFilterDto";
 import { useCart } from "../../../context/CartContext";
+import { useTranslation } from "react-i18next";
 
 const PublicProductList = () => {
+    const { i18n } = useTranslation();
     const { addToCart } = useCart();
-    const [products, setProducts] = useState<ProductDTO[]>([]);
+    const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-    const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(`Product/Getfullproduct`);
-    const ProductFilterRepo = genericRepository<ProductDTO[], ProductDTO>("product/productfilter");
-
-    const [page, setPage] = useState(1);
-    const [pageSize] = useState(10);
+  
+    const productRepo = genericRepository<ProductDTO[], ProductDTO>(`Product`); 
+    const numberRepository = genericRepository<number, number>("Product");
+    
     const [searchText, setSearchText] = useState("");
 
     const [brands, setBrands] = useState<BrandDto[]>([]);
@@ -35,6 +36,12 @@ const PublicProductList = () => {
     const [showAllBrands, setShowAllBrands] = useState(false);
     const [showAllColors, setShowAllColors] = useState(false);
     const [showAllSizes, setShowAllSizes] = useState(false);
+
+     //pagination
+      const [page, setPage] = useState(0);
+      const [pageSize, setPageSize] = useState(10);
+      const [rowCount, setRowCount] = useState(1);
+      const [totalPages, setTotalPages] = useState(0);
 
     const filteredProducts = products.filter((prod) =>
         prod.name.toLowerCase().includes(searchText.toLowerCase())
@@ -57,40 +64,86 @@ const PublicProductList = () => {
         }
     };
 
-    const fetchProducts = async () => {
+    const fetchProducts = async () => {  
+        setLoading(true);
         try {
-            setLoading(true);
-            const result = await ProductRepo.getAll();
-            if (!result.error && result.response) setProducts(result.response);
-        } catch (error) {
-            console.error("Network error:", error);
-            setErrorMessage("Network error while loading Products.");
+           const recordsResponse = await numberRepository.getAllByQuery<number>(
+                    `/recordsNumber`
+                    );
+                    const totalRecords = !recordsResponse.error && recordsResponse.response
+                    ? Number(recordsResponse.response)
+                    : 10;     
+                    setRowCount(totalRecords);   
+                    console.log("totalRecords:", totalRecords)
+                    const totalPagesResponse = await numberRepository.getAllByQuery<number>(
+                    `/totalPages`
+                    );
+                    const pages = !totalPagesResponse.error && totalPagesResponse.response
+                    ? Number(totalPagesResponse.response)
+                    : 1;           
+                    setTotalPages(pages); 
+                    console.log("totalpages:", totalPages)
+                    const currentPage = page >= pages ? pages - 1 : page;            
+                    const queryParams = new URLSearchParams({
+                    Page: (currentPage + 1).toString(),      
+                    RecordsNumber: pageSize.toString(),
+                    Language: i18n.language || "en",
+                    });   
+           const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams}`);;      
+          if (!data.error && data.response) {
+            const products = data.response.map((item: ProductDTO) => ({
+                id: item.id,
+                name: item.name,
+                description: item.description,
+                price: item.price,
+                stock: item.stock,          
+                categories: item.categories?.map(c => ({
+                                                            id: c.id,
+                                                            category: c.category,
+                                                          })) ?? [],  
+               
+                image: item.productImages && item.productImages.length > 0
+                                ? item.productImages[0]
+                                : "/no-image.png",     
+                colors:item.colors?.map(c=>c.hexCode) ?? [],
+                sizes:item.sizes?.map(s=>s.name) ??[],
+                brand:item.brand?.brandTranslations?.[0]?.name ?? "",            
+             
+            }));
+            setProducts(products);
+            console.log("product Data:", products)
+          } else {
+            console.error("Error fetching Products:", data.message);
+          }
+        } catch (error: any) {
+          console.error("Unexpected error:", error.message || error);
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
-    };
+      };
+    
 
-    const fetchFilteredProducts = async (filter: ProductFilterDto) => {
-        try {
-            setLoading(true);
-            const result = await ProductFilterRepo.post(filter);
-            if (!result.error && result.response) {
-                setProducts(Array.isArray(result.response) ? result.response : [result.response]);
-            } else {
-                setErrorMessage("No products found with the given filters");
-                setProducts([]);
-            }
-        } catch (error) {
-            setErrorMessage("Network error while loading filtered products.");
-        } finally {
-            setLoading(false);
-        }
-    };
+    // const fetchFilteredProducts = async (filter: ProductFilterDto) => {
+    //     try {
+    //         setLoading(true);
+    //         const result = await ProductFilterRepo.post(filter);
+    //         if (!result.error && result.response) {
+    //             setProducts(Array.isArray(result.response) ? result.response : [result.response]);
+    //         } else {
+    //             setErrorMessage("No products found with the given filters");
+    //             setProducts([]);
+    //         }
+    //     } catch (error) {
+    //         setErrorMessage("Network error while loading filtered products.");
+    //     } finally {
+    //         setLoading(false);
+    //     }
+    // };
 
     useEffect(() => {
         fetchProducts();
-        fetchFiltersData();
-    }, []);
+        //fetchFiltersData();
+    }, [page, pageSize, i18n.language]);
       
     return (
         <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -139,7 +192,7 @@ const PublicProductList = () => {
                                             }}
                                         />
                                     }
-                                    label={b.name}
+                                    label={b.brandTranslations?.[0].name}
                                 />
                             ))}
                             {brands.length > 4 && (
@@ -220,7 +273,7 @@ const PublicProductList = () => {
                                         MinPrice: priceRange[0],
                                         MaxPrice: priceRange[1]
                                     };
-                                    fetchFilteredProducts(newFilters);
+                                    //fetchFilteredProducts(newFilters);
                                 }}
                             >
                                 Apply Filters
@@ -230,13 +283,13 @@ const PublicProductList = () => {
                         {/* Products Grid */}
                         <Box sx={{ flex: 1 }}>
                             <Grid container spacing={3}>
-                                {paginatedProducts.map((prod) => (
+                                {products.map((prod) => (
                                     <Grid size={{xs:12, sm:6, md:4}} key={prod.id}>
                                         <Card>
                                             <CardMedia
                                                 component="img"
                                                 height="200"
-                                                image={`https://localhost:7027/${prod.productImages[0]}`}
+                                                image={`https://localhost:7027/${prod.image}`}
                                                 alt={prod.name}
                                             />
                                             <CardContent>
@@ -248,7 +301,7 @@ const PublicProductList = () => {
                                                    ProductId: prod.id,
                                                     Name: prod.name,
                                                     Description: prod.description,
-                                                    Image: `https://localhost:7027/${prod.productImages[0]}`,
+                                                    Image: `https://localhost:7027/${prod.image}`,
                                                     Price: prod.price,
                                                     Quantity: 1
                                                 })} sx={{ mt: 2 }}>Buy Now</Button>
@@ -260,9 +313,9 @@ const PublicProductList = () => {
 
                             <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
                                 <Pagination
-                                    count={Math.ceil(filteredProducts.length / pageSize)}
+                                    count={totalPages}
                                     page={page}
-                                    onChange={handlePageChange}
+                                    onChange={(e, value) => setPage(value)}
                                     variant="outlined"
                                     color="primary"
                                 />

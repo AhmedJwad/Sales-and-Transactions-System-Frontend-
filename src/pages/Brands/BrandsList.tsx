@@ -74,7 +74,8 @@ const BrandsList=()=>{
         try {
             setLoading(true);
            const result= await repository.delete(id);
-           if(result.error)
+           console.log("Delete API raw result:", result);
+           if(!result.error)
            {
             await getBrands();
            } 

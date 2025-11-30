@@ -1,5 +1,5 @@
 export interface ProductionTranslationsDTO {
-    Language:string;
-    Description:string;
-    Name:string;
+    language:string;
+    description:string;
+    name:string;
 }

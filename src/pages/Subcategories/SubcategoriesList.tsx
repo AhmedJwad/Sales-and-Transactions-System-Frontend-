@@ -87,7 +87,7 @@ const SubcategoriesList = () => {
     try {
       setLoading(true);
      const result= await repository.delete(id);
-     if(result.error)
+     if(!result.error)
      {
       await getSubcategories();
      }else

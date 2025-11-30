@@ -12,7 +12,7 @@ const ProductList = () => {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<any[]>([]); 
   const [editId, setEditId] = useState<number | null>(null);  
-  const { i18n } = useTranslation() 
+  const { i18n } = useTranslation();
   //pagination
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
@@ -81,12 +81,12 @@ const renderColorCell = (params: any) => {
         ? params.value.map((c: any) => c.category).join(", ")
         : "",
   },
-    { field: "color", headerName: "colors", flex: 6 , renderCell:renderColorCell},
+    { field: "colors", headerName: "colors", flex: 6 , renderCell:renderColorCell},
     { field: "sizes", headerName: "Sizes", flex: 6 },
     { field: "image", headerName: "Image", flex: 6, renderCell: renderImageCell },
   ];
 
-  const productRepo = genericRepository<ProductDTO[], ProductDTO>("Product"); 
+  const productRepo = genericRepository<ProductDTO[], ProductDTO>(`Product`); 
   const numberRepository = genericRepository<number, number>("Product");
    
 
@@ -131,8 +131,8 @@ const renderColorCell = (params: any) => {
             image: item.productImages && item.productImages.length > 0
                             ? item.productImages[0]
                             : "/no-image.png",     
-            color:item.productColor ?? [],
-            sizes:item.productSize ?? [],
+            colors:item.colors?.map(c=>c.hexCode) ?? [],
+            sizes:item.sizes?.map(s=>s.name) ??[],
             brand:item.brand?.brandTranslations?.[0]?.name ?? "",            
          
         }));
@@ -154,6 +154,7 @@ const renderColorCell = (params: any) => {
       const result = await productRepo.delete(id);
       if (!result.error) {      
         await getProducts();
+        console.log("delete data:", result)
       } else {
         console.error("Delete failed:", result.message || "Unknown error");
       }

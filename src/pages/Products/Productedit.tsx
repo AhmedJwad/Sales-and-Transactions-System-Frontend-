@@ -10,16 +10,19 @@ import { ProductImageUploadDTO } from "../../types/ProductImageUploadDTO";
 import { ColourDTO } from "../../types/ColoutDTO";
 import { SizeDTO } from "../../types/SizeDTO";
 import { BrandDto } from "../../types/BrandDto";
+import { useTranslation } from "react-i18next";
+import { ProductResponseDTO } from "../../types/ProductResponseDTO";
 
 const ProductEdit: FC = () => {
+   const { i18n } = useTranslation();
   const { id } = useParams();
   const numericId = id ? parseInt(id, 10) : 0;
 
   const [product, setProduct] = useState<ProductDtoRequest>({
-    id: 0,
-    name: "",
-    description: "",
+    id: 0,  
     barcode: "5E5C2D9C45D0",
+    name:"",
+    description:"",
     price: 0,
     cost: 0,
     desiredProfit: 0,
@@ -27,11 +30,15 @@ const ProductEdit: FC = () => {
     brandId: 1,
     hasSerial: false,
     productCategoryIds: [],
+    ProductColorIds:[],
     productImages: [],
     serialNumbers: [],
-    ProductColorIds: [],
-    ProductSizeIds:[],    
-    BrandId:0,
+    ProductSizeIds:[],
+    productionTranslations: [
+    { language: "ar", name: "", description: "" },
+    { language: "en", name: "", description: "" }
+  ]  ,
+ 
   });
 
   const [nonSelectedSubcategories, setNonSelectedSubcategories] = useState<SubcategoryDto[]>([]);
@@ -45,9 +52,9 @@ const ProductEdit: FC = () => {
 
   const navigate = useNavigate();
   
-  const repoproductbyId = genericRepository<ProductDTO[], ProductDTO>("Product");
+  const repoproductbyId = genericRepository<ProductResponseDTO[], ProductResponseDTO>(`Product/get/${numericId}?lang=${i18n.language||"en"}`);
   const repo = genericRepository<ProductDtoRequest[], ProductDtoRequest>("Product/full");
-  const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>("Subcategory/combo");
+  const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combo?lang=${i18n.language || "en"}`);
   const ImageRepo = genericRepository<ProductImageUploadDTO[], ProductImageUploadDTO>("Product/addImages");
   const RemoveImageRepo = genericRepository<ProductImageUploadDTO[], ProductImageUploadDTO>("Product/removeLastImage");
   const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combo");
@@ -74,7 +81,8 @@ const ProductEdit: FC = () => {
       const result = await ColorRepo.getAll();
       if (!result.error && result.response) {
         setNonSelectedColors(result.response);
-        return result.response;
+         console.log("color:",result.response )
+        return result.response;       
       }
       return [];
     } finally {
@@ -105,29 +113,33 @@ const fetchSizes = async () => {
     try {
       const result = await repoproductbyId.getOne(numericId);
       if (!result.error && result.response) {
-        const dto: ProductDTO = result.response;
+        const dto: ProductResponseDTO = result.response;
         const transformed: ProductDtoRequest = {
           id: dto.id,
-          name: dto.name,
+          name: "",
           barcode: dto.barcode,
-          description: dto.description,
+          description: "",
           price: dto.price,
           cost: dto.cost,
           desiredProfit: dto.desiredProfit,
-          stock: dto.stock,
-          brandId: dto.brandId,
+          stock: dto.stock,           
+          brandId: dto.brandId,         
           hasSerial: dto.hasSerial,
           productCategoryIds: dto.productsubCategories?.map((sc) => sc.subcategoryId) || [],
           productImages: dto.productImages?.map((img) => img.image) || [],
           serialNumbers: dto.serialNumbers?.map((s) => s.serialNumberValue) || [],
           ProductColorIds: dto.productColor?.map((c) => c.colorId) || [],
-          ProductSizeIds:dto.productSize?.map((s)=> s.sizeId)||[],
-          BrandId:dto.brandId,          
+          ProductSizeIds:dto.productSize?.map((s)=> s.sizeId)||[],         
+          productionTranslations: dto.productTranslations?.map(t => ({
+                                      language: t.language,
+                                      name: t.name,
+                                      description: t.description
+                                    })) || [],   
         };
 
         setProduct(transformed);
-
-        const selectedSubs = subcategories.filter((sub) =>
+        console.log("update product:",transformed)
+         const selectedSubs = subcategories.filter((sub) =>
           transformed.productCategoryIds?.includes(sub.id)
         );
         setSelectedSubcategories(selectedSubs);
@@ -138,7 +150,8 @@ const fetchSizes = async () => {
          const selectedsizes = sizes.filter((siz) =>
           transformed.ProductSizeIds?.includes(siz.id)
         );
-       setSelectSize(selectedsizes);
+       setSelectSize(selectedsizes);   
+       
       }
     } catch {}
   };
@@ -225,7 +238,7 @@ const fetchBrands=async()=>{
       setLoading(false);
     };
     init();
-  }, [numericId]);
+  }, [numericId, i18n.language]);
 
   // ===== Render =====
   return loading ? (

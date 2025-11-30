@@ -93,9 +93,11 @@ const CategoriesList = () => {
     try {
       setLoading(true);
       const result= await repository.delete(id);
-        if(result.error)
+      console.log("Delete API raw result:", result);
+        if(!result.error)
         {
           await getCategories();
+          
         }else
         {
         console.error("Delete failed:", result.message || "Unknown error");

@@ -1,5 +1,10 @@
 import { BrandDto } from "./BrandDto";
+import { CategoryProductDto } from "./CategoryProductDto";
+import { ColourDTO } from "./ColoutDTO";
 import { ProductionTranslationsDTO } from "./ProductionTranslationsDTO";
+import { SizeDTO } from "./SizeDTO";
+import { SubcategoryDto } from "./SubcategoryDto";
+
 
 export interface ProductDtoRequest {
     id: number; 
@@ -16,10 +21,10 @@ export interface ProductDtoRequest {
     productImages?: string[];        
     serialNumbers?: string[];
     BrandId?:number; 
-    productionTranslations:ProductionTranslationsDTO[];  
-    Name: string;
-    Description: string;
-
-      
+    productionTranslations:ProductionTranslationsDTO[];   
+    name: string;
+    description: string; 
+    
+    
   }
   

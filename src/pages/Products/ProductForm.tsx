@@ -80,8 +80,8 @@ const ProductForm: FC<ProductFormProps> = ({
     productionTranslations: product.productionTranslations?.length
       ? product.productionTranslations
       : [
-          { Language: "ar", Name: "", Description: "" },
-          { Language: "en", Name: "", Description: "" }
+          { language: "ar", name: "", description: "" },
+          { language: "en", name: "", description: "" }
         ],
     },
     enableReinitialize: true,
@@ -92,8 +92,8 @@ const ProductForm: FC<ProductFormProps> = ({
       desiredProfit: Yup.number().min(0).required("Desired profit is required"),
       productionTranslations:Yup.array().of(
         Yup.object({
-            Name:Yup.string().required("Name is required"),
-            Description:Yup.string().required("Description is required"),
+            name:Yup.string().required("Name is required"),
+            description:Yup.string().required("Description is required"),
         })
       )
     }),
@@ -101,10 +101,10 @@ const ProductForm: FC<ProductFormProps> = ({
       // 🟢 Add selected categories + colors IDs to payload
       const currentLanguage = i18n.language; 
       const selectedTranslation = values.productionTranslations.find(
-        t => t.Language === currentLanguage
+        t => t.language === currentLanguage
       );
-      values.Name = selectedTranslation?.Name ?? '';
-      values.Description = selectedTranslation?.Description ?? '';
+      values.name = selectedTranslation?.name ?? '';
+      values.description = selectedTranslation?.description ?? '';
       values.productCategoryIds = selectedCategories.map((x) => parseInt(x.key));
       values.ProductColorIds = selectedColorsState.map((x) => parseInt(x.key));
       values.ProductSizeIds=selectedSizesstate.map((x)=>parseInt(x.key));
@@ -191,21 +191,21 @@ useEffect(() => {
              {formik.values.productionTranslations.map((t, index) => (
                   <Box key={index} mb={3} p={2} border="1px solid #e0e0e0" borderRadius={2}>
                     <Typography fontWeight="bold">
-                      Language: {t.Language}
+                      Language: {t.language}
                     </Typography>
                     <TextField
                       fullWidth
-                      label={`Name (${t.Language})`}
-                      name={`productionTranslations[${index}].Name`}
-                      value={t.Name}
+                      label={`Name (${t.language})`}
+                      name={`productionTranslations[${index}].name`}
+                      value={t.name}
                       onChange={formik.handleChange}
                       sx={{ mb: 2 }}
                     />
                     <TextField
                       fullWidth
-                      label={`Description (${t.Language})`}
-                      name={`productionTranslations[${index}].Description`}
-                      value={t.Description}
+                      label={`Description (${t.language})`}
+                      name={`productionTranslations[${index}].description`}
+                      value={t.description}
                       onChange={formik.handleChange}
                       sx={{ mb: 2 }}
                     />
@@ -313,18 +313,18 @@ useEffect(() => {
                    <TextField
                                     style={{ marginTop: '20px' }}
                                     select
-                                    id="BrandId"
-                                    name="BrandId"
+                                    id="brandId"
+                                    name="brandId"
                                     label="Brand"
                                     fullWidth
-                                    value={formik.values.BrandId}
+                                    value={formik.values.brandId}
                                     onChange={formik.handleChange}
                                     error={
-                                      formik.touched.BrandId &&
-                                      Boolean(formik.errors.BrandId)
+                                      formik.touched.brandId &&
+                                      Boolean(formik.errors.brandId)
                                     }
                                     helperText={
-                                      formik.touched.BrandId && formik.errors.BrandId
+                                      formik.touched.brandId && formik.errors.brandId
                                     }
                                     size="small"
                                   >
