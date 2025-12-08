@@ -60,7 +60,8 @@ const ar = () => ({
     signIn: "تسجيل الدخول",
     signInMessage: "أدخل بريدك الإلكتروني وكلمة المرور لتسجيل الدخول!",
     registerPrompt: "لست مستخدماً بعد؟ سجل هنا",
-    orderPlusManagement: "إدارة Order Plus"
+    orderPlusManagement: "إدارة Order Plus",
+    currency: "العملة",
   },
 });
 export default ar;

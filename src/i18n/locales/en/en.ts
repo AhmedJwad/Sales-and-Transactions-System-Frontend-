@@ -61,7 +61,8 @@ const en = () => ({
     signIn: "Sign In",
     signInMessage: "Enter your email and password to sign in!",
     registerPrompt: "Don't have an account? Register Here",
-    orderPlusManagement: "Order Plus Management"
+    orderPlusManagement: "Order Plus Management",
+    currency: "Currency",
   },
 });
 export default en;

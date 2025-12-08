@@ -1,4 +1,4 @@
-import { Box } from "@mui/material";
+import { Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
 import { useEffect, useState } from "react";
 import DataGridCustom from "../../components/DataGridCustom";
 import LoadingComponent from "../../components/LoadingComponent";
@@ -12,12 +12,15 @@ const ProductList = () => {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<any[]>([]); 
   const [editId, setEditId] = useState<number | null>(null);  
-  const { i18n } = useTranslation();
+  const { t, i18n } = useTranslation();
   //pagination
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [rowCount, setRowCount] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+
+  //currencies
+  const [currencyCode, setCurrencyCode]=useState<string>("IQ");
   const navigate = useNavigate();
 
   const renderImageCell = (params: any) => {
@@ -114,6 +117,7 @@ const renderColorCell = (params: any) => {
                 Page: (currentPage + 1).toString(),      
                 RecordsNumber: pageSize.toString(),
                 Language: i18n.language || "en",
+                CurrencyCode: currencyCode,
                 });   
        const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams}`);;      
       if (!data.error && data.response) {
@@ -186,10 +190,26 @@ const renderColorCell = (params: any) => {
     };
 
     init();
-  }, [page, pageSize, totalPages, i18n.language]);
+  }, [page, pageSize, totalPages, i18n.language, currencyCode]);
 
-  return (
-    <Box>
+  return (    
+    <Box >
+      {/* Currency Selector */}
+        <Box mb={2} display="flex" justifyContent="flex-end">
+          <FormControl size="small" variant="outlined">
+            <InputLabel id="currency-label">{t("currency")}</InputLabel>
+            <Select
+              labelId="currency-label"
+              value={currencyCode}
+              label={t("currency")}
+              onChange={(e) => setCurrencyCode(e.target.value)}
+              sx={{ minWidth: 120 }}
+            >
+              <MenuItem value="IQ">IQD</MenuItem>
+              <MenuItem value="USD">USD</MenuItem>
+            </Select>
+          </FormControl>
+        </Box>
       {loading ? (
         <LoadingComponent />
       ) : (
