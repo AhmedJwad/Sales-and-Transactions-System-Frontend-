@@ -28,6 +28,7 @@ import {
   IconMap2,
   IconMenuOrder,
   IconResize,
+  IconUserDollar,
 } from "@tabler/icons-react";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
@@ -459,6 +460,77 @@ const Sidebar = () => {
                   fontWeight: isActive("/admin/Products") ? 600 : 500,
                   fontSize: "0.95rem",
                   color: isActive("/admin/Products")
+                    ? "#4caf50"
+                    : isDarkMode
+                    ? "#fff"
+                    : "#1a1a1a",
+                }}
+              />
+            </ListItemButton>
+          </Tooltip>
+        )}
+        {/*exchange rate  */}
+        {(userRole === "Admin") && (
+          <Tooltip
+            title="Exchange Rate"
+            placement="right"
+            arrow
+            disableHoverListener={isExpanded || isMobileOpen}
+          >
+            <ListItemButton
+              component={Link}
+              to="/admin/exchangeRate"
+              sx={{
+                mb: 0.5,
+                borderRadius: 2,
+                transition: "all 0.3s ease",
+                bgcolor: isActive("/admin/exchangeRate")
+                  ? isDarkMode
+                    ? "rgba(76, 175, 80, 0.15)"
+                    : "rgba(76, 175, 80, 0.1)"
+                  : "transparent",
+                "&:hover": {
+                  bgcolor: isDarkMode
+                    ? "rgba(76, 175, 80, 0.1)"
+                    : "rgba(76, 175, 80, 0.05)",
+                  transform: "translateX(8px)",
+                  boxShadow: isDarkMode
+                    ? "0 4px 12px rgba(76, 175, 80, 0.2)"
+                    : "0 4px 12px rgba(76, 175, 80, 0.15)",
+                },
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  height: "100%",
+                  width: "4px",
+                  bgcolor: isActive("/admin/exchangeRate")
+                    ? "#4caf50"
+                    : "transparent",
+                  borderRadius: "0 4px 4px 0",
+                  transition: "all 0.3s ease",
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color: isActive("/admin/exchangeRate")
+                    ? "#4caf50"
+                    : isDarkMode
+                    ? "rgba(255,255,255,0.7)"
+                    : "rgba(0,0,0,0.6)",
+                  minWidth: 45,
+                }}
+              >
+                <IconUserDollar size={22} />
+              </ListItemIcon>
+              <ListItemText
+                primary="exchangeRate"
+                primaryTypographyProps={{
+                  fontWeight: isActive("/admin/exchangeRate") ? 600 : 500,
+                  fontSize: "0.95rem",
+                  color: isActive("/admin/exchangeRate")
                     ? "#4caf50"
                     : isDarkMode
                     ? "#fff"

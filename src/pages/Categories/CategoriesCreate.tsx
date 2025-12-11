@@ -72,6 +72,7 @@ const CategoriesCreate: FC<Props> = ({ id, onClose }) => {
       });
     }
   }, [id]);
+  
 
   const formik = useFormik({
     initialValues: category,

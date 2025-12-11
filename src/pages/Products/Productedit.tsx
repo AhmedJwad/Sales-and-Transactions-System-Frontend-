@@ -116,12 +116,12 @@ const fetchSizes = async () => {
         const dto: ProductResponseDTO = result.response;
         const transformed: ProductDtoRequest = {
           id: dto.id,
-          name: "",
+          name: "test",
           barcode: dto.barcode,
-          description: "",
-          price: dto.price,
-          cost: dto.cost,
-          desiredProfit: dto.desiredProfit,
+          description: "test",
+          price: dto.productPrices?.[0]?.price ?? 0,
+          cost:dto.productPrices?.[0]?.cost ?? 0,
+          desiredProfit:dto.desiredProfit ?? 0,
           stock: dto.stock,           
           brandId: dto.brandId,         
           hasSerial: dto.hasSerial,

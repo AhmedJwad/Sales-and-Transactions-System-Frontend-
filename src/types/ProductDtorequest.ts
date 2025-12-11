@@ -24,7 +24,5 @@ export interface ProductDtoRequest {
     productionTranslations:ProductionTranslationsDTO[];   
     name: string;
     description: string; 
-    
-    
   }
   

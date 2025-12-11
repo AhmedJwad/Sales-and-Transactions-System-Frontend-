@@ -1,4 +1,5 @@
 import { ColourDTO } from "./ColoutDTO";
+import { productPricesDTO } from "./productPricesDTO";
 import { SerialNumberDTO } from "./SerialNumberDTO";
 import { SizeDTO } from "./SizeDTO";
 
@@ -29,6 +30,7 @@ export interface ProductResponseDTO {
   rating?: any;
   orderDetail?: any;
   productTranslations: ProductTranslationDTO[];
+  productPrices:productPricesDTO[] | null;
 }
 
 // ----------------------------

@@ -28,6 +28,7 @@ import ContinueShopping from './pages/Home/ReturnShopping/ContinueShopping';
 import OrderConfigRouter from './pages/Order/OrderConfigRouter';
 import OrderIndex from './pages/Order/OrderIndex';
 import OrderDetails from './pages/Order/OrderDetails';
+import ExchangeRateRouterConfig from './pages/ExchangeRate/ExchangeRateRouter';
 
 
 function App() {  
@@ -115,6 +116,11 @@ function App() {
                 <OrderConfigRouter/>
               </PrivateRoute>
             }/>      
+            <Route path="exchangeRate/*" element={
+              <PrivateRoute allowedRoles={["Admin"]}>
+                <ExchangeRateRouterConfig/>
+              </PrivateRoute>
+            }/>
           </Route>           
            <Route path="login" element={<Login />} />   
           <Route path="/api/Accounts/ConfirmEmail" element={<ConfirmEmail />} />

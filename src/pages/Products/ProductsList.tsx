@@ -62,7 +62,7 @@ const renderColorCell = (params: any) => {
     { field: "id", headerName: "Id", flex: 1 },
     { field: "name", headerName: "Name", flex: 6 },
     { field: "description", headerName: "Description", flex: 6 },
-    { field: "price", headerName: "Price", flex: 3 },
+    { field: "price", headerName: "Price", flex: 6 },
     { field: "stock", headerName: "Stock", flex: 3 },
     
       {
@@ -91,7 +91,25 @@ const renderColorCell = (params: any) => {
 
   const productRepo = genericRepository<ProductDTO[], ProductDTO>(`Product`); 
   const numberRepository = genericRepository<number, number>("Product");
-   
+  const formatPrice=(amount:number, currency:string)=>{
+    if(!amount)
+    {
+      return "";
+    }
+    if(currency==="IQ")
+      {
+        return `${Math.round(amount).toLocaleString("en-US")} IQ`
+      }  
+      else if(currency==="USD")
+      {
+        return `${amount.toFixed(2)} $`
+      }
+      else
+      {
+        return amount.toString();
+      }
+
+  }   
 
   const getProducts = async () => {  
     setLoading(true);
@@ -125,7 +143,7 @@ const renderColorCell = (params: any) => {
             id: item.id,
             name: item.name,
             description: item.description,
-            price: item.price,
+            price:formatPrice(item.price, currencyCode) ,
             stock: item.stock,          
             categories: item.categories?.map(c => ({
                                                         id: c.id,

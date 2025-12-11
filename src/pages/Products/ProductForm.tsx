@@ -223,7 +223,7 @@ useEffect(() => {
                 error={formik.touched.price && Boolean(formik.errors.price)}
                 helperText={formik.touched.price && formik.errors.price}
                 sx={{ mb: 2 }}
-              />
+              />             
               <TextField
                 fullWidth
                 label="Stock"
@@ -317,7 +317,7 @@ useEffect(() => {
                                     name="brandId"
                                     label="Brand"
                                     fullWidth
-                                    value={formik.values.brandId}
+                                    value={brand.find(b => b.id === formik.values.brandId)?.id || ""}
                                     onChange={formik.handleChange}
                                     error={
                                       formik.touched.brandId &&
