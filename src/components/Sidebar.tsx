@@ -22,6 +22,7 @@ import {
   IconCategory2,
   IconCategoryPlus,
   IconColorPicker,
+  IconDiscount,
   IconHome,
   IconLayoutNavbarCollapse,
   IconMap,
@@ -540,6 +541,78 @@ const Sidebar = () => {
             </ListItemButton>
           </Tooltip>
         )}
+          {/*Discounts  */}
+        {(userRole === "Admin") && (
+          <Tooltip
+            title="Discounts"
+            placement="right"
+            arrow
+            disableHoverListener={isExpanded || isMobileOpen}
+          >
+            <ListItemButton
+              component={Link}
+              to="/admin/discounts"
+              sx={{
+                mb: 0.5,
+                borderRadius: 2,
+                transition: "all 0.3s ease",
+                bgcolor: isActive("/admin/discounts")
+                  ? isDarkMode
+                    ? "rgba(76, 175, 80, 0.15)"
+                    : "rgba(76, 175, 80, 0.1)"
+                  : "transparent",
+                "&:hover": {
+                  bgcolor: isDarkMode
+                    ? "rgba(76, 175, 80, 0.1)"
+                    : "rgba(76, 175, 80, 0.05)",
+                  transform: "translateX(8px)",
+                  boxShadow: isDarkMode
+                    ? "0 4px 12px rgba(76, 175, 80, 0.2)"
+                    : "0 4px 12px rgba(76, 175, 80, 0.15)",
+                },
+                "&::before": {
+                  content: '""',
+                  position: "absolute",
+                  left: 0,
+                  top: 0,
+                  height: "100%",
+                  width: "4px",
+                  bgcolor: isActive("/admin/discounts")
+                    ? "#4caf50"
+                    : "transparent",
+                  borderRadius: "0 4px 4px 0",
+                  transition: "all 0.3s ease",
+                },
+              }}
+            >
+              <ListItemIcon
+                sx={{
+                  color: isActive("/admin/discounts")
+                    ? "#4caf50"
+                    : isDarkMode
+                    ? "rgba(255,255,255,0.7)"
+                    : "rgba(0,0,0,0.6)",
+                  minWidth: 45,
+                }}
+              >
+                <IconDiscount size={22} />
+              </ListItemIcon>
+              <ListItemText
+                primary="Discounts"
+                primaryTypographyProps={{
+                  fontWeight: isActive("/admin/discounts") ? 600 : 500,
+                  fontSize: "0.95rem",
+                  color: isActive("/admin/discounts")
+                    ? "#4caf50"
+                    : isDarkMode
+                    ? "#fff"
+                    : "#1a1a1a",
+                }}
+              />
+            </ListItemButton>
+          </Tooltip>
+        )}
+
 
         {/* Orders - Admin Only */}
         {userRole === "Admin" && (

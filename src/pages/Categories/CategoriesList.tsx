@@ -63,9 +63,7 @@ const CategoriesList = () => {
       ? Number(totalPagesResponse.response)
       : 1;
     setTotalPages(pages);     
-    const currentPage = page >= pages ? pages - 1 : page;
-
-   
+    const currentPage = page >= pages ? pages - 1 : page;   
     const queryParams = new URLSearchParams({
       Page: (currentPage + 1).toString(),      
       RecordsNumber: pageSize.toString(),

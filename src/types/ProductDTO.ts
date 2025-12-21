@@ -36,5 +36,7 @@ export interface ProductDTO {
   mainImage: string;
   serialNumbers:SerialNumberDTO[];
   productionTranslations:ProductionTranslationsDTO[] |null;
+  oldPrice:number;
+  discountPercent :number;
   
   }

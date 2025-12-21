@@ -1,7 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { ExchangeRateResponseDTO } from "../../types/ExchangeRateREsponseDTO";
+import { ExchangeRateResponseDTO } from "../../types/ExchangeRateResponseDTO";
 import genericRepository from "../../repositories/genericRepository";
 import { Box } from "@mui/material";
 import LoadingComponent from "../../components/LoadingComponent";

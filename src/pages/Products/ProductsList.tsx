@@ -1,4 +1,4 @@
-import { Box, Select, MenuItem, FormControl, InputLabel } from "@mui/material";
+import { Box, Select, MenuItem, FormControl, InputLabel, Typography, Chip } from "@mui/material";
 import { useEffect, useState } from "react";
 import DataGridCustom from "../../components/DataGridCustom";
 import LoadingComponent from "../../components/LoadingComponent";
@@ -62,7 +62,68 @@ const renderColorCell = (params: any) => {
     { field: "id", headerName: "Id", flex: 1 },
     { field: "name", headerName: "Name", flex: 6 },
     { field: "description", headerName: "Description", flex: 6 },
-    { field: "price", headerName: "Price", flex: 6 },
+   {
+  field: "price",
+  headerName: "Price",
+  flex: 6,
+  renderCell: (params: any) => {
+    const { price, oldPrice, discountPercent } = params.row;
+    return (
+      <Box
+        position="relative"
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        gap={0.4}
+        sx={{
+          minHeight: 60,
+          lineHeight: 1.2,
+        }}
+      >
+        {/* Discount Badge */}
+        {discountPercent > 0 && (
+          <Chip
+            label={`-${discountPercent}%`}
+            size="small"
+            color="error"
+            sx={{
+              position: "absolute",
+              top: -6,
+              right: -6,
+              fontSize: 11,
+              fontWeight: "bold",
+              height: 20,
+            }}
+          />
+        )}
+
+        {/* Old Price */}
+        {discountPercent > 0 && oldPrice && (
+          <Typography
+            variant="caption"
+            sx={{
+              color: "text.secondary",
+              textDecoration: "line-through",
+            }}
+          >
+            {oldPrice}
+          </Typography>
+        )}
+
+        {/* New Price */}
+        <Typography
+          variant="subtitle2"
+          fontWeight="bold"
+          color={discountPercent > 0 ? "error.main" : "text.primary"}
+        >
+          {price}
+        </Typography>
+      </Box>
+    );
+  },
+},
+
+
     { field: "stock", headerName: "Stock", flex: 3 },
     
       {
@@ -137,13 +198,18 @@ const renderColorCell = (params: any) => {
                 Language: i18n.language || "en",
                 CurrencyCode: currencyCode,
                 });   
-       const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams}`);;      
+       const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams}`);     
       if (!data.error && data.response) {
-        const products = data.response.map((item: ProductDTO) => ({
+        const products = data.response.map((item: ProductDTO) => (
+          {          
             id: item.id,
             name: item.name,
             description: item.description,
             price:formatPrice(item.price, currencyCode) ,
+            oldPrice: item.oldPrice && item.oldPrice > 0 
+              ? formatPrice(item.oldPrice, currencyCode) 
+              : null,
+            discountPercent: item.discountPercent || 0,
             stock: item.stock,          
             categories: item.categories?.map(c => ({
                                                         id: c.id,
@@ -155,7 +221,7 @@ const renderColorCell = (params: any) => {
                             : "/no-image.png",     
             colors:item.colors?.map(c=>c.hexCode) ?? [],
             sizes:item.sizes?.map(s=>s.name) ??[],
-            brand:item.brand?.brandTranslations?.[0]?.name ?? "",            
+            brand:item.brand?.brandTranslations?.[0]?.name ?? "",                    
          
         }));
         setRows(products);

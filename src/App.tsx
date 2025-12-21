@@ -29,6 +29,7 @@ import OrderConfigRouter from './pages/Order/OrderConfigRouter';
 import OrderIndex from './pages/Order/OrderIndex';
 import OrderDetails from './pages/Order/OrderDetails';
 import ExchangeRateRouterConfig from './pages/ExchangeRate/ExchangeRateRouter';
+import DiscountRouterConfig from './pages/Discount/DiscountRouter';
 
 
 function App() {  
@@ -119,6 +120,11 @@ function App() {
             <Route path="exchangeRate/*" element={
               <PrivateRoute allowedRoles={["Admin"]}>
                 <ExchangeRateRouterConfig/>
+              </PrivateRoute>
+            }/>
+              <Route path="discounts/*" element={
+              <PrivateRoute allowedRoles={["Admin"]}>
+                <DiscountRouterConfig/>
               </PrivateRoute>
             }/>
           </Route>           

@@ -2,7 +2,6 @@ import { FC, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import LoadingComponent from "../../components/LoadingComponent";
 import genericRepository from "../../repositories/genericRepository";
-import { ProductDTO } from "../../types/ProductDTO";
 import { ProductDtoRequest } from "../../types/ProductDtorequest";
 import { SubcategoryDto } from "../../types/SubcategoryDto";
 import ProductForm from "./ProductForm";
