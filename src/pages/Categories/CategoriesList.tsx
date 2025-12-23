@@ -10,7 +10,7 @@ import genericRepository from "../../repositories/genericRepository";
 import { useTranslation } from "react-i18next";
 
 const CategoriesList = () => {
-   const { i18n } = useTranslation()
+  const { i18n } = useTranslation()
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<CategoryDto[]>([]);
   const [dialogOpen, setDialogOpen] = useState(false);
