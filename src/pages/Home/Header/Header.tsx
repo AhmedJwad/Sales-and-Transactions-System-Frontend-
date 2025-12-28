@@ -17,6 +17,7 @@ import { useCart } from "../../../context/CartContext";
 import { useNavigate } from "react-router-dom";
 import MainNav from "./MainNav";
 import { useTranslation } from 'react-i18next';
+import CurrencySwitcher from "../../../components/CurrencySwitcher";
 
 const Header = () => {
   const { t, i18n} = useTranslation();
@@ -58,7 +59,7 @@ const Header = () => {
         </Typography>
 
         <Box sx={{ display: "flex", alignItems: "center", gap: 2 ,color: "grey.700"}}>
-          <Typography>USD ▾</Typography>
+          <CurrencySwitcher />
           <Typography>
              <button onClick={() => changeLanguage('en')}>EN</button>
             <button onClick={() => changeLanguage('ar')}>العربية</button>

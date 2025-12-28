@@ -30,10 +30,7 @@ const setDocumentLangAndDir = (lng:any) => {
   document.documentElement.dir = dir;
   document.body.dir = dir;
 };
-
 setDocumentLangAndDir(i18n.language || localStorage.getItem('lang') || 'en');
-
-// عند تغيّر اللغة (يحفظ في localStorage ويضبط dir)
 i18n.on('languageChanged', (lng) => {
   localStorage.setItem('lang', lng);
   setDocumentLangAndDir(lng);

@@ -5,12 +5,14 @@ import Header from "./Header/Header";
 import FooterHome from "./Footer/FooterHome";
 import { CategoryProvider } from "./CategoryContext";
 import { CartProvider } from "../../context/CartContext";
+import { CurrencyProvider } from "../../context/CurrencyContext";
 
 
 const HomeLayout: FC = () => {
     return(
       <CartProvider>
-       <CategoryProvider>        
+       <CategoryProvider> 
+        <CurrencyProvider>      
          <Box sx={{display:"flex", flexDirection:"column", minHeight:"100vh"}}>
         {/*header*/}
         <Header/>       
@@ -23,6 +25,7 @@ const HomeLayout: FC = () => {
         <FooterHome/>
       </Box>
     </Box>
+    </CurrencyProvider> 
     </CategoryProvider>
     </CartProvider>
     )   

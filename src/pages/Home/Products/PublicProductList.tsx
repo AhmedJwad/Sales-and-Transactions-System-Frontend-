@@ -1,58 +1,49 @@
 import { useEffect, useState } from "react";
 import genericRepository from "../../../repositories/genericRepository";
 import { ProductDTO } from "../../../types/ProductDTO";
-import { Box, Button, Card, CardContent, CardMedia, Grid, TextField, Typography, Slider, FormControlLabel, Checkbox, Collapse } from "@mui/material";
+import { Box, Button, Card, CardContent, CardMedia, Grid, TextField, Typography, Slider, FormControlLabel, Checkbox, Collapse, Chip, styled } from "@mui/material";
 import Pagination from '@mui/material/Pagination';
 import LoadingComponent from "../../../components/LoadingComponent";
 import Autocomplete from '@mui/material/Autocomplete';
 import { BrandDto } from "../../../types/BrandDto";
 import { ColourDTO } from "../../../types/ColoutDTO";
 import { SizeDTO } from "../../../types/SizeDTO";
-import { ProductFilterDto } from "../../../types/ProductFilterDto";
 import { useCart } from "../../../context/CartContext";
 import { useTranslation } from "react-i18next";
+import { useCurrency } from "../../../context/CurrencyContext";
 
-const PublicProductList = () => {
+
+const PublicProductList = () => {   
+    const { currency } = useCurrency();
     const { i18n } = useTranslation();
     const { addToCart } = useCart();
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
-  
+    const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);  
     const productRepo = genericRepository<ProductDTO[], ProductDTO>(`Product`); 
-    const numberRepository = genericRepository<number, number>("Product");
-    
+    const numberRepository = genericRepository<number, number>("Product");    
     const [searchText, setSearchText] = useState("");
-
     const [brands, setBrands] = useState<BrandDto[]>([]);
     const [colors, setColors] = useState<ColourDTO[]>([]);
     const [sizes, setSizes] = useState<SizeDTO[]>([]);
-
-    const [selectedBrands, setSelectedBrands] = useState<number[]>([]);
-    const [selectedColors, setSelectedColors] = useState<number[]>([]);
-    const [selectedSizes, setSelectedSizes] = useState<number[]>([]);
-    const [priceRange, setPriceRange] = useState<number[]>([0, 1000]);
-
+    const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
+    const [selectedColorIds, setSelectedColorIds] = useState<number[]>([]);
+    const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
+    const [priceRange, setPriceRange] = useState<number[]>([0, 5000000]);
     const [showAllBrands, setShowAllBrands] = useState(false);
     const [showAllColors, setShowAllColors] = useState(false);
     const [showAllSizes, setShowAllSizes] = useState(false);
 
      //pagination
-      const [page, setPage] = useState(0);
+      const [page, setPage] = useState(1);
       const [pageSize, setPageSize] = useState(10);
       const [rowCount, setRowCount] = useState(1);
-      const [totalPages, setTotalPages] = useState(0);
-
-    const filteredProducts = products.filter((prod) =>
-        prod.name.toLowerCase().includes(searchText.toLowerCase())
-    );
-    const paginatedProducts = filteredProducts.slice((page - 1) * pageSize, page * pageSize);
-
-    const handlePageChange = (event: React.ChangeEvent<unknown>, value: number) => setPage(value);
+      const [totalPages, setTotalPages] = useState(0);     
+   
 
     const fetchFiltersData = async () => {
         try {
-            const brandsRes = await genericRepository<BrandDto[], BrandDto>("Brand/combo").getAll();
+            const brandsRes = await genericRepository<BrandDto[], BrandDto>(`Brand/combo?lang=${i18n.language || "en"}`).getAll();
             const colorsRes = await genericRepository<ColourDTO[], ColourDTO>("colours/combo").getAll();
             const sizesRes = await genericRepository<SizeDTO[], SizeDTO>("sizes/combo").getAll();
 
@@ -63,6 +54,25 @@ const PublicProductList = () => {
             console.error("Error fetching filter data:", error);
         }
     };
+    const formatPrice=(amount:number, currency:string)=>{
+    if(!amount)
+    {
+      return "";
+    }
+    if(currency==="IQ")
+      {
+        return `${Math.round(amount).toLocaleString("en-US")} IQ`
+      }  
+      else if(currency==="USD")
+      {
+        return `${amount.toFixed(2)} $`
+      }
+      else
+      {
+        return amount.toString();
+      }
+
+  }   
 
     const fetchProducts = async () => {  
         setLoading(true);
@@ -82,20 +92,47 @@ const PublicProductList = () => {
                     ? Number(totalPagesResponse.response)
                     : 1;           
                     setTotalPages(pages); 
-                    console.log("totalpages:", totalPages)
-                    const currentPage = page >= pages ? pages - 1 : page;            
+                    console.log("totalpages:", totalPages)                            
                     const queryParams = new URLSearchParams({
-                    Page: (currentPage + 1).toString(),      
+                    Page: page.toString(),      
                     RecordsNumber: pageSize.toString(),
                     Language: i18n.language || "en",
+                    CurrencyCode: currency,
                     });   
-           const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams}`);;      
+                    if (searchText && searchText.trim() !== "") {
+                        queryParams.append("Filter", searchText);
+                        }
+                        if (selectedBrandId !== null) {
+                                queryParams.append("BrandId", selectedBrandId.toString());
+                            }
+                            if (selectedColorIds.length > 0) {
+                                selectedColorIds.forEach(colorId => {
+                                    queryParams.append("ColorIds", colorId.toString());
+                                });
+                            }
+                            if (selectedSizeIds.length > 0) {
+                                selectedSizeIds.forEach(sizeId => {
+                                    queryParams.append("SizeIds", sizeId.toString());
+                                });
+                            }
+                            if (priceRange[0] > 0) { 
+                                queryParams.append("MinPrice", priceRange[0].toString());
+                            }
+
+                            if (priceRange[1] < 5000) { 
+                                queryParams.append("MaxPrice", priceRange[1].toString());
+                            }
+           const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams.toString()}`);      
           if (!data.error && data.response) {
             const products = data.response.map((item: ProductDTO) => ({
                 id: item.id,
                 name: item.name,
                 description: item.description,
-                price: item.price,
+                price:formatPrice(item.price, currency) ,
+                oldPrice: item.oldPrice && item.oldPrice > 0 
+                ? formatPrice(item.oldPrice, currency) 
+                : null,
+                discountPercent: item.discountPercent || 0,
                 stock: item.stock,          
                 categories: item.categories?.map(c => ({
                                                             id: c.id,
@@ -121,30 +158,18 @@ const PublicProductList = () => {
           setLoading(false);
         }
       };
-    
-
-    // const fetchFilteredProducts = async (filter: ProductFilterDto) => {
-    //     try {
-    //         setLoading(true);
-    //         const result = await ProductFilterRepo.post(filter);
-    //         if (!result.error && result.response) {
-    //             setProducts(Array.isArray(result.response) ? result.response : [result.response]);
-    //         } else {
-    //             setErrorMessage("No products found with the given filters");
-    //             setProducts([]);
-    //         }
-    //     } catch (error) {
-    //         setErrorMessage("Network error while loading filtered products.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
 
     useEffect(() => {
-        fetchProducts();
-        //fetchFiltersData();
-    }, [page, pageSize, i18n.language]);
-      
+        fetchProducts();        
+       fetchFiltersData();
+    }, [page, pageSize, i18n.language, currency,searchText ]);
+    useEffect(() => {
+        setPage(1);
+        }, [searchText]);
+      useEffect(() => {
+            setPage(1);         
+            fetchProducts();    
+        }, [selectedBrandId, selectedColorIds, selectedSizeIds, priceRange,]);
     return (
         <Box sx={{ p: { xs: 2, md: 4 } }}>
             {loading ? <LoadingComponent /> : (
@@ -158,7 +183,7 @@ const PublicProductList = () => {
                             freeSolo
                             options={products.map((p) => p.name)}
                             inputValue={searchText}
-                            onInputChange={(event, newInputValue) => { setSearchText(newInputValue); setPage(1); }}
+                            onInputChange={(event, newInputValue) => { setSearchText(newInputValue) }}
                             sx={{ width: 700 }}
                             renderInput={(params) => (
                                 <TextField
@@ -185,14 +210,17 @@ const PublicProductList = () => {
                                     key={b.id}
                                     control={
                                         <Checkbox
-                                            checked={selectedBrands.includes(b.id)}
+                                            checked={selectedBrandId === b.id}
                                             onChange={(e) => {
-                                                if (e.target.checked) setSelectedBrands([...selectedBrands, b.id]);
-                                                else setSelectedBrands(selectedBrands.filter((id) => id !== b.id));
+                                                if (e.target.checked) {
+                                                    setSelectedBrandId(b.id);
+                                                } else {
+                                                    setSelectedBrandId(null);
+                                                }
                                             }}
                                         />
                                     }
-                                    label={b.brandTranslations?.[0].name}
+                                    label={b.brandTranslations?.[0]?.name}
                                 />
                             ))}
                             {brands.length > 4 && (
@@ -207,10 +235,10 @@ const PublicProductList = () => {
                                         key={c.id}
                                         control={
                                             <Checkbox
-                                                checked={selectedColors.includes(c.id)}
+                                                checked={selectedColorIds.includes(c.id)}
                                                 onChange={(e) => {
-                                                    if (e.target.checked) setSelectedColors([...selectedColors, c.id]);
-                                                    else setSelectedColors(selectedColors.filter((id) => id !== c.id));
+                                                    if (e.target.checked) setSelectedColorIds([...selectedColorIds, c.id]);
+                                                    else setSelectedColorIds(selectedColorIds.filter((id) => id !== c.id));
                                                 }}
                                                 sx={{
                                                     color: c.hexCode,
@@ -238,10 +266,10 @@ const PublicProductList = () => {
                                     key={s.id}
                                     control={
                                         <Checkbox
-                                            checked={selectedSizes.includes(s.id)}
+                                            checked={selectedSizeIds.includes(s.id)}
                                             onChange={(e) => {
-                                                if (e.target.checked) setSelectedSizes([...selectedSizes, s.id]);
-                                                else setSelectedSizes(selectedSizes.filter((id) => id !== s.id));
+                                                if (e.target.checked) setSelectedSizeIds([...selectedSizeIds, s.id]);
+                                                else setSelectedSizeIds(selectedSizeIds.filter((id) => id !== s.id));
                                             }}
                                         />
                                     }
@@ -255,29 +283,16 @@ const PublicProductList = () => {
                             )}
 
                             <Typography variant="h6">Price Range</Typography>
-                            <Slider
-                                value={priceRange}
-                                onChange={(e, newValue) => setPriceRange(newValue as number[])}
-                                valueLabelDisplay="auto"
-                                min={0}
-                                max={5000}
+                           <Slider
+                            value={priceRange}
+                            onChange={(e, newValue) => setPriceRange(newValue as number[])}
+                            onChangeCommitted={() => fetchProducts()}
+                            valueLabelDisplay="auto"
+                            min={0}
+                            max={5000000} // IQD فقط
                             />
 
-                            <Button
-                                variant="contained"
-                                onClick={() => {
-                                    const newFilters: ProductFilterDto = {
-                                        BrandId: selectedBrands.length === 1 ? selectedBrands[0] : undefined,
-                                        ColorIds: selectedColors,
-                                        SizeIds: selectedSizes,
-                                        MinPrice: priceRange[0],
-                                        MaxPrice: priceRange[1]
-                                    };
-                                    //fetchFilteredProducts(newFilters);
-                                }}
-                            >
-                                Apply Filters
-                            </Button>
+                            
                         </Box>
 
                         {/* Products Grid */}
@@ -286,27 +301,81 @@ const PublicProductList = () => {
                                 {products.map((prod) => (
                                     <Grid size={{xs:12, sm:6, md:4}} key={prod.id}>
                                         <Card>
+                                        {/* Image + Discount */}
+                                        <Box sx={{ position: "relative" }}>
                                             <CardMedia
-                                                component="img"
-                                                height="200"
-                                                image={`https://localhost:7027/${prod.image}`}
-                                                alt={prod.name}
+                                            component="img"
+                                            height="200"
+                                            image={`https://localhost:7027/${prod.image}`}
+                                            alt={prod.name}
                                             />
-                                            <CardContent>
-                                                <Typography variant="h6">{prod.name}</Typography>
-                                                <Typography color="text.secondary">{prod.description}</Typography>
-                                                <Typography color="text.primary">{prod.price}</Typography>
-                                                <Typography color="text.primary">{prod.stock}</Typography>
-                                                <Button variant="contained" onClick={()=>addToCart({
-                                                   ProductId: prod.id,
-                                                    Name: prod.name,
-                                                    Description: prod.description,
-                                                    Image: `https://localhost:7027/${prod.image}`,
-                                                    Price: prod.price,
-                                                    Quantity: 1
-                                                })} sx={{ mt: 2 }}>Buy Now</Button>
-                                            </CardContent>
+
+                                            {/* Discount Badge */}
+                                            {prod.discountPercent > 0 && (
+                                            <Chip
+                                                label={`-${prod.discountPercent}%`}
+                                                size="medium"
+                                                color="error"
+                                                sx={{
+                                                position: "absolute",
+                                                top: 8,
+                                                right: 8,
+                                                fontSize: 11,
+                                                fontWeight: "bold",
+                                                height: 22,
+                                                }}
+                                            />
+                                            )}
+                                        </Box>
+
+                                        <CardContent>
+                                            <Typography variant="h6">{prod.name}</Typography>
+                                            <Typography color="text.secondary">{prod.description}</Typography>
+
+                                            {/* Prices */}
+                                            <Box display="flex" flexDirection="column" gap={0.4} mt={1}>
+                                            {prod.discountPercent > 0 && prod.oldPrice && (
+                                                <Typography
+                                                variant="caption"
+                                                sx={{
+                                                    color: "text.secondary",
+                                                    textDecoration: "line-through",
+                                                }}
+                                                >
+                                                {prod.oldPrice}
+                                                </Typography>
+                                            )}
+
+                                            <Typography
+                                                variant="subtitle2"
+                                                fontWeight="bold"
+                                                color={prod.discountPercent > 0 ? "error.main" : "text.primary"}
+                                            >
+                                                {prod.price}
+                                            </Typography>
+                                            </Box>
+
+                                            <Typography color="text.primary">{prod.stock}</Typography>
+
+                                            <Button
+                                            variant="contained"
+                                            sx={{ mt: 2 }}
+                                            onClick={() =>
+                                                addToCart({
+                                                ProductId: prod.id,
+                                                Name: prod.name,
+                                                Description: prod.description,
+                                                Image: `https://localhost:7027/${prod.image}`,
+                                                Price: prod.price,
+                                                Quantity: 1,
+                                                })
+                                            }
+                                            >
+                                            Buy Now
+                                            </Button>
+                                        </CardContent>
                                         </Card>
+
                                     </Grid>
                                 ))}
                             </Grid>
@@ -315,11 +384,12 @@ const PublicProductList = () => {
                                 <Pagination
                                     count={totalPages}
                                     page={page}
-                                    onChange={(e, value) => setPage(value)}
+                                    onChange={(e, value) => setPage(value)}                                   
                                     variant="outlined"
                                     color="primary"
                                 />
                             </Box>
+                             
                         </Box>
                     </Box>
                 </>
