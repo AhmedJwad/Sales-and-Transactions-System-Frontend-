@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import genericRepository from "../../../repositories/genericRepository";
 import { ProductDTO } from "../../../types/ProductDTO";
 import { Box, Button, Card, CardContent, CardMedia, Grid, TextField, Typography, Slider, FormControlLabel, Checkbox, Collapse, Chip, styled } from "@mui/material";
@@ -11,6 +11,7 @@ import { SizeDTO } from "../../../types/SizeDTO";
 import { useCart } from "../../../context/CartContext";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "../../../context/CurrencyContext";
+import { PriceRangeDTO } from "../../../types/PriceRangeDTO";
 
 
 const PublicProductList = () => {   
@@ -21,6 +22,7 @@ const PublicProductList = () => {
     const [loading, setLoading] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);  
     const productRepo = genericRepository<ProductDTO[], ProductDTO>(`Product`); 
+    const PriceRangeRepo = genericRepository<PriceRangeDTO[],PriceRangeDTO>(`Product`); 
     const numberRepository = genericRepository<number, number>("Product");    
     const [searchText, setSearchText] = useState("");
     const [brands, setBrands] = useState<BrandDto[]>([]);
@@ -29,11 +31,14 @@ const PublicProductList = () => {
     const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
     const [selectedColorIds, setSelectedColorIds] = useState<number[]>([]);
     const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
-    const [priceRange, setPriceRange] = useState<number[]>([0, 5000000]);
+    const [priceRange, setPriceRange] = useState<number[]>([0, 0]);
     const [showAllBrands, setShowAllBrands] = useState(false);
     const [showAllColors, setShowAllColors] = useState(false);
     const [showAllSizes, setShowAllSizes] = useState(false);
 
+    const [minPrice, setMinPrice] = useState<number>(0);
+    const [maxPrice, setMaxPrice] = useState<number>(0);
+     const isInitialMount = useRef(true);
      //pagination
       const [page, setPage] = useState(1);
       const [pageSize, setPageSize] = useState(10);
@@ -74,102 +79,126 @@ const PublicProductList = () => {
 
   }   
 
-    const fetchProducts = async () => {  
-        setLoading(true);
-        try {
-           const recordsResponse = await numberRepository.getAllByQuery<number>(
-                    `/recordsNumber`
-                    );
-                    const totalRecords = !recordsResponse.error && recordsResponse.response
-                    ? Number(recordsResponse.response)
-                    : 10;     
-                    setRowCount(totalRecords);   
-                    console.log("totalRecords:", totalRecords)
-                    const totalPagesResponse = await numberRepository.getAllByQuery<number>(
-                    `/totalPages`
-                    );
-                    const pages = !totalPagesResponse.error && totalPagesResponse.response
-                    ? Number(totalPagesResponse.response)
-                    : 1;           
-                    setTotalPages(pages); 
-                    console.log("totalpages:", totalPages)                            
-                    const queryParams = new URLSearchParams({
-                    Page: page.toString(),      
-                    RecordsNumber: pageSize.toString(),
-                    Language: i18n.language || "en",
-                    CurrencyCode: currency,
-                    });   
-                    if (searchText && searchText.trim() !== "") {
-                        queryParams.append("Filter", searchText);
-                        }
-                        if (selectedBrandId !== null) {
-                                queryParams.append("BrandId", selectedBrandId.toString());
+        const fetchProducts = async () => {  
+            setLoading(true);
+            try {
+            const recordsResponse = await numberRepository.getAllByQuery<number>(
+                        `/recordsNumber`
+                        );
+                        const totalRecords = !recordsResponse.error && recordsResponse.response
+                        ? Number(recordsResponse.response)
+                        : 10;     
+                        setRowCount(totalRecords);   
+                        console.log("totalRecords:", totalRecords)
+                        const totalPagesResponse = await numberRepository.getAllByQuery<number>(
+                        `/totalPages`
+                        );
+                        const pages = !totalPagesResponse.error && totalPagesResponse.response
+                        ? Number(totalPagesResponse.response)
+                        : 1;           
+                        setTotalPages(pages); 
+                        console.log("totalpages:", totalPages)                            
+                        const queryParams = new URLSearchParams({
+                        Page: page.toString(),      
+                        RecordsNumber: pageSize.toString(),
+                        Language: i18n.language || "en",
+                        CurrencyCode: currency,
+                        });   
+                        if (searchText && searchText.trim() !== "") {
+                            queryParams.append("Filter", searchText);
                             }
-                            if (selectedColorIds.length > 0) {
-                                selectedColorIds.forEach(colorId => {
-                                    queryParams.append("ColorIds", colorId.toString());
-                                });
-                            }
-                            if (selectedSizeIds.length > 0) {
-                                selectedSizeIds.forEach(sizeId => {
-                                    queryParams.append("SizeIds", sizeId.toString());
-                                });
-                            }
-                            if (priceRange[0] > 0) { 
-                                queryParams.append("MinPrice", priceRange[0].toString());
-                            }
+                            if (selectedBrandId !== null) {
+                                    queryParams.append("BrandId", selectedBrandId.toString());
+                                }
+                                if (selectedColorIds.length > 0) {
+                                    selectedColorIds.forEach(colorId => {
+                                        queryParams.append("ColorIds", colorId.toString());
+                                    });
+                                }
+                                if (selectedSizeIds.length > 0) {
+                                    selectedSizeIds.forEach(sizeId => {
+                                        queryParams.append("SizeIds", sizeId.toString());
+                                    });
+                                }
+                                const minPriceValue = Math.floor(priceRange[0]);
+                                    const maxPriceValue = Math.floor(priceRange[1]);                               
+                                    if (minPriceValue >= 0 && minPriceValue <= 999999999999) {
+                                        queryParams.append("MinPrice", minPriceValue.toString());                                        
+                                    }
+                                    if (maxPriceValue >= 0 && maxPriceValue <= 999999999999) {
+                                        queryParams.append("MaxPrice", maxPriceValue.toString());                                        
+                                    } else if (maxPriceValue > 999999999999) {                                    
+                                        queryParams.append("MaxPrice", "999999999999");                                       
+                                    }
 
-                            if (priceRange[1] < 5000) { 
-                                queryParams.append("MaxPrice", priceRange[1].toString());
-                            }
-           const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams.toString()}`);      
-          if (!data.error && data.response) {
-            const products = data.response.map((item: ProductDTO) => ({
-                id: item.id,
-                name: item.name,
-                description: item.description,
-                price:formatPrice(item.price, currency) ,
-                oldPrice: item.oldPrice && item.oldPrice > 0 
-                ? formatPrice(item.oldPrice, currency) 
-                : null,
-                discountPercent: item.discountPercent || 0,
-                stock: item.stock,          
-                categories: item.categories?.map(c => ({
-                                                            id: c.id,
-                                                            category: c.category,
-                                                          })) ?? [],  
+            const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams.toString()}`);      
+            if (!data.error && data.response) {               
+                const products = data.response.map((item: ProductDTO) => ({
+                    id: item.id,
+                    name: item.name,
+                    description: item.description,
+                    price:item.price,//formatPrice(item.price, currency) ,
+                    oldPrice: item.oldPrice,// && item.oldPrice > 0 
+                    //? formatPrice(item.oldPrice, currency) 
+                // : null,
+                    discountPercent: item.discountPercent || 0,
+                    stock: item.stock,          
+                    categories: item.categories?.map(c => ({
+                                                                id: c.id,
+                                                                category: c.category,
+                                                            })) ?? [],  
+                
+                    image: item.productImages && item.productImages.length > 0
+                                    ? item.productImages[0]
+                                    : "/no-image.png",     
+                    colors:item.colors?.map(c=>c.hexCode) ?? [],
+                    sizes:item.sizes?.map(s=>s.name) ??[],
+                    brand:item.brand?.brandTranslations?.[0]?.name ?? "",            
+                
+                }));
+                setProducts(products);
                
-                image: item.productImages && item.productImages.length > 0
-                                ? item.productImages[0]
-                                : "/no-image.png",     
-                colors:item.colors?.map(c=>c.hexCode) ?? [],
-                sizes:item.sizes?.map(s=>s.name) ??[],
-                brand:item.brand?.brandTranslations?.[0]?.name ?? "",            
-             
-            }));
-            setProducts(products);
-            console.log("product Data:", products)
-          } else {
-            console.error("Error fetching Products:", data.message);
-          }
-        } catch (error: any) {
-          console.error("Unexpected error:", error.message || error);
-        } finally {
-          setLoading(false);
-        }
-      };
+                console.log("product Data:", products)
+            } else {
+                console.error("Error fetching Products:", data.message);
+            }
+            } catch (error: any) {
+            console.error("Unexpected error:", error.message || error);
+            } finally {
+            setLoading(false);
+            }
+        };
+          
+        useEffect(() => {           
+        fetchFiltersData();
+        }, []); 
 
-    useEffect(() => {
+        useEffect(() => {          
+          setPage(1);             
+        }, [searchText, selectedBrandId, selectedColorIds, selectedSizeIds, priceRange]);
+
+        useEffect(() => {
         fetchProducts();        
-       fetchFiltersData();
-    }, [page, pageSize, i18n.language, currency,searchText ]);
-    useEffect(() => {
-        setPage(1);
-        }, [searchText]);
-      useEffect(() => {
-            setPage(1);         
-            fetchProducts();    
-        }, [selectedBrandId, selectedColorIds, selectedSizeIds, priceRange,]);
+        }, [page, pageSize, i18n.language, currency, searchText, selectedBrandId, selectedColorIds, selectedSizeIds, priceRange]);
+        useEffect(() => {
+        const fetchInitialPrices = async () => {
+            try {
+                const data = await PriceRangeRepo.getAllByQuery<PriceRangeDTO[]>(`/price-range`);
+                if (data.response && data.response.length > 0) {
+                    const first = data.response[0];
+                    setMinPrice(first.minPrice);
+                    setMaxPrice(first.maxPrice);
+                    setPriceRange([first.minPrice, first.maxPrice]);
+                    console.log("min price:", first.minPrice)
+                }
+            } catch (error) {
+                console.error("Error fetching price range:", error);
+            }
+        };
+
+        fetchInitialPrices();
+    }, []);
+
     return (
         <Box sx={{ p: { xs: 2, md: 4 } }}>
             {loading ? <LoadingComponent /> : (
@@ -283,14 +312,22 @@ const PublicProductList = () => {
                             )}
 
                             <Typography variant="h6">Price Range</Typography>
-                           <Slider
-                            value={priceRange}
-                            onChange={(e, newValue) => setPriceRange(newValue as number[])}
-                            onChangeCommitted={() => fetchProducts()}
-                            valueLabelDisplay="auto"
-                            min={0}
-                            max={5000000} // IQD فقط
-                            />
+                          <Box sx={{ px: 2 }}>
+                                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                    <Typography variant="caption">{maxPrice.toLocaleString()} IQ</Typography>
+                                    <Typography variant="caption">{minPrice.toLocaleString()} IQ</Typography>
+                                    
+                                </Box>
+
+                                <Slider
+                                    value={priceRange}
+                                    onChange={(e, newValue) => setPriceRange(newValue as number[])}
+                                    valueLabelDisplay="auto"
+                                    max={maxPrice}
+                                    min={minPrice}                                    
+                                    valueLabelFormat={(value) => `${Math.round(value).toLocaleString()} IQ`}
+                                />
+                                </Box>
 
                             
                         </Box>
@@ -342,7 +379,7 @@ const PublicProductList = () => {
                                                     textDecoration: "line-through",
                                                 }}
                                                 >
-                                                {prod.oldPrice}
+                                                {formatPrice(prod.oldPrice, currency)}                                               
                                                 </Typography>
                                             )}
 
@@ -351,7 +388,7 @@ const PublicProductList = () => {
                                                 fontWeight="bold"
                                                 color={prod.discountPercent > 0 ? "error.main" : "text.primary"}
                                             >
-                                                {prod.price}
+                                               {formatPrice(prod.price, currency)}                                                
                                             </Typography>
                                             </Box>
 

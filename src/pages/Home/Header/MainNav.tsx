@@ -4,13 +4,13 @@ import { ChevronDown, AlignJustify, Phone } from "lucide-react";
 import genericRepository from "../../../repositories/genericRepository";
 import { CategoryDto } from "../../../types/CategoryDto";
 import { useNavigate } from "react-router-dom";
-import { useCategory } from "../CategoryContext";
+
 import { useTranslation } from 'react-i18next';
 
 const MainNav: FC = () => {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [category, setCategory] = useState<CategoryDto[]>([]);
-  const { setCategoryId } = useCategory();
+ const [categoryId, setCategoryId] = useState<number | null>(null);
   const navigate = useNavigate();
   const {t}=useTranslation();
 
@@ -20,7 +20,10 @@ const MainNav: FC = () => {
     const fetchCategories = async () => {
       try {
         const result = await categoryRepository.getAll();
-        if (!result.error && result.response) setCategory(result.response);
+        if (!result.error && result.response) {
+          setCategory(result.response);
+          setCategoryId(result.response[0].id); 
+        }
       } catch (err) {
         console.error(err);
       }
@@ -66,7 +69,7 @@ const MainNav: FC = () => {
         <Typography sx={{ display: { xs: "none", md: "flex" }, gap: 4 }}>
           <Button
           onClick={() => {
-            setCategoryId(0);
+            setCategoryId(categoryId);
             navigate("/");
           }}
           sx={{ color: "#fff" }}
