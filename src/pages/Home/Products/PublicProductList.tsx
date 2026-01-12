@@ -12,9 +12,20 @@ import { useCart } from "../../../context/CartContext";
 import { useTranslation } from "react-i18next";
 import { useCurrency } from "../../../context/CurrencyContext";
 import { PriceRangeDTO } from "../../../types/PriceRangeDTO";
+import { useParams } from "react-router-dom";
+import { SubcategoryDto } from "../../../types/SubcategoryDto";
 
 
 const PublicProductList = () => {   
+    // const { categoryId } = useParams<{ categoryId: string }>();
+    // const numericCategoryId = categoryId ? Number(categoryId) : null;
+    const { type, value } = useParams<{ type: string; value: string }>();
+    const numericValue = Number(value);
+    const isCategory = type === "category";
+    const isDiscount = type === "discount";
+    const numericCategoryId = isCategory ? numericValue : null;
+    const numericDiscountId = isDiscount ? numericValue : null;
+
     const { currency } = useCurrency();
     const { i18n } = useTranslation();
     const { addToCart } = useCart();
@@ -31,19 +42,42 @@ const PublicProductList = () => {
     const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
     const [selectedColorIds, setSelectedColorIds] = useState<number[]>([]);
     const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
+    const [selectedSubcategoryId, setSelectedSubcategoryId] = useState<number[]>([]);
     const [priceRange, setPriceRange] = useState<number[]>([0, 0]);
     const [showAllBrands, setShowAllBrands] = useState(false);
     const [showAllColors, setShowAllColors] = useState(false);
     const [showAllSizes, setShowAllSizes] = useState(false);
-
+    const [isCategoryReady, setIsCategoryReady] = useState(false);
+    const [isDiscountReady, setisDiscountReady] = useState(false);
+    const isInitialPageSet = useRef(false);
     const [minPrice, setMinPrice] = useState<number>(0);
     const [maxPrice, setMaxPrice] = useState<number>(0);
      const isInitialMount = useRef(true);
+     const isInitialLoad = useRef(true);
      //pagination
       const [page, setPage] = useState(1);
       const [pageSize, setPageSize] = useState(10);
       const [rowCount, setRowCount] = useState(1);
-      const [totalPages, setTotalPages] = useState(0);     
+      const [totalPages, setTotalPages] = useState(0); 
+      const [subcategory, setSubcategoies]=useState<SubcategoryDto[]>([]);     
+      var subcategoryrepo=genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combocategory/${numericCategoryId}?lang=${i18n.language || "en"}`);
+     const fetchsubcategories = async () => {  
+             setLoading(true);
+             try {
+             const result = await subcategoryrepo.getAll();
+             if (!result.error && result.response) {
+                 setSubcategoies(result.response);   
+                 console.log("subcategories:", subcategory)    
+             } else {
+                 console.error("Error fetching Subcategories:", result.message);
+             }
+             } catch (error: any) {
+             console.error("Unexpected error:", error.message || error);
+             } finally {
+             setLoading(false);
+             }
+   };  
+      
    
 
     const fetchFiltersData = async () => {
@@ -106,6 +140,12 @@ const PublicProductList = () => {
                         });   
                         if (searchText && searchText.trim() !== "") {
                             queryParams.append("Filter", searchText);
+                            }
+                             if (selectedSubcategoryId.length > 0) {
+                                    selectedSubcategoryId.forEach(id => queryParams.append("CategoryId", id.toString()));
+                                }
+                           if (numericDiscountId  !== null) {                              
+                                queryParams.append("DiscountIds", numericDiscountId .toString());
                             }
                             if (selectedBrandId !== null) {
                                     queryParams.append("BrandId", selectedBrandId.toString());
@@ -173,13 +213,28 @@ const PublicProductList = () => {
         fetchFiltersData();
         }, []); 
 
-        useEffect(() => {          
+        useEffect(() => {     
+             if (!isInitialPageSet.current) {
+                isInitialPageSet.current = true;
+                return;
+            }     
           setPage(1);             
-        }, [searchText, selectedBrandId, selectedColorIds, selectedSizeIds, priceRange]);
+        }, [searchText, selectedBrandId, selectedColorIds, selectedSizeIds, priceRange,selectedSubcategoryId]);
 
         useEffect(() => {
+             if (!isCategoryReady ) 
+                {
+                    return;
+                }
+                 if (isDiscount && (numericDiscountId === null || isNaN(numericDiscountId))) {
+                        return;
+                    }
+                    
+                            
         fetchProducts();        
-        }, [page, pageSize, i18n.language, currency, searchText, selectedBrandId, selectedColorIds, selectedSizeIds, priceRange]);
+        }, [page, pageSize, i18n.language, currency, searchText, selectedBrandId, 
+            selectedColorIds, selectedSizeIds, priceRange,selectedSubcategoryId,numericDiscountId,
+            isDiscount,numericCategoryId, isCategory]);
         useEffect(() => {
         const fetchInitialPrices = async () => {
             try {
@@ -198,6 +253,41 @@ const PublicProductList = () => {
 
         fetchInitialPrices();
     }, []);
+   useEffect(() => {
+    if (!isCategory || numericCategoryId === null || isNaN(numericCategoryId)) {
+        setSubcategoies([]);
+        setSelectedSubcategoryId([]);
+        setIsCategoryReady(true);
+        return;
+    }
+
+    setIsCategoryReady(false);
+
+    const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>(
+        `Subcategory/combocategory/${numericCategoryId}?lang=${i18n.language || "en"}`
+    );
+
+    const fetchSubcategories = async () => {
+        setLoading(true);
+        try {
+            const result = await subcategoryRepo.getAll();
+            if (!result.error && result.response) {
+                setSubcategoies(result.response);
+                const allIds = result.response.map(sub => sub.id);
+                setSelectedSubcategoryId(allIds);
+            }
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setIsCategoryReady(true);
+        }
+    };
+
+    fetchSubcategories();
+}, [numericCategoryId, isCategory, i18n.language]);
+
+
 
     return (
         <Box sx={{ p: { xs: 2, md: 4 } }}>
@@ -233,31 +323,58 @@ const PublicProductList = () => {
                     <Box sx={{ display: 'flex', gap: 3 }}>
                         {/* Filters Sidebar */}
                         <Box sx={{ width: 250, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                            {/* Subcategories */}
+                            <Typography variant="h6">Subcategories</Typography>
+                            {subcategory.length === 0 && (
+                            <Typography variant="caption" color="text.secondary">
+                                No subcategories
+                            </Typography>
+                            )}
+                            {subcategory.map((sub) => (
+                            <FormControlLabel
+                                key={sub.id}
+                                control={
+                                <Checkbox
+                                    checked={selectedSubcategoryId.includes(sub.id)}
+                                    onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectedSubcategoryId([...selectedSubcategoryId, sub.id]);
+                                    } else {
+                                        setSelectedSubcategoryId(selectedSubcategoryId.filter(id => id !== sub.id));
+                                    }
+                                    }}
+                                />
+                                }
+                                label={sub.subcategoryTranslations?.[0]?.name}
+                            />
+                            ))}
+
+                            {/* Brands */}
                             <Typography variant="h6">Brands</Typography>
                             {brands.slice(0, showAllBrands ? brands.length : 4).map((b) => (
-                                <FormControlLabel
-                                    key={b.id}
-                                    control={
-                                        <Checkbox
-                                            checked={selectedBrandId === b.id}
-                                            onChange={(e) => {
-                                                if (e.target.checked) {
-                                                    setSelectedBrandId(b.id);
-                                                } else {
-                                                    setSelectedBrandId(null);
-                                                }
-                                            }}
-                                        />
+                            <FormControlLabel
+                                key={b.id}
+                                control={
+                                <Checkbox
+                                    checked={selectedBrandId === b.id}
+                                    onChange={(e) => {
+                                    if (e.target.checked) {
+                                        setSelectedBrandId(b.id);
+                                    } else {
+                                        setSelectedBrandId(null);
                                     }
-                                    label={b.brandTranslations?.[0]?.name}
+                                    }}
                                 />
+                                }
+                                label={b.brandTranslations?.[0]?.name}
+                            />
                             ))}
                             {brands.length > 4 && (
-                                <Button size="small" onClick={() => setShowAllBrands(!showAllBrands)}>
-                                    {showAllBrands ? "Show Less" : `More (${brands.length - 4})`}
-                                </Button>
+                            <Button size="small" onClick={() => setShowAllBrands(!showAllBrands)}>
+                                {showAllBrands ? "Show Less" : `More (${brands.length - 4})`}
+                            </Button>
                             )}
-
+                           
                            <Typography variant="h6">Colors</Typography>
                                 {colors.slice(0, showAllColors ? colors.length : 4).map((c) => (
                                     <FormControlLabel

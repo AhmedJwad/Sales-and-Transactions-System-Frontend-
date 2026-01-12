@@ -40,7 +40,9 @@ function App() {
           {/* Home layout */}
           <Route path="/" element={<HomeLayout />}>
             <Route index element={<Home />} />  
-            <Route path="homeproducts" element={<PublicProductList/>}/>     
+            {/* <Route path="homeproducts/:categoryId?" element={<PublicProductList/>}/>      */}
+            <Route path="/homeproducts/:type/:value" element={<PublicProductList />} />
+            <Route path="/homeproducts" element={<PublicProductList />} />
             <Route path="homeproducts/:subcategoryId" element={<Products/>}/>
             <Route path="/register" element={<RegisterForm/>}/>
             <Route path="/cart" element={<Cart />} />

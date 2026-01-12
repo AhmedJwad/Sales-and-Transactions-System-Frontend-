@@ -25,6 +25,7 @@ import { ProductDTO } from "../../types/ProductDTO";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import LoadingComponent from "../../components/LoadingComponent";
+import { useCurrency } from "../../context/CurrencyContext";
 
 interface DiscountDTO {
   id: number;
@@ -35,17 +36,30 @@ interface DiscountDTO {
   productDiscounts: {
     id: number;
     productID: number;
-    product: ProductDTO & { mainImage?: string };
+    product: ProductDTO[];
   }[];
 }
 
 const Home: FC = () => {
+   const { currency } = useCurrency();
   const { i18n } = useTranslation();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [categories, setCategories] = useState<CategoryDto[]>([]);
-  const [products, setProducts] = useState<ProductDTO[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [discounts, setDiscounts] = useState<DiscountDTO[]>([]);
+  const [searchText, setSearchText] = useState("");
+  const [selectedBrandId, setSelectedBrandId] = useState<number | null>(null);
+  const [selectedColorIds, setSelectedColorIds] = useState<number[]>([]);
+  const [selectedSizeIds, setSelectedSizeIds] = useState<number[]>([]);
+  const [priceRange, setPriceRange] = useState<number[]>([0, 0]);
+  const [selectedDiscount, setSelectedDiscount] = useState<number | null>(null);
+
+   //pagination
+        const [page, setPage] = useState(1);
+        const [pageSize, setPageSize] = useState(10);
+        const [rowCount, setRowCount] = useState(1);
+        const [totalPages, setTotalPages] = useState(0);     
 
   const language = i18n.language || "en";
 
@@ -53,9 +67,8 @@ const Home: FC = () => {
     `Categories/combo?lang=${language}`
   );
 
-  const ProductRepo = genericRepository<ProductDTO[], ProductDTO>(
-    `Product/Getfullproduct`
-  );
+   const productRepo = genericRepository<ProductDTO[], ProductDTO>(`Product`);       
+    const numberRepository = genericRepository<number, number>("Product");    
 
   const DiscountsRepo = genericRepository<DiscountDTO[], DiscountDTO>(
     `Discounts?Page=1&RecordsNumber=10&language=${language}`
@@ -73,43 +86,101 @@ const Home: FC = () => {
     }
   };
 
-  const fetchProducts = async () => {
-    setLoading(true);
-    try {
-      const result = await ProductRepo.getAll();
-      if (!result.error && result.response) setProducts(result.response);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+   const fetchProducts = async () => {  
+              setLoading(true);
+              try {
+              const recordsResponse = await numberRepository.getAllByQuery<number>(
+                          `/recordsNumber`
+                          );
+                          const totalRecords = !recordsResponse.error && recordsResponse.response
+                          ? Number(recordsResponse.response)
+                          : 10;     
+                          setRowCount(totalRecords);   
+                          console.log("totalRecords:", totalRecords)
+                          const totalPagesResponse = await numberRepository.getAllByQuery<number>(
+                          `/totalPages`
+                          );
+                          const pages = !totalPagesResponse.error && totalPagesResponse.response
+                          ? Number(totalPagesResponse.response)
+                          : 1;           
+                          setTotalPages(pages); 
+                          console.log("totalpages:", totalPages)                            
+                          const queryParams = new URLSearchParams({
+                          Page: page.toString(),      
+                          RecordsNumber: pageSize.toString(),
+                          Language: i18n.language || "en",
+                          CurrencyCode: currency,
+                          });                          
+  
+              const data=await  await productRepo.getAllByQuery<ProductDTO[]>(`?${queryParams.toString()}`);      
+              if (!data.error && data.response) {               
+                  const products = data.response.map((item: ProductDTO) => ({
+                      id: item.id,
+                      name: item.name,
+                      description: item.description,
+                      price:item.price,//formatPrice(item.price, currency) ,
+                      oldPrice: item.oldPrice,// && item.oldPrice > 0 
+                      //? formatPrice(item.oldPrice, currency) 
+                  // : null,
+                      discountPercent: item.discountPercent || 0,
+                      stock: item.stock,          
+                      categories: item.categories?.map(c => ({
+                                                                  id: c.id,
+                                                                  category: c.category,
+                                                              })) ?? [],  
+                  
+                      image: item.productImages && item.productImages.length > 0
+                                      ? item.productImages[0]
+                                      : "/no-image.png",     
+                      colors:item.colors?.map(c=>c.hexCode) ?? [],
+                      sizes:item.sizes?.map(s=>s.name) ??[],
+                      brand:item.brand?.brandTranslations?.[0]?.name ?? "",            
+                  
+                  }));
+                  setProducts(products);                 
+                  console.log("product Data:", products)
+              } else {
+                  console.error("Error fetching Products:", data.message);
+              }
+              } catch (error: any) {
+              console.error("Unexpected error:", error.message || error);
+              } finally {
+              setLoading(false);
+              }
+          };
+            
 
-  const fetchDiscounts = async () => {
-    setLoading(true);
-    try {
-      const result = await DiscountsRepo.getAll();
-      if (!result.error && result.response) setDiscounts(result.response);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
+          const fetchDiscounts = async () => {
+          setLoading(true);
+          try {
+            const result = await DiscountsRepo.getAll();
+            if (!result.error && result.response) {
+              setDiscounts(result.response);
+            }
+          } catch (error) {
+            console.error(error);
+          } finally {
+            setLoading(false);
+          }
+        };
+
 
   const handleCategoryClick = (categoryId: number) => {
-    navigate(`/category/${categoryId}`);
+    navigate(`/homeproducts/category/${categoryId}`);
   };
 
   const handleDiscountBannerClick = () => {
     navigate("/discounts");
   };
+  const handleDiscountClick = (DiscountId: number) => {
+  navigate(`/homeproducts/discount/${DiscountId}`);
+};
 
   useEffect(() => {
     fetchCategories();
     fetchProducts();
     fetchDiscounts();
-  }, [i18n.language]);
+  }, [i18n.language, currency]);
 
   return (
     <Box sx={{ bgcolor: "#FAFAFA", minHeight: "100vh", py: 4 }}>
@@ -458,164 +529,47 @@ const Home: FC = () => {
           </Grid>
         </Box>
 
-        {/* Flash Deals from Discounts */}
-        {discounts.length > 0 && (
-          <Box sx={{ mb: 6 }}>
-            <Stack
-              direction="row"
-              justifyContent="space-between"
-              alignItems="center"
-              sx={{ mb: 3 }}
-            >
-              <Box sx={{ textAlign: 'center', flex: 1 }}>
-                <Typography
-                  variant="h4"
+        {/* Discount Banners */}
+        <Box sx={{ mb: 6 }}>
+          <Typography
+            variant="h4"
+            sx={{ fontWeight: 800, textAlign: "center", mb: 4 }}
+          >
+            Hot Discounts 🔥
+          </Typography>
+
+          <Grid container spacing={2} justifyContent="center">
+            {discounts.map((discount) => (
+              <Grid  key={discount.id}>
+                <Card
+                  onClick={() => handleDiscountClick(discount.id)}
                   sx={{
-                    fontWeight: 800,
-                    background: 'linear-gradient(135deg, #FF4757 0%, #FF6B81 100%)',
-                    WebkitBackgroundClip: 'text',
-                    WebkitTextFillColor: 'transparent',
-                    backgroundClip: 'text',
-                    fontSize: { xs: '1.75rem', md: '2.5rem' },
-                    mb: 1,
-                    letterSpacing: '-0.02em',
-                    position: 'relative',
-                    display: 'inline-block',
-                    '&::after': {
-                      content: '""',
-                      position: 'absolute',
-                      bottom: -8,
-                      left: '50%',
-                      transform: 'translateX(-50%)',
-                      width: '60px',
-                      height: '4px',
-                      background: 'linear-gradient(90deg, #FF4757 0%, #FF6B81 100%)',
-                      borderRadius: '2px',
-                    }
+                    cursor: "pointer",
+                    px: 4,
+                    py: 3,
+                    borderRadius: 3,
+                    textAlign: "center",
+                    background: "linear-gradient(135deg, #FF416C, #FF4B2B)",
+                    color: "#fff",
+                    minWidth: 160,
+                    transition: "0.3s",
+                    "&:hover": {
+                      transform: "scale(1.05)",
+                      boxShadow: "0 10px 25px rgba(0,0,0,0.25)",
+                    },
                   }}
                 >
-                  Flash Deals
-                </Typography>
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: '#666',
-                    fontSize: '1rem',
-                    mt: 2,
-                    fontWeight: 400,
-                  }}
-                >
-                  Limited time offers just for you
-                </Typography>
-              </Box>
-            </Stack>
-
-            <Grid container spacing={2.5}>
-              {discounts
-                .flatMap((discount) =>
-                  discount.productDiscounts.map((pd) => ({
-                    ...pd.product,
-                    discountPercent: discount.discountPercent,
-                  }))
-                )
-                .slice(0, 4)
-                .map((prod, index) => (
-                  <Grid size={{ xs: 6, sm: 6, md: 3 }} key={prod.id || index}>
-                    <Card
-                      sx={{
-                        borderRadius: 2.5,
-                        boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-                        bgcolor: "#FFFFFF",
-                        border: "1px solid #F0F0F0",
-                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
-                        cursor: "pointer",
-                        position: "relative",
-                        overflow: "hidden",
-                        "&:hover": {
-                          boxShadow: "0 8px 24px rgba(0,0,0,0.12)",
-                          transform: "translateY(-6px)",
-                          borderColor: "#E0E0E0",
-                        },
-                      }}
-                    >
-                      <Chip
-                        label={`${prod.discountPercent}% off`}
-                        sx={{
-                          position: "absolute",
-                          top: 12,
-                          left: 12,
-                          bgcolor: "#FF4757",
-                          color: "#FFFFFF",
-                          fontWeight: 700,
-                          fontSize: "0.75rem",
-                          zIndex: 2,
-                          boxShadow: "0 2px 8px rgba(255,71,87,0.3)",
-                          border: "none",
-                        }}
-                      />
-                      <Box sx={{ position: "relative", bgcolor: "#F7F8FA" }}>
-                        <CardMedia
-                          component="img"
-                          height="220"
-                          image={`https://localhost:7027/${prod.productImages?.[0]}`}
-                          alt={
-                            prod.productionTranslations?.[0]?.name ?? "Product"
-                          }
-                          sx={{ objectFit: "contain", p: 2.5 }}
-                        />
-                      </Box>
-                      <CardContent sx={{ p: 2 }}>
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            color: "#6C757D",
-                            textTransform: "uppercase",
-                            fontWeight: 600,
-                            fontSize: "0.7rem",
-                            letterSpacing: "0.5px",
-                            display: "block",
-                            mb: 0.5,
-                          }}
-                        >
-                          {prod.categories?.[0]?.subcategoryTranslations?.[0]
-                            ?.name ?? "CATEGORY"}
-                        </Typography>
-                        <Typography
-                          variant="body1"
-                          sx={{
-                            fontWeight: 600,
-                            mb: 1,
-                            fontSize: "0.9rem",
-                            overflow: "hidden",
-                            textOverflow: "ellipsis",
-                            display: "-webkit-box",
-                            WebkitLineClamp: 2,
-                            WebkitBoxOrient: "vertical",
-                            minHeight: 44,
-                            color: "#1A1A1A",
-                          }}
-                        >
-                          {prod.productionTranslations?.[0]?.name ??
-                            "Product Name"}
-                        </Typography>
-                        <Typography
-                          variant="h6"
-                          sx={{
-                            fontWeight: 700,
-                            fontSize: "1.2rem",
-                            color: "#FF4757",
-                          }}
-                        >
-                          IQD {prod.price?.toLocaleString()}
-                        </Typography>
-                      </CardContent>
-                    </Card>
-                  </Grid>
-                ))}
-            </Grid>
-          </Box>
-        )}
-
+                  <Typography sx={{ fontSize: "2rem", fontWeight: 900 }}>
+                    {discount.discountPercent}%
+                  </Typography>
+                  <Typography sx={{ fontWeight: 600 }}>
+                    OFF
+                  </Typography>
+                </Card>
+              </Grid>
+            ))}
+          </Grid>
+        </Box>
         {/* Just for You Section */}
         <Box sx={{ mb: 6 }}>
           <Box sx={{ textAlign: 'center', mb: 4 }}>
@@ -682,8 +636,8 @@ const Home: FC = () => {
                     <CardMedia
                       component="img"
                       height="200"
-                      image={`https://localhost:7027/${prod.productImages?.[0]}`}
-                      alt={prod.productionTranslations?.[0]?.name ?? "Product"}
+                      image={`https://localhost:7027/${prod.image}`}
+                      alt={prod.name ?? "Product"}
                       sx={{ objectFit: "contain", p: 2.5 }}
                     />
                     <IconButton
@@ -740,7 +694,7 @@ const Home: FC = () => {
                         color: "#1A1A1A",
                       }}
                     >
-                      {prod.productionTranslations?.[0]?.name ?? "Product Name"}
+                      {prod.name ?? "Product Name"}
                     </Typography>
                     <Typography
                       variant="h6"
@@ -750,7 +704,7 @@ const Home: FC = () => {
                         color: "#1A1A1A",
                       }}
                     >
-                      IQD {prod.price?.toLocaleString()}
+                      {prod.price?.toLocaleString()}
                     </Typography>
                   </CardContent>
                 </Card>
