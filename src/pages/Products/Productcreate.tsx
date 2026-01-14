@@ -48,8 +48,8 @@ const ProductCreate: FC = () => {
 
   const repo = genericRepository<ProductDtoRequest[], ProductDtoRequest>("Product/full");
   const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combo?lang=${i18n.language || "en"}`);
-  const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combo");
-  const Sizerepo=genericRepository<SizeDTO[], SizeDTO>("sizes/combo");
+  const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combocolor");
+  const Sizerepo=genericRepository<SizeDTO[], SizeDTO>("sizes/combosize");
 
   const fetchSubcategories = async () => {
     setLoading(true);

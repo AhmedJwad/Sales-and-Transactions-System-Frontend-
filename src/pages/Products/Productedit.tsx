@@ -56,8 +56,8 @@ const ProductEdit: FC = () => {
   const subcategoryRepo = genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combo?lang=${i18n.language || "en"}`);
   const ImageRepo = genericRepository<ProductImageUploadDTO[], ProductImageUploadDTO>("Product/addImages");
   const RemoveImageRepo = genericRepository<ProductImageUploadDTO[], ProductImageUploadDTO>("Product/removeLastImage");
-  const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combo");
-  const Sizerepo=genericRepository<SizeDTO[], SizeDTO>("sizes/combo");
+  const ColorRepo = genericRepository<ColourDTO[], ColourDTO>("colours/combocolor");
+  const Sizerepo=genericRepository<SizeDTO[], SizeDTO>("sizes/combosize");
   const brandRepo=genericRepository<BrandDto[], BrandDto>("Brand/combo");
 
   // ===== Fetch functions =====

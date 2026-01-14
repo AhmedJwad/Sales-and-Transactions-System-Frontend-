@@ -54,6 +54,8 @@ const ProductForm: FC<ProductFormProps> = ({
   removeImageAction,
 }) => {
   const [loading] = useState(false);
+  const [activeColor, setActiveColor] = useState<MultipleSelectorModel | null>(null);
+
   // 🟢 Subcategories state
   const [selectedCategories, setSelectedCategories] = useState<MultipleSelectorModel[]>(
     selectedSubcategories.map((x) => ({ key: x.id.toString(), value: x.subcategoryTranslations?.[0].name }))
@@ -307,6 +309,7 @@ useEffect(() => {
                       title={option.value} 
                       onClick={() => {                      
                         handleColorChange([...selectedColorsState, option]);
+                         setActiveColor(option);
                       }}
                     ></span>
                   ))}</div>
@@ -362,20 +365,24 @@ useEffect(() => {
                   textAlign="center"
                   gap={2}
                 >
-                 <Button
-                  variant="outlined"
-                  color="primary"
-                  onClick={() => {
-                    const color = selectedColorsState[0]
-                      ? { id: parseInt(selectedColorsState[0].key), hexCode: selectedColorsState[0].value }
-                      : undefined;
+                <Button
+                    variant="outlined"
+                    color="primary"
+                    disabled={!activeColor}
+                    onClick={() => {
+                      if (!activeColor) return;
 
-                    addImageAction?.(formik.values.productImages ?? [], color);
-                  }}
-                >
-                  Add Image
-                </Button>
-
+                      addImageAction?.(
+                        formik.values.productImages ?? [],
+                        {
+                          id: parseInt(activeColor.key),
+                          hexCode: activeColor.value,
+                        }
+                      );
+                    }}
+                  >
+                    Add Image
+                  </Button>
                   <Button
                     variant="outlined"
                     color="error"
