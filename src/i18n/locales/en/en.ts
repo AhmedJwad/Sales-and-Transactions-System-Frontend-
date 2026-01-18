@@ -63,6 +63,7 @@ const en = () => ({
     registerPrompt: "Don't have an account? Register Here",
     orderPlusManagement: "Order Plus Management",
     currency: "Currency",
+    Details:"Details",
   },
 });
 export default en;

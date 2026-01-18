@@ -30,6 +30,7 @@ import OrderIndex from './pages/Order/OrderIndex';
 import OrderDetails from './pages/Order/OrderDetails';
 import ExchangeRateRouterConfig from './pages/ExchangeRate/ExchangeRateRouter';
 import DiscountRouterConfig from './pages/Discount/DiscountRouter';
+import ProductDetails from './pages/Home/Products/ProductDetails';
 
 
 function App() {  
@@ -44,6 +45,7 @@ function App() {
             <Route path="/homeproducts/:type/:value" element={<PublicProductList />} />
             <Route path="/homeproducts" element={<PublicProductList />} />
             <Route path="homeproducts/:subcategoryId" element={<Products/>}/>
+            <Route path="/product/:id" element={<ProductDetails />} />
             <Route path="/register" element={<RegisterForm/>}/>
             <Route path="/cart" element={<Cart />} />
             <Route path="/editprfile" element={<EditProfileForm/>}/>

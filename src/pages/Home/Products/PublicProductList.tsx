@@ -18,6 +18,8 @@ import SearchIcon from '@mui/icons-material/Search';
 import GridViewIcon from '@mui/icons-material/GridView';
 import ViewListIcon from '@mui/icons-material/ViewList';
 import AddIcon from '@mui/icons-material/Add';
+import { useNavigate } from "react-router-dom";
+
 
 const PublicProductList = () => {   
     const { type, value } = useParams<{ type: string; value: string }>();
@@ -28,7 +30,8 @@ const PublicProductList = () => {
     const numericDiscountId = isDiscount ? numericValue : null;
 
     const { currency } = useCurrency();
-    const { i18n } = useTranslation();
+    const {t, i18n } = useTranslation();
+    const navigate = useNavigate();
     const { addToCart } = useCart();
     const [products, setProducts] = useState<any[]>([]);
     const [loading, setLoading] = useState(false);
@@ -741,37 +744,52 @@ const PublicProductList = () => {
                                                     </Typography>
                                                 </Box>
 
-                                                <Box sx={{ 
-                                                    display: 'flex', 
-                                                    justifyContent: 'space-between', 
-                                                    alignItems: 'center',
-                                                    mt: 'auto'
-                                                }}>
-                                                    <IconButton
-                                                        size="small"
-                                                        onClick={() =>
-                                                            addToCart({
-                                                                ProductId: prod.id,
-                                                                Name: prod.name,
-                                                                Description: prod.description,
-                                                                Image: `https://localhost:7027/${prod.image}`,
-                                                                Price: prod.price,
-                                                                Quantity: 1,
-                                                            })
-                                                        }
-                                                        sx={{
-                                                            bgcolor: 'white',
-                                                            border: '1px solid #dee2e6',
-                                                            width: 36,
-                                                            height: 36,
-                                                            '&:hover': {
-                                                                bgcolor: '#f8f9fa',
-                                                                borderColor: '#007bff'
-                                                            }
-                                                        }}
-                                                    >
-                                                        <AddIcon sx={{ fontSize: 18 }} />
-                                                    </IconButton>
+                                                <Box
+                                                sx={{
+                                                    display: "flex",
+                                                    justifyContent: "space-between",
+                                                    alignItems: "center",
+                                                    mt: "auto",
+                                                    gap: 1
+                                                }}
+                                                >                                                
+                                                <IconButton
+                                                    size="small"
+                                                    onClick={() =>
+                                                    addToCart({
+                                                        ProductId: prod.id,
+                                                        Name: prod.name,
+                                                        Description: prod.description,
+                                                        Image: `https://localhost:7027/${prod.image}`,
+                                                        Price: prod.price,
+                                                        Quantity: 1,
+                                                    })
+                                                    }
+                                                    sx={{
+                                                    bgcolor: "white",
+                                                    border: "1px solid #dee2e6",
+                                                    width: 36,
+                                                    height: 36,
+                                                    "&:hover": {
+                                                        bgcolor: "#f8f9fa",
+                                                        borderColor: "#007bff",
+                                                    },
+                                                    }}
+                                                >
+                                                    <AddIcon sx={{ fontSize: 18 }} />
+                                                </IconButton>                                               
+                                                <Button
+                                                    size="small"
+                                                    variant="outlined"
+                                                    onClick={() => navigate(`/product/${prod.id}`)}
+                                                    sx={{
+                                                    textTransform: "none",
+                                                    fontSize: "13px",
+                                                    borderRadius: "20px",
+                                                    }}
+                                                >
+                                                    {t('Details')}
+                                                </Button>
                                                 </Box>
                                             </CardContent>
                                         </Card>

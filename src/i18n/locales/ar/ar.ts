@@ -62,6 +62,7 @@ const ar = () => ({
     registerPrompt: "لست مستخدماً بعد؟ سجل هنا",
     orderPlusManagement: "إدارة Order Plus",
     currency: "العملة",
+    Details:"تفاصيل",
   },
 });
 export default ar;
