@@ -64,6 +64,18 @@ const en = () => ({
     orderPlusManagement: "Order Plus Management",
     currency: "Currency",
     Details:"Details",
+    Categories:"Categories",
+    Brand:"Brand",
+    Productcode:"Product code:",
+    Rating:"Rating:",
+    Size:"Size",
+    Color:"Color",
+    Availableinstock:"Available in stock",
+    stock:"Stock:",
+    unavailable:" Unavailable",
+    addtocart:"Add to Cart",
+    Specifications:"Specifications:",
+    RelatedProducts:"Related Products",
   },
 });
 export default en;

@@ -38,5 +38,6 @@ export interface ProductDTO {
   productionTranslations:ProductionTranslationsDTO[] |null;
   oldPrice:number;
   discountPercent :number;
+  image?:string|null;
   
   }

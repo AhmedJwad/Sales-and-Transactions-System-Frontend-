@@ -62,7 +62,19 @@ const ar = () => ({
     registerPrompt: "لست مستخدماً بعد؟ سجل هنا",
     orderPlusManagement: "إدارة Order Plus",
     currency: "العملة",
-    Details:"تفاصيل",
+    Details:"التفاصيل",
+    Categories:" التصنيفات",
+    Brand:"العلامة التجارية",
+    Productcode:"كود المنتج :",
+    Rating:"التقييم:",
+    Size:"الحجم",
+    Color:"اللون",
+    Availableinstock:"متوفر في المخزون",
+    stock:"مخزون:",
+    unavailable:"غير متوفر",
+    addtocart:"إضافة إلى السلة",
+    Specifications:"المواصفات:",
+    RelatedProducts:"منتجات ذات صلة"
   },
 });
 export default ar;
