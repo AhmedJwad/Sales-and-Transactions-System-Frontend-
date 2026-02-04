@@ -22,10 +22,10 @@ import CurrencySwitcher from "../../../components/CurrencySwitcher";
 const Header = () => {
   const { t, i18n} = useTranslation();
   const { order } = useCart();
-  const totalQuantity = order.OrderDetails.reduce(
-    (sum, item) => sum + item.Quantity,
+   const totalQuantity = order?.orderDetails?.reduce(
+    (sum, item) => sum + item.quantity,
     0
-  );
+  ) || 0;
   const navigate = useNavigate();
   const changeLanguage=(lng:any)=>{
     i18n.changeLanguage(lng)

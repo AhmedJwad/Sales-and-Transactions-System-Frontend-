@@ -11,5 +11,7 @@ export interface OrderResponseDTO {
   quantity: number;
   value: number;
   orderStatus: number;
+  phoneNumber: string;
+  city:string;
   orderDetailResponseDTOs: OrderDetailResponseDTO[];
 }

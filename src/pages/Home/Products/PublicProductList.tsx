@@ -58,7 +58,7 @@ const PublicProductList = () => {
     const [page, setPage] = useState(1);
     const [pageSize, setPageSize] = useState(10);
     const [rowCount, setRowCount] = useState(1);
-    const [totalPages, setTotalPages] = useState(0); 
+    const [totalPages, setTotalPages] = useState(0);
     const [subcategory, setSubcategoies]=useState<SubcategoryDto[]>([]);     
     var subcategoryrepo=genericRepository<SubcategoryDto[], SubcategoryDto>(`Subcategory/combocategory/${numericCategoryId}?lang=${i18n.language || "en"}`);
     
@@ -93,20 +93,23 @@ const PublicProductList = () => {
         }
     };
 
-    const formatPrice=(amount:number, currency:string)=>{
-        if(!amount) {
+    const formatPrice = (amount?: number, currency?: string) => {
+        if (amount === null || amount === undefined) {
             return "";
         }
-        if(currency==="IQ") {
-            return `${Math.round(amount).toLocaleString("en-US")} IQ`
-        }  
-        else if(currency==="USD") {
-            return `${amount.toFixed(2)} $`
+        const currencyCode = currency || "IQ";
+        switch (currencyCode) {           
+            case "IQ":
+                return `${Math.round(amount).toLocaleString("en-US")} IQ`;
+
+            case "USD":
+                return `${amount.toFixed(2)} $`;
+
+            default:
+                return `${amount.toLocaleString("en-US")}`;
         }
-        else {
-            return amount.toString();
-        }
-    }   
+    };
+
 
     const fetchProducts = async () => {  
         setLoading(true);
@@ -659,10 +662,12 @@ const PublicProductList = () => {
                                                     component="img"
                                                     height="200"
                                                     image={`https://localhost:7027/${prod.image}`}
+                                                    onClick={() => navigate(`/product/${prod.id}`)}
                                                     alt={prod.name}
                                                     sx={{
                                                         objectFit: 'contain',
-                                                        mixBlendMode: 'multiply'
+                                                        mixBlendMode: 'multiply',
+                                                        cursor: 'pointer',
                                                     }}
                                                 />
                                                 {prod.discountPercent > 0 && (
@@ -757,12 +762,13 @@ const PublicProductList = () => {
                                                     size="small"
                                                     onClick={() =>
                                                     addToCart({
-                                                        ProductId: prod.id,
-                                                        Name: prod.name,
-                                                        Description: prod.description,
-                                                        Image: `https://localhost:7027/${prod.image}`,
-                                                        Price: prod.price,
-                                                        Quantity: 1,
+                                                        productId: prod.id,
+                                                        name: prod.name,
+                                                        description: prod.description,
+                                                        image: `https://localhost:7027/${prod.image}`,
+                                                        price: prod.price,
+                                                        quantity: 1,
+                                                        
                                                     })
                                                     }
                                                     sx={{

@@ -74,7 +74,8 @@ const ar = () => ({
     unavailable:"غير متوفر",
     addtocart:"إضافة إلى السلة",
     Specifications:"المواصفات:",
-    RelatedProducts:"منتجات ذات صلة"
+    RelatedProducts:"منتجات ذات صلة",
+    Quantity:"الكمية",
   },
 });
 export default ar;

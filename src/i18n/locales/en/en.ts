@@ -76,6 +76,7 @@ const en = () => ({
     addtocart:"Add to Cart",
     Specifications:"Specifications:",
     RelatedProducts:"Related Products",
+    Quantity:"Quantity",
   },
 });
 export default en;

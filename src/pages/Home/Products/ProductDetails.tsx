@@ -19,16 +19,22 @@ import {
   Stack,
   Paper
 } from "@mui/material";
+import { useCart } from "../../../context/CartContext";
 
 const ProductDetails = () => {
   const { currency } = useCurrency();
   const { i18n, t } = useTranslation();
+   const { addToCart } = useCart();
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined);
   const { id } = useParams<{ id: string }>();
   const numericValue = Number(id);
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(0);
+  const [selectedColor, setSelectedColor] = useState<number | null>(null);
+  const [selectedSize, setSelectedSize] = useState<number | null>(null);
+  const [quantity, setQuantity] = useState<number>(1);
+
   
   const [product, setProduct] = useState<ProductDetailsDTO>({
     id: 0,
@@ -96,6 +102,7 @@ const ProductDetails = () => {
     if (!numericValue) {
      return;
     }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       getProduct();
   }, [numericValue, currency, i18n.language]);
 
@@ -134,8 +141,13 @@ const ProductDetails = () => {
                   }}
                 >
                   <CardMedia
-                    component="img"
-                    image={`https://localhost:7027/${product.images[selectedImage] || product.images[0]}`}
+                    component="img"                    
+                     image={`https://localhost:7027/${
+                      product.colors
+                        .find(c => c.images?.[0]?.images?.[0] === product.images[selectedImage])
+                        ? product.images[selectedImage]
+                        : product.images[selectedImage]
+                    }`}
                     sx={{
                       objectFit: "contain",
                       height: 450,
@@ -285,25 +297,26 @@ const ProductDetails = () => {
                       {product.sizes.map((size) => (
                         <Button
                           key={size.id}
-                          variant="outlined"
+                          variant={selectedSize === size.id ? "contained" : "outlined"}
                           size="medium"
-                          sx={{
-                            minWidth: 90,
-                            height: 48,
-                            color: "#1a1a1a",
-                            borderColor: "#d0d0d0",
-                            textTransform: "none",
-                            fontWeight: 600,
-                            fontSize: "1rem",
-                            borderRadius: 2,
-                            transition: "all 0.3s ease",
-                            "&:hover": {
-                              borderColor: "#2196F3",
-                              bgcolor: "#E3F2FD",
-                              transform: "translateY(-2px)",
-                              boxShadow: "0 4px 12px rgba(33, 150, 243, 0.2)"
-                            },
-                          }}
+                          onClick={() => setSelectedSize(size.id)}
+                           sx={{
+                                minWidth: 90,
+                                height: 48,
+                                color: "#1a1a1a",
+                                borderColor: "#d0d0d0",
+                                textTransform: "none",
+                                fontWeight: 600,
+                                fontSize: "1rem",
+                                borderRadius: 2,
+                                transition: "all 0.3s ease",
+                                "&:hover": {
+                                  borderColor: "#2196F3",
+                                  bgcolor: "#E3F2FD",
+                                  transform: "translateY(-2px)",
+                                  boxShadow: "0 4px 12px rgba(33, 150, 243, 0.2)"
+                                },
+                              }}
                         >
                           {size.name}
                         </Button>
@@ -321,13 +334,23 @@ const ProductDetails = () => {
                     <Box sx={{ display: "flex", gap: 2, flexWrap: "wrap" }}>
                       {product.colors.map((c) => (
                         <Box
-                          key={c.id}                        
+                          key={c.id}  
+                          onClick={() => {
+                            setSelectedColor(c.id);
+                            const colorImage = c.images?.[0]?.images?.[0];
+                            if (colorImage) {
+                              const index = product.images.indexOf(colorImage);
+                              if (index !== -1) {
+                                setSelectedImage(index);
+                              }
+                            }
+                          }}                      
                           sx={{
                             width: 40,
                             height: 40,
                             borderRadius: "50%",
                             bgcolor: c.hexCode,
-                            border: "3px solid #fff",
+                            border: selectedColor === c.id ? "3px solid #2196F3" : "3px solid #fff",
                             boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
                             cursor: "pointer",
                             transition: "all 0.3s ease",
@@ -357,11 +380,52 @@ const ProductDetails = () => {
                     {t(`stock`)} {product.stock}
                   </Typography>
                 </Box>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 2, mb: 3 }}>
+                  <Typography fontWeight={700} fontSize="1.1rem">
+                    {t("Quantity")}
+                  </Typography>
 
+                  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setQuantity(prev => Math.max(1, prev - 1))}
+                      sx={{ minWidth: 32, minHeight: 32, fontWeight: 700 }}
+                    >
+                      -
+                    </Button>
+
+                    <Typography sx={{ minWidth: 32, textAlign: "center", fontWeight: 700 }}>
+                      {quantity}
+                    </Typography>
+
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      onClick={() => setQuantity(prev => prev + 1)}
+                      sx={{ minWidth: 32, minHeight: 32, fontWeight: 700 }}
+                    >
+                      +
+                    </Button>
+                  </Box>
+                </Box>
                 <Button
                   variant="contained"
                   size="large"
                   fullWidth
+                  onClick={()=>{
+                    addToCart({
+                       productId: product.id,
+                      name: product.name,
+                      description: product.description,
+                      image: `https://localhost:7027/${product.images[0]}`,
+                      price:product.price,
+                      quantity: quantity,
+                      colorId:selectedColor?? undefined,
+                      sizeId:selectedSize?? undefined,
+
+                    })
+                  }}
                   sx={{
                     bgcolor: "#2196F3",
                     color: "#fff",
@@ -377,6 +441,7 @@ const ProductDetails = () => {
                       transform: "translateY(-3px)",
                       boxShadow: "0 8px 30px rgba(33, 150, 243, 0.5)"
                     },
+                    
                   }}
                 >                  
                   {t(`addtocart`)}

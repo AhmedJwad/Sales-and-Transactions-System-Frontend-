@@ -59,14 +59,14 @@ const EditProfileForm =()=>{
         })
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     const navigate = useNavigate();
-     const theme = useTheme();
+    const theme = useTheme();   
     const [countries, setCountries] = useState<CountryDto[]>([]);
     const [states, setStates] = useState<StateDto[]>([]);
     const [cities, setCities] = useState<CityDto[]>([]);
     const [loading, setLoading] = useState(false);
     const [successMessage, setSuccessMessage] = useState("");
     const [errorMessage, setErrorMessage] = useState<string | undefined>(undefined); 
-    const { isAuthenticated  } = useAuth();  
+    const { isAuthenticated, userRole  } = useAuth();  
     const [originalPhoto, setOriginalPhoto] = useState("");      
     const CountryRepo = genericRepository<CountryDto[], CountryDto>("Countries/combo");
     const Accountrepository = genericRepository<UserDTOrequest[], UserDTOrequest>("accounts");
@@ -264,7 +264,13 @@ const EditProfileForm =()=>{
                     setTimeout(() => {  
                         setSuccessMessage("Your profile has been updated successfully.");                      
                     }, 3000);
-                    navigate("/admin");
+                   // navigate("/admin");                  
+
+                    if (userRole === "Admin") {
+                        navigate("/admin");
+                    } else {
+                        navigate("/");
+                    }
                 } else {
                     console.log("Error updating your profile:", result.error);
                     setErrorMessage(result.message || "Registration failed. Please try again.");
@@ -433,7 +439,7 @@ useEffect(() => {
                                                                 ? afterCountryCode.substring(1) 
                                                                 : afterCountryCode;                                                        
                                                                 formik.setFieldValue("CountryCode", "+964");
-                                                                formik.setFieldValue("PhoneNumber", phoneNumber);
+                                                                formik.setFieldValue("phoneNumber", phoneNumber);
                                                                 }
                                                                 
                                                                 else {
@@ -443,7 +449,7 @@ useEffect(() => {
                                                                         const phoneNumber = match[3]; 
                                                                         
                                                                         formik.setFieldValue("CountryCode", countryCode);
-                                                                        formik.setFieldValue("PhoneNumber", phoneNumber);
+                                                                        formik.setFieldValue("phoneNumber", phoneNumber);
                                                                     } else {                                                                
                                                                         formik.setFieldValue("CountryCode", "+964");
                                                                         formik.setFieldValue("PhoneNumber", cleanValue.replace(/^\+?0?/, ""));
@@ -454,7 +460,7 @@ useEffect(() => {
                                                                 formik.setFieldValue("PhoneNumber", "");
                                                             }
                                                         }}
-                                                        onBlur={() => formik.setFieldTouched("PhoneNumber", true)}
+                                                        onBlur={() => formik.setFieldTouched("phoneNumber", true)}
                                                         style={{ width: "100%", border: "none", outline: "none" }}
                                                     />
                                                 </Paper>

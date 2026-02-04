@@ -4,4 +4,5 @@ export interface ColourDTO {
   hexCode: string;
   productColor: any[] | null;   
   productImage: string | null;
+  images: any[] | null; 
 }

@@ -1,6 +1,7 @@
 import { Children, createContext, ReactNode, useContext, useState, useEffect } from "react";
 import { OrderDetailDTO } from "../types/OrderDetailDTO";
 import { OrderDTO } from "../types/OrderDTO";
+import { useCurrency } from "./CurrencyContext";
 
 interface CartContextType {
     order: OrderDTO,
@@ -14,50 +15,60 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider = ({ children }: { children: ReactNode }) => {
+    const { currency } = useCurrency();
     const [order, setOrder] = useState<OrderDTO>(() => {
         const savedCart = localStorage.getItem("cart");
-        return savedCart ? JSON.parse(savedCart) : { OrderStatus: 0, OrderDetails: [],Remarks:"" };
+      return savedCart ? JSON.parse(savedCart):{ orderStatus: 0, orderDetails: [], remarks: "", currency: currency };
     });
 
     useEffect(() => {
         localStorage.setItem("cart", JSON.stringify(order));
     }, [order]);
+    useEffect(() => {
+    setOrder(prev => ({
+        ...prev,
+        currency: currency
+    }));
+}, [currency]);
+
     const setRemark = (remark: string) => {
-        setOrder(prev => ({ ...prev, Remarks: remark }));
+        setOrder(prev => ({ ...prev, remarks: remark }));
     };
     const addToCart = (item: OrderDetailDTO) => {
         setOrder((prev) => {
-            const exist = prev.OrderDetails.find(d => d.ProductId === item.ProductId);
+            const exist = prev.orderDetails.find(d => d.productId === item.productId);          
             if (exist) {
                 return {
                     ...prev,
-                    OrderDetails: prev.OrderDetails.map(d =>
-                        d.ProductId === item.ProductId ? { ...d, Quantity: d.Quantity + item.Quantity } : d
+                    orderDetails: prev.orderDetails.map(d =>
+                        d.productId === item.productId ? { ...d, quantity: d.quantity + item.quantity } : d
                     )
                 }
             }
             return {
                 ...prev,
-                OrderDetails: [...prev.OrderDetails, item]
+                orderDetails: [...prev.orderDetails, item]
+                
             }
+           
         })
     }
 
     const removeFromCart = (productId: number) => {
         setOrder((prev) => ({
             ...prev,
-            OrderDetails: prev.OrderDetails.filter(d => d.ProductId !== productId)
+            orderDetails: prev.orderDetails.filter(d => d.productId !== productId)
         }))
     }
 
     const updateQuantity = (productId: number, qyt: number) => {
         setOrder((prev) => ({
             ...prev,
-            OrderDetails: prev.OrderDetails.map(d => d.ProductId === productId ? { ...d, Quantity: qyt } : d)
+            orderDetails: prev.orderDetails.map(d => d.productId=== productId ? { ...d, quantity: qyt } : d)
         }))
     }
 
-    const clearCart = () => setOrder({ OrderStatus: 0, OrderDetails: [] });
+    const clearCart = () => setOrder({ orderStatus: 0, orderDetails: [] ,remarks: "", currency:currency});
 
     return (
         <CartContext.Provider value={{ order, addToCart, removeFromCart, updateQuantity, clearCart, setRemark }}>

@@ -1,9 +1,10 @@
 export interface OrderDetailDTO {
-  ProductId: number;
-  Name: string;
-  Description: string;
-  Image: string;
-  Price: number;
-  Quantity: number;
-  Remarks?: string;
+  productId: number;
+  name: string;
+  description: string;
+  image: string;
+  quantity: number;
+  price: number;
+  colorId?: number;
+  sizeId?: number;  
 }

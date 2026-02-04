@@ -23,41 +23,65 @@ import {
 import LoadingComponent from "../../components/LoadingComponent";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useCurrency } from "../../context/CurrencyContext";
+import { useTranslation } from "react-i18next";
+
 const orderStatusMap: Record<number, string> = {
   0: "New",
   1: "Shipped",
   2: "Sent",
   3: "Confirmed",
-  4: "Cancelled"
+  4: "Cancelled",
 };
 
 const OrderIndex = () => {
-  const [loading, setLoading] = useState(false);
-  const [rows, setRows] = useState<OrderResponseDTO[]>([]);
-  const [search, setSearch] = useState("");
-  const [page, setPage] = useState(1);
-  const rowsPerPage = 5;
-  const repository = genericRepository<OrderResponseDTO[], OrderResponseDTO>("orders");
-  const navigate = useNavigate();
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { currency } = useCurrency();
+  const { i18n } = useTranslation();
   const { userRole } = useAuth();
+  const navigate = useNavigate();
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+
+  const [loading, setLoading] = useState(false);
+  const [orders, setOrders] = useState<OrderResponseDTO[]>([]);
+  const [page, setPage] = useState(1);
+  const [pageSize] = useState(10);
+  const [totalPages, setTotalPages] = useState(1);
+  const [searchText, setSearchText] = useState("");
+
+  const OrderRepo = genericRepository<OrderResponseDTO[], OrderResponseDTO>("orders");
+  const numberRepo = genericRepository<number, number>("orders");
 
   const getOrders = async () => {
     try {
       setLoading(true);
-      var result = await repository.getAll();
-      if (!result.error && result.response) {
-        const orders = result.response.map((item: OrderResponseDTO) => ({
-          ...item,
-          id: item.id,
-        }));
-        setRows(orders);
-      } else {
-        console.log("order:", result.error);
+
+      const pagesResponse = await numberRepo.getAllByQuery<number>("/totalPages");
+      if (!pagesResponse.error && pagesResponse.response) {
+        setTotalPages(Number(pagesResponse.response));
+      }
+
+      const queryParams = new URLSearchParams({
+        Page: page.toString(),
+        RecordsNumber: pageSize.toString(),
+        Language: i18n.language || "en",
+        currency: currency,
+      });
+
+      if (searchText.trim()) {
+        queryParams.append("Filter", searchText);
+      }
+
+      const data = await OrderRepo.getAllByQuery<OrderResponseDTO[]>(
+        `?${queryParams.toString()}`
+      );
+
+      if (!data.error && data.response) {
+        setOrders(data.response);
       }
     } catch (error) {
-      console.log(error);
+      console.error(error);
     } finally {
       setLoading(false);
     }
@@ -65,96 +89,61 @@ const OrderIndex = () => {
 
   useEffect(() => {
     getOrders();
-   
-  }, []);
-  useEffect(() => {
-  console.log("userRole updated:", userRole);
-}, [userRole]);
+  }, [currency, i18n.language, page, searchText]);
 
-  const filteredRows = rows.filter((row) =>
-    row.userFullName?.toLowerCase().includes(search.toLowerCase())
-  );
-
-  const paginatedRows = filteredRows.slice(
-    (page - 1) * rowsPerPage,
-    page * rowsPerPage
-  );
-  const handleOrderdetailsClick = (id: number) => {
-    if(userRole==="Admin")
-    {
-      navigate(`/admin/orders/orderdetails/${id}`);
-      
-    }else 
-    {
-      navigate(`/orderdetails/${id}`);
-    }
-   
+  const handleOrderDetailsClick = (id: number) => {
+    navigate(
+      userRole === "Admin"
+        ? `/admin/orders/orderdetails/${id}`
+        : `/orderdetails/${id}`
+    );
   };
-  // Mobile Card View
+  const formattedDate = new Date("2026-01-31T07:33:36.9393774")
+  .toLocaleDateString("en-GB")
+
   const MobileOrderCard = ({ row }: { row: OrderResponseDTO }) => {
-    const noImage = "https://localhost:7027/images/products/no-image.png";
-    const imagePath =
-      row.userPhoto && row.userPhoto !== "/no-image.png"
-        ? `https://localhost:7027/${row.userPhoto}`
-        : noImage;
+    const imagePath = row.userPhoto
+      ? `https://localhost:7027/${row.userPhoto}`
+      : "https://localhost:7027/images/products/no-image.png";
 
     return (
       <Card sx={{ mb: 2 }}>
         <CardContent>
           <Grid container spacing={2}>
-            <Grid size={{xs:12}} display="flex" alignItems="center" gap={2}>
-              <img
-                src={imagePath}
-                alt="user"
-                style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
-              />
-              <Box flex={1}>
-                <Typography variant="h6" gutterBottom>
-                  {row.userFullName}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {row.date}
-                </Typography>
+            <Grid size={{xs:12}}  display="flex" gap={2}>
+              <img src={imagePath} width={60} height={60} />
+              <Box>
+                <Typography variant="h6">{row.userFullName}</Typography>
+                <Typography variant="body2">{new Date(row.date).toLocaleString()}</Typography>
               </Box>
             </Grid>
-            
-            <Grid size={{xs:6}} >
-              <Typography variant="caption" color="text.secondary">
-                lines
-              </Typography>
-              <Typography variant="body1">{row.lines}</Typography>
-            </Grid>
-            
+
             <Grid size={{xs:6}}>
-              <Typography variant="caption" color="text.secondary">
-                Quantity
-              </Typography>
-              <Typography variant="body1">{row.quantity}</Typography>
+              <Typography variant="caption">Lines</Typography>
+              <Typography>{row.lines}</Typography>
             </Grid>
-            
+
             <Grid size={{xs:6}}>
-              <Typography variant="caption" color="text.secondary">
-                Value
-              </Typography>
-              <Typography variant="body1">{row.value}</Typography>
+              <Typography variant="caption">Quantity</Typography>
+              <Typography>{row.quantity}</Typography>
             </Grid>
-            
+
             <Grid size={{xs:6}}>
-              <Typography variant="caption" color="text.secondary">
-                Order status
-              </Typography>
-              <Typography variant="body1">
-                {orderStatusMap[row.orderStatus as number]?? row.orderStatus}
-                </Typography>
+              <Typography variant="caption">Value</Typography>
+              <Typography>{row.value}</Typography>
             </Grid>
-            
+
             <Grid size={{xs:6}}>
-              <Button
-                variant="contained"
-                fullWidth
-                onClick={() => handleOrderdetailsClick(row.id)}
-              >
-               Details
+              <Typography variant="caption">Status</Typography>
+              <Typography>
+                {orderStatusMap[row.orderStatus] ?? row.orderStatus}
+              </Typography>
+            </Grid>
+
+            <Grid size={{xs:6}}>
+              <Button fullWidth variant="contained"
+                onClick={() => handleOrderDetailsClick(row.id)}>
+                Details
               </Button>
             </Grid>
           </Grid>
@@ -165,94 +154,72 @@ const OrderIndex = () => {
 
   return (
     <Box>
-      {loading ? (
-        <LoadingComponent />
-      ) : (
+      {loading ? <LoadingComponent /> : (
         <>
           <TextField
             label="Search by Full Name"
-            variant="outlined"
             fullWidth
             margin="normal"
-            value={search}
+            value={searchText}
             onChange={(e) => {
-              setSearch(e.target.value);
+              setSearchText(e.target.value);
               setPage(1);
             }}
           />
 
           {isMobile ? (
-            // Mobile View - Cards
-            <Box sx={{ mt: 2 }}>
-              {paginatedRows.map((row) => (
-                <MobileOrderCard key={row.id} row={row} />
-              ))}
-            </Box>
+            orders.map(row => <MobileOrderCard key={row.id} row={row} />)
           ) : (
-            // Desktop View - Table
-            <TableContainer component={Paper} sx={{ width: '100%', overflowX: 'auto' }}>
-              <Table sx={{ minWidth: 650 }}>
+            <TableContainer component={Paper}>
+              <Table>
                 <TableHead>
                   <TableRow>
                     <TableCell>Date</TableCell>
                     <TableCell>Full Name</TableCell>
+                    <TableCell>Mobile Number</TableCell>
+                    <TableCell>Adress</TableCell>
                     <TableCell>Lines</TableCell>
-                    <TableCell>َQuantity</TableCell>
-                    <TableCell>Values</TableCell>
-                    <TableCell>Order Status</TableCell>
-                    <TableCell>User Photo</TableCell>
+                    <TableCell>Quantity</TableCell>
+                    <TableCell>Value</TableCell>
+                    <TableCell>Status</TableCell>
+                    <TableCell>Photo</TableCell>
                     <TableCell>Details</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {paginatedRows.map((row) => {
-                    const noImage = "https://localhost:7027/images/products/no-image.png";
-                    const imagePath =
-                      row.userPhoto && row.userPhoto !== "/no-image.png"
-                        ? `https://localhost:7027/${row.userPhoto}`
-                        : noImage;
-
-                    return (
-                      <TableRow key={row.id}>
-                        <TableCell>{row.date}</TableCell>
-                        <TableCell>{row.userFullName}</TableCell>
-                        <TableCell>{row.lines}</TableCell>
-                        <TableCell>{row.quantity}</TableCell>
-                        <TableCell>{row.value}</TableCell>
-                        <TableCell>
-                          {orderStatusMap[row.orderStatus as number]?? row.orderStatus}
-                          </TableCell>
-                        <TableCell>
-                          <img
-                            src={imagePath}
-                            alt="user"
-                            style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
-                          />
-                        </TableCell>
-                        <TableCell>
-                          <Button
-                            variant="contained"
-                            size="small"
-                             onClick={() => handleOrderdetailsClick(row.id)}
-                          >
-                            Details
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    );
-                  })}
+                  {orders.map(row => (
+                    <TableRow key={row.id}>
+                      <TableCell  dir="ltr">{new Date(row.date).toLocaleString()}</TableCell>
+                      <TableCell>{row.userFullName}</TableCell>
+                      <TableCell  dir="ltr">{row.phoneNumber}</TableCell>
+                      <TableCell>{row.city}</TableCell>
+                      <TableCell>{row.lines}</TableCell>
+                      <TableCell>{row.quantity}</TableCell>
+                      <TableCell>{row.value}</TableCell>
+                      <TableCell>
+                        {orderStatusMap[row.orderStatus] ?? row.orderStatus}
+                      </TableCell>
+                      <TableCell>
+                        <img src={`https://localhost:7027/${row.userPhoto}`} width={50} />
+                      </TableCell>
+                      <TableCell>
+                        <Button size="small" variant="contained"
+                          onClick={() => handleOrderDetailsClick(row.id)}>
+                          Details
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </TableContainer>
           )}
 
-          {/* Pagination */}
-          <Box display="flex" justifyContent="center" mt={2}>
+          <Box mt={2} display="flex" justifyContent="center">
             <Pagination
-              count={Math.ceil(filteredRows.length / rowsPerPage)}
+              count={totalPages}
               page={page}
               onChange={(_, value) => setPage(value)}
-              color="primary"
             />
           </Box>
         </>
